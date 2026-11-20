@@ -1,0 +1,3619 @@
+{
+  "fetched_at_utc": "2026-11-20 21:41 UTC",
+  "branches": {
+    "boho": {
+      "id": "boho",
+      "name": "Boho Café",
+      "city": "El Gouna",
+      "poster_account": "boho-cafe",
+      "is_pilot": true,
+      "storages": [
+        {
+          "id": "2",
+          "name": "Bar"
+        },
+        {
+          "id": "3",
+          "name": "Kitchen"
+        },
+        {
+          "id": "5",
+          "name": "General Store"
+        },
+        {
+          "id": "8",
+          "name": "Bustan beverages store"
+        },
+        {
+          "id": "9",
+          "name": "saigon"
+        },
+        {
+          "id": "11",
+          "name": "Le Garage"
+        }
+      ],
+      "suppliers_count": 61,
+      "suppliers": [
+        {
+          "poster_supplier_id": "2",
+          "name": "Abu Amer For Fruit & Vegetable's",
+          "phone": "01203156750",
+          "address": "El Gouna  Hurghada",
+          "comment": "Supplies Fresh Fruit & Vegetable's"
+        },
+        {
+          "poster_supplier_id": "3",
+          "name": "Samir For Bread Oriantal",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Supplier For Bread Oriantal"
+        },
+        {
+          "poster_supplier_id": "4",
+          "name": "S.M For Food Supply",
+          "phone": "",
+          "address": "El Gouna",
+          "comment": "Grocery Supplier"
+        },
+        {
+          "poster_supplier_id": "5",
+          "name": "Baghera Service",
+          "phone": "01000766221",
+          "address": "Hurghada",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "6",
+          "name": "Farm Frites United Trade Company",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Food Supply"
+        },
+        {
+          "poster_supplier_id": "7",
+          "name": "Abd allah For Fresh Meat",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Fresh Meat Supplies"
+        },
+        {
+          "poster_supplier_id": "8",
+          "name": "7Stars For Suppl Of Fresh Juice",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Fresh Juice Supply"
+        },
+        {
+          "poster_supplier_id": "9",
+          "name": "Red Sea For Supplies",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Fish Supply"
+        },
+        {
+          "poster_supplier_id": "10",
+          "name": "El Masa For Fruit & Vegetaples",
+          "phone": "",
+          "address": "Cairo - Hurghada",
+          "comment": "Fruit & Vegetaples Supplie"
+        },
+        {
+          "poster_supplier_id": "11",
+          "name": "El Kods For Fish",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Fish Sypplier"
+        },
+        {
+          "poster_supplier_id": "12",
+          "name": "Prima For Cheese",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "13",
+          "name": "Reach For Trading & Marketing",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Wine & Beer Supply"
+        },
+        {
+          "poster_supplier_id": "14",
+          "name": "H.M for Food Supplier",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Food Supplier"
+        },
+        {
+          "poster_supplier_id": "15",
+          "name": "HM For Food Supply",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Food Supply"
+        },
+        {
+          "poster_supplier_id": "16",
+          "name": "Tulima Farms",
+          "phone": "",
+          "address": "Cairo",
+          "comment": "Green Vegetables"
+        },
+        {
+          "poster_supplier_id": "17",
+          "name": "Oroots",
+          "phone": "",
+          "address": "Cairo Giza",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "18",
+          "name": "Tasweek For Wine",
+          "phone": "",
+          "address": "Elgouna",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "19",
+          "name": "Best Way",
+          "phone": "",
+          "address": "Elgouna",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "20",
+          "name": "Farm Cheese 6th October",
+          "phone": "",
+          "address": "6 October",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "21",
+          "name": "Quanta for monin",
+          "phone": "",
+          "address": "",
+          "comment": "syrup supply"
+        },
+        {
+          "poster_supplier_id": "22",
+          "name": "Cash",
+          "phone": "",
+          "address": "",
+          "comment": "Cash Purchasing"
+        },
+        {
+          "poster_supplier_id": "23",
+          "name": "Katzela",
+          "phone": "",
+          "address": "",
+          "comment": "Coffe Beans"
+        },
+        {
+          "poster_supplier_id": "24",
+          "name": "Coca cola",
+          "phone": "",
+          "address": "",
+          "comment": "soft drink"
+        },
+        {
+          "poster_supplier_id": "25",
+          "name": "Abu Saleh",
+          "phone": "",
+          "address": "",
+          "comment": "Elgouna"
+        },
+        {
+          "poster_supplier_id": "26",
+          "name": "Hisham For Meat ( Alaa )",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "27",
+          "name": "Abu Ashra",
+          "phone": "",
+          "address": "",
+          "comment": "grocery"
+        },
+        {
+          "poster_supplier_id": "28",
+          "name": "Pepsi Cola",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "29",
+          "name": "Sakara",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "30",
+          "name": "West Food",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "31",
+          "name": "Fruit Store",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "32",
+          "name": "Nestle",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "33",
+          "name": "Diamon For Cheese Supply",
+          "phone": "",
+          "address": "",
+          "comment": "Supply For Dairy Product"
+        },
+        {
+          "poster_supplier_id": "34",
+          "name": "Ramses Fresh",
+          "phone": "",
+          "address": "",
+          "comment": "Fresh Juice"
+        },
+        {
+          "poster_supplier_id": "35",
+          "name": "Azahier",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "36",
+          "name": "Supplier",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        }
+      ],
+      "total_ingredients_in_poster": 656,
+      "items": [
+        {
+          "poster_id": "553",
+          "name": "Foam Plate 1kg",
+          "unit": "pcs",
+          "poster_stock": 15608.0,
+          "prime_cost": 82.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "568",
+          "name": "Cup One Way with Cover",
+          "unit": "pcs",
+          "poster_stock": 10022.0,
+          "prime_cost": 139.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "545",
+          "name": "Silver Plate 1135",
+          "unit": "pcs",
+          "poster_stock": 8814.0,
+          "prime_cost": 514.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "563",
+          "name": "Straw Plastic 10ml",
+          "unit": "pcs",
+          "poster_stock": 4315.0,
+          "prime_cost": 264.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "535",
+          "name": "Sponge Stainless",
+          "unit": "pcs",
+          "poster_stock": 3408.0,
+          "prime_cost": 703.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "550",
+          "name": "Sauce Bowl Square",
+          "unit": "pcs",
+          "poster_stock": 3301.0,
+          "prime_cost": 128.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "574",
+          "name": "Plate 420 with Cover",
+          "unit": "pcs",
+          "poster_stock": 2934.0,
+          "prime_cost": 363.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "620",
+          "name": "Plate Microwave 1 Eye",
+          "unit": "pcs",
+          "poster_stock": 2550.0,
+          "prime_cost": 575.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "555",
+          "name": "Straw Plastic 6ml",
+          "unit": "pcs",
+          "poster_stock": 2523.0,
+          "prime_cost": 286.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "631",
+          "name": "Cover 7*1",
+          "unit": "pcs",
+          "poster_stock": 2500.0,
+          "prime_cost": 411.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "536",
+          "name": "Sponge Lahlouba",
+          "unit": "pcs",
+          "poster_stock": 1929.0,
+          "prime_cost": 798.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "569",
+          "name": "Garbage Bag Blue",
+          "unit": "kg",
+          "poster_stock": 1382.82,
+          "prime_cost": 6039.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "552",
+          "name": "Soap Towel",
+          "unit": "pcs",
+          "poster_stock": 1141.0,
+          "prime_cost": 520.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "268",
+          "name": "Small Bread",
+          "unit": "pcs",
+          "poster_stock": 955.0,
+          "prime_cost": 174.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "530",
+          "name": "Gas Cylinder Big",
+          "unit": "pcs",
+          "poster_stock": 890.0,
+          "prime_cost": 62739.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "543",
+          "name": "Edit Hand Paper",
+          "unit": "pcs",
+          "poster_stock": 780.0,
+          "prime_cost": 25780.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "579",
+          "name": "Roll Cashier",
+          "unit": "pcs",
+          "poster_stock": 758.0,
+          "prime_cost": 2550.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "28",
+          "name": "Egg",
+          "unit": "pcs",
+          "poster_stock": 625.887,
+          "prime_cost": 455.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "548",
+          "name": "Take Away Bags Ahla Wasahla",
+          "unit": "kg",
+          "poster_stock": 537.0,
+          "prime_cost": 3277.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "556",
+          "name": "Shish Kebab Sticks",
+          "unit": "pcs",
+          "poster_stock": 529.0,
+          "prime_cost": 1174.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "298",
+          "name": "Water Gallon",
+          "unit": "kg",
+          "poster_stock": 512.15,
+          "prime_cost": 573.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "533",
+          "name": "Butter Paper 20x20",
+          "unit": "pcs",
+          "poster_stock": 424.0,
+          "prime_cost": 1898.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "540",
+          "name": "Roll Stretch 35cm",
+          "unit": "pcs",
+          "poster_stock": 410.0,
+          "prime_cost": 22561.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "83",
+          "name": "Water 0.5",
+          "unit": "pcs",
+          "poster_stock": 388.0,
+          "prime_cost": 650.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "546",
+          "name": "Medical Gloves",
+          "unit": "pcs",
+          "poster_stock": 307.0,
+          "prime_cost": 21351.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "296",
+          "name": "Soda Water",
+          "unit": "pcs",
+          "poster_stock": 300.0,
+          "prime_cost": 2380.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "534",
+          "name": "Soap 20 Liter Without Smile",
+          "unit": "pcs",
+          "poster_stock": 291.0,
+          "prime_cost": 44382.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "277",
+          "name": "Beer Stella",
+          "unit": "pcs",
+          "poster_stock": 252.0,
+          "prime_cost": 5000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "538",
+          "name": "Fridge Plastic Bag 20cm",
+          "unit": "kg",
+          "poster_stock": 252.0,
+          "prime_cost": 11000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "59",
+          "name": "Rucola",
+          "unit": "kg",
+          "poster_stock": 248.09,
+          "prime_cost": 308.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "720",
+          "name": "Puvana Sparkling 250",
+          "unit": "pcs",
+          "poster_stock": 247.0,
+          "prime_cost": 2510.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "544",
+          "name": "Dettol 500ml",
+          "unit": "pcs",
+          "poster_stock": 241.0,
+          "prime_cost": 8103.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "651",
+          "name": "Coca-Cola",
+          "unit": "pcs",
+          "poster_stock": 228.0,
+          "prime_cost": 1774.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "54",
+          "name": "Red Lettuce",
+          "unit": "kg",
+          "poster_stock": 226.85,
+          "prime_cost": 2402.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "557",
+          "name": "Wipes Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 209.0,
+          "prime_cost": 53482.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "404",
+          "name": "Sprite Diet",
+          "unit": "pcs",
+          "poster_stock": 200.0,
+          "prime_cost": 1914.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "48",
+          "name": "Potato Fresh",
+          "unit": "kg",
+          "poster_stock": 182.972,
+          "prime_cost": 3475.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "278",
+          "name": "Beer Sakara Gold",
+          "unit": "pcs",
+          "poster_stock": 172.0,
+          "prime_cost": 5417.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "80",
+          "name": "Cola Zero 0.33",
+          "unit": "pcs",
+          "poster_stock": 172.0,
+          "prime_cost": 1636.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "623",
+          "name": "Puvana Premium Mineral Water Still 500ml",
+          "unit": "pcs",
+          "poster_stock": 167.0,
+          "prime_cost": 4962.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "622",
+          "name": "Puvana Mineral Water Still 1L",
+          "unit": "pcs",
+          "poster_stock": 165.0,
+          "prime_cost": 6230.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "541",
+          "name": "Fat Remover 5Liter",
+          "unit": "pcs",
+          "poster_stock": 160.0,
+          "prime_cost": 18143.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "560",
+          "name": "Air Freshener Fredal",
+          "unit": "pcs",
+          "poster_stock": 150.0,
+          "prime_cost": 7798.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "551",
+          "name": "Plate Plastic Black",
+          "unit": "pcs",
+          "poster_stock": 150.0,
+          "prime_cost": 606.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "123",
+          "name": "Milk Full Cream",
+          "unit": "L",
+          "poster_stock": 148.746,
+          "prime_cost": 4709.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "564",
+          "name": "Stainless Steel Brush",
+          "unit": "pcs",
+          "poster_stock": 148.0,
+          "prime_cost": 3671.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "529",
+          "name": "Paper Napkin 33*33",
+          "unit": "pcs",
+          "poster_stock": 135.0,
+          "prime_cost": 78918.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "451",
+          "name": "Sugar Portion",
+          "unit": "kg",
+          "poster_stock": 131.25,
+          "prime_cost": 5929.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "12",
+          "name": "Flour",
+          "unit": "kg",
+          "poster_stock": 126.054,
+          "prime_cost": 3699.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "39",
+          "name": "Cooking Cream",
+          "unit": "L",
+          "poster_stock": 116.466,
+          "prime_cost": 24134.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "205",
+          "name": "Kitchen Oil",
+          "unit": "L",
+          "poster_stock": 110.243,
+          "prime_cost": 8749.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "547",
+          "name": "Overhead Hairnet",
+          "unit": "pcs",
+          "poster_stock": 109.0,
+          "prime_cost": 5104.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "572",
+          "name": "Shemex",
+          "unit": "pcs",
+          "poster_stock": 101.0,
+          "prime_cost": 6478.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "445",
+          "name": "Tonic",
+          "unit": "pcs",
+          "poster_stock": 97.0,
+          "prime_cost": 2394.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "331",
+          "name": "Orange Fresh",
+          "unit": "kg",
+          "poster_stock": 89.195,
+          "prime_cost": 6931.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "531",
+          "name": "Gas Cylinder Small",
+          "unit": "pcs",
+          "poster_stock": 89.0,
+          "prime_cost": 29520.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "561",
+          "name": "Broomstick",
+          "unit": "pcs",
+          "poster_stock": 85.0,
+          "prime_cost": 4580.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "81",
+          "name": "Fanta 0.33",
+          "unit": "pcs",
+          "poster_stock": 83.0,
+          "prime_cost": 1925.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "144",
+          "name": "Oil for Frying",
+          "unit": "L",
+          "poster_stock": 81.25,
+          "prime_cost": 10000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "279",
+          "name": "Beer Heineken",
+          "unit": "pcs",
+          "poster_stock": 80.0,
+          "prime_cost": 4583.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "562",
+          "name": "Moub Change Sheret",
+          "unit": "pcs",
+          "poster_stock": 80.0,
+          "prime_cost": 5048.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "440",
+          "name": "Chicken Shish",
+          "unit": "kg",
+          "poster_stock": 79.95,
+          "prime_cost": 23558.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "558",
+          "name": "Toilet Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 78.0,
+          "prime_cost": 41524.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "13",
+          "name": "Sugar",
+          "unit": "kg",
+          "poster_stock": 75.436,
+          "prime_cost": 3500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "559",
+          "name": "Floor Smell Fredal",
+          "unit": "pcs",
+          "poster_stock": 75.0,
+          "prime_cost": 5379.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "229",
+          "name": "Jasmine Tea Bag",
+          "unit": "pcs",
+          "poster_stock": 74.0,
+          "prime_cost": 389.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "573",
+          "name": "Roll Silver",
+          "unit": "pcs",
+          "poster_stock": 74.0,
+          "prime_cost": 29727.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "118",
+          "name": "Vinegar White",
+          "unit": "L",
+          "poster_stock": 68.044,
+          "prime_cost": 1769.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "47",
+          "name": "Eggplant Fresh",
+          "unit": "kg",
+          "poster_stock": 67.94,
+          "prime_cost": 2000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "196",
+          "name": "Watermelon",
+          "unit": "kg",
+          "poster_stock": 67.87,
+          "prime_cost": 2756.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "450",
+          "name": "Sugar Brown",
+          "unit": "kg",
+          "poster_stock": 58.356,
+          "prime_cost": 6330.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "309",
+          "name": "Butter New Zealand Block",
+          "unit": "kg",
+          "poster_stock": 56.435,
+          "prime_cost": 59500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "607",
+          "name": "D-Fence Solv DF Fat Remover",
+          "unit": "kg",
+          "poster_stock": 55.0,
+          "prime_cost": 7795.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "140",
+          "name": "Vanilla Ice Cream",
+          "unit": "kg",
+          "poster_stock": 53.61,
+          "prime_cost": 9611.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "587",
+          "name": "Coconut Cream",
+          "unit": "L",
+          "poster_stock": 53.44,
+          "prime_cost": 12459.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "542",
+          "name": "Descaler 5 Liter",
+          "unit": "pcs",
+          "poster_stock": 53.0,
+          "prime_cost": 21324.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "114",
+          "name": "Butter Fern",
+          "unit": "kg",
+          "poster_stock": 52.207,
+          "prime_cost": 17270.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "204",
+          "name": "Pumpkin",
+          "unit": "kg",
+          "poster_stock": 52.0,
+          "prime_cost": 3999.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "193",
+          "name": "Sprite",
+          "unit": "L",
+          "poster_stock": 49.3,
+          "prime_cost": 1925.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "46",
+          "name": "Paprika Yellow/Red Fresh",
+          "unit": "kg",
+          "poster_stock": 49.165,
+          "prime_cost": 4559.0,
+          "min_limit": 0.0
+        }
+      ]
+    },
+    "gouna": {
+      "id": "gouna",
+      "name": "Le Garage El Gouna",
+      "city": "El Gouna",
+      "poster_account": "le-garage-restaurant",
+      "is_pilot": false,
+      "storages": [
+        {
+          "id": "2",
+          "name": "Kitchen Store"
+        },
+        {
+          "id": "3",
+          "name": "Bar Store"
+        },
+        {
+          "id": "4",
+          "name": "General Store"
+        },
+        {
+          "id": "10",
+          "name": "Bustan Beverage store"
+        },
+        {
+          "id": "12",
+          "name": "Central Kitchen Staff Drinks"
+        },
+        {
+          "id": "13",
+          "name": "BURGER PRODUCTION - RAW MEAT"
+        },
+        {
+          "id": "14",
+          "name": "BURGER PRODUCTION - FINISHED PRODUCT"
+        },
+        {
+          "id": "15",
+          "name": "Boho invoice"
+        },
+        {
+          "id": "16",
+          "name": "Saigon invoice"
+        },
+        {
+          "id": "17",
+          "name": "Le Garage Cairo invoice"
+        },
+        {
+          "id": "18",
+          "name": "Dobre sell Invoice"
+        },
+        {
+          "id": "19",
+          "name": "marin warehouse food"
+        }
+      ],
+      "suppliers_count": 58,
+      "suppliers": [
+        {
+          "poster_supplier_id": "7",
+          "name": "Abu Amer For Fruit & Vegetable's",
+          "phone": "01203156750",
+          "address": "Elgouna- Hurghada",
+          "comment": "Fresh Fruit & Vegetable's Supply"
+        },
+        {
+          "poster_supplier_id": "8",
+          "name": "El Helaly For Trading & Supplies",
+          "phone": "01001119926-01222660520",
+          "address": "Hurghada Town",
+          "comment": "Grocery & Meat"
+        },
+        {
+          "poster_supplier_id": "9",
+          "name": "Samir For Bread Oriantal",
+          "phone": "01121439222",
+          "address": "Hurghada Town",
+          "comment": "Supplier For Bread Only Monthly Payment"
+        },
+        {
+          "poster_supplier_id": "10",
+          "name": "Fruit Store For Fruit & Vegetaples",
+          "phone": "01006494565-01149204096",
+          "address": "Hurghada Town",
+          "comment": "Supplied Lettuce Capuche"
+        },
+        {
+          "poster_supplier_id": "11",
+          "name": "Seven Stars For Supply Of Fresh Juices",
+          "phone": "01015753963-01203013066",
+          "address": "Hurghada Town",
+          "comment": "Fresh Juice & Ice Cream"
+        },
+        {
+          "poster_supplier_id": "12",
+          "name": "Bagheera Service For Food Supply",
+          "phone": "010007666221-0123127177",
+          "address": "Hurghada Town",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "13",
+          "name": "S.M For Food Supply",
+          "phone": "01203285983",
+          "address": "",
+          "comment": "Grocery Supply"
+        },
+        {
+          "poster_supplier_id": "14",
+          "name": "Reach For Trading & Marketing",
+          "phone": "01270261313",
+          "address": "Hurghada Town",
+          "comment": "Beer & Wine Supply"
+        },
+        {
+          "poster_supplier_id": "15",
+          "name": "Farm Cheese 6th October",
+          "phone": "",
+          "address": "Red Sea",
+          "comment": "Food Dairy & Food Products"
+        },
+        {
+          "poster_supplier_id": "16",
+          "name": "Farm Frites United Trade Company",
+          "phone": "01100633022",
+          "address": "Hurghada Town",
+          "comment": "Farm Frites & Frozen Vegetable's supply"
+        },
+        {
+          "poster_supplier_id": "17",
+          "name": "Best Way",
+          "phone": "01274051222",
+          "address": "Marina Abu Tig",
+          "comment": "Grocery Supply"
+        },
+        {
+          "poster_supplier_id": "18",
+          "name": "Pepsi Cola",
+          "phone": "",
+          "address": "Hurghada Town",
+          "comment": "Soft Drink Supplier"
+        },
+        {
+          "poster_supplier_id": "19",
+          "name": "Red Sea For Supplies",
+          "phone": "01227114242",
+          "address": "Hurghada Town",
+          "comment": "Fish & Chicken Supply"
+        },
+        {
+          "poster_supplier_id": "20",
+          "name": "Opening Inventory",
+          "phone": "",
+          "address": "Elgouna",
+          "comment": "Opening Food Inventory"
+        },
+        {
+          "poster_supplier_id": "21",
+          "name": "West food",
+          "phone": "",
+          "address": "Cairo",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "22",
+          "name": "Cash",
+          "phone": "",
+          "address": "",
+          "comment": "Cash Purchasing"
+        },
+        {
+          "poster_supplier_id": "23",
+          "name": "Abu Saleh",
+          "phone": "",
+          "address": "El Gouna",
+          "comment": "Meat & Grocery"
+        },
+        {
+          "poster_supplier_id": "24",
+          "name": "El Kods For Fish",
+          "phone": "",
+          "address": "",
+          "comment": "Hurghada"
+        },
+        {
+          "poster_supplier_id": "25",
+          "name": "Abu Ashra",
+          "phone": "",
+          "address": "Hurghada",
+          "comment": "Grocery"
+        },
+        {
+          "poster_supplier_id": "26",
+          "name": "Hydro Food For Juice Fresh",
+          "phone": "",
+          "address": "",
+          "comment": "Fresh Juices"
+        },
+        {
+          "poster_supplier_id": "27",
+          "name": "Supplier",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "28",
+          "name": "Coca Cola",
+          "phone": "",
+          "address": "",
+          "comment": "Hurghada"
+        },
+        {
+          "poster_supplier_id": "29",
+          "name": "Tulima Farms",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "30",
+          "name": "Oroots",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "31",
+          "name": "Alaa For Beef Fresh",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "32",
+          "name": "Nestle",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "33",
+          "name": "Diamon For Cheese",
+          "phone": "",
+          "address": "",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "34",
+          "name": "Tasweek Hurghada",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "35",
+          "name": "Mohamed Butcher Hurghada",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "36",
+          "name": "Amir For General Supply",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "37",
+          "name": "Magdi For Gas",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "38",
+          "name": "Octubus For Printing",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "39",
+          "name": "House Cleaning",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "40",
+          "name": "Pest Control",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "41",
+          "name": "Samuel For Filters",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        }
+      ],
+      "total_ingredients_in_poster": 428,
+      "items": [
+        {
+          "poster_id": "799",
+          "name": "Sauce Bowel Square",
+          "unit": "pcs",
+          "poster_stock": 21148.0,
+          "prime_cost": 123.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "896",
+          "name": "Foam Plate 1 Kg",
+          "unit": "pcs",
+          "poster_stock": 11600.0,
+          "prime_cost": 82.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "830",
+          "name": "Straw Plastic 10ml",
+          "unit": "pcs",
+          "poster_stock": 8931.0,
+          "prime_cost": 131.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "798",
+          "name": "Silver Plate 1135 With Cover",
+          "unit": "pcs",
+          "poster_stock": 7918.0,
+          "prime_cost": 424.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "800",
+          "name": "Take Away Bowel 1 Eye",
+          "unit": "pcs",
+          "poster_stock": 5520.0,
+          "prime_cost": 624.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "791",
+          "name": "French Fries Bag With Logo Take Away",
+          "unit": "pcs",
+          "poster_stock": 5115.0,
+          "prime_cost": 250.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "804",
+          "name": "Soap Towel one Way paper",
+          "unit": "pcs",
+          "poster_stock": 3950.0,
+          "prime_cost": 344.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "847",
+          "name": "Cup Take Away",
+          "unit": "pcs",
+          "poster_stock": 3545.0,
+          "prime_cost": 137.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "817",
+          "name": "Sponge Stainless",
+          "unit": "pcs",
+          "poster_stock": 3231.0,
+          "prime_cost": 745.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "834",
+          "name": "Sponge Lahlouba",
+          "unit": "pcs",
+          "poster_stock": 3067.0,
+          "prime_cost": 891.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "630",
+          "name": "Ketchup Portion p.c",
+          "unit": "pcs",
+          "poster_stock": 2996.0,
+          "prime_cost": 58.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "812",
+          "name": "Butter Paper 20x20",
+          "unit": "pcs",
+          "poster_stock": 2869.0,
+          "prime_cost": 931.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "839",
+          "name": "Bags With Logo take away",
+          "unit": "pcs",
+          "poster_stock": 2692.0,
+          "prime_cost": 810.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "808",
+          "name": "Straw 6ml Platic",
+          "unit": "pcs",
+          "poster_stock": 2506.0,
+          "prime_cost": 475.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "807",
+          "name": "Cover 7*1",
+          "unit": "pcs",
+          "poster_stock": 2310.0,
+          "prime_cost": 402.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "801",
+          "name": "Garbage Bag Blue",
+          "unit": "kg",
+          "poster_stock": 2182.07,
+          "prime_cost": 6138.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "790",
+          "name": "Bag With Logo For Left Over",
+          "unit": "pcs",
+          "poster_stock": 2000.0,
+          "prime_cost": 200.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "765",
+          "name": "Mayonnaise portion",
+          "unit": "pcs",
+          "poster_stock": 1460.0,
+          "prime_cost": 291.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "973",
+          "name": "PF Burger patty",
+          "unit": "kg",
+          "poster_stock": 1376.165,
+          "prime_cost": 42997.0,
+          "min_limit": 105.0
+        },
+        {
+          "poster_id": "966",
+          "name": "PF Pickled Onion",
+          "unit": "kg",
+          "poster_stock": 1348.111,
+          "prime_cost": 3007.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "824",
+          "name": "Medical Gloves",
+          "unit": "pcs",
+          "poster_stock": 1283.0,
+          "prime_cost": 16068.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "897",
+          "name": "Lava cake form",
+          "unit": "pcs",
+          "poster_stock": 1150.0,
+          "prime_cost": 117.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "503",
+          "name": "Water Free",
+          "unit": "kg",
+          "poster_stock": 1078.172,
+          "prime_cost": 579.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "873",
+          "name": "Rolls Cashier",
+          "unit": "pcs",
+          "poster_stock": 939.0,
+          "prime_cost": 3146.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "788",
+          "name": "Gas Cylender Big",
+          "unit": "pcs",
+          "poster_stock": 927.0,
+          "prime_cost": 62205.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "581",
+          "name": "Bread Oriental",
+          "unit": "pcs",
+          "poster_stock": 720.0,
+          "prime_cost": 154.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "811",
+          "name": "Plastic Bag 20cm refridge",
+          "unit": "kg",
+          "poster_stock": 719.7,
+          "prime_cost": 11088.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "489",
+          "name": "Oil For Fries",
+          "unit": "kg",
+          "poster_stock": 711.02,
+          "prime_cost": 9984.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "648",
+          "name": "Pepsi",
+          "unit": "pcs",
+          "poster_stock": 560.0,
+          "prime_cost": 1417.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "422",
+          "name": "Red Lettuce Fresh",
+          "unit": "kg",
+          "poster_stock": 558.438,
+          "prime_cost": 2311.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "960",
+          "name": "Shoulder Dobre",
+          "unit": "kg",
+          "poster_stock": 506.27,
+          "prime_cost": 10422.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "728",
+          "name": "Water Small",
+          "unit": "pcs",
+          "poster_stock": 503.0,
+          "prime_cost": 553.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "884",
+          "name": "Sanifood 3.5 Vegetables Tablet",
+          "unit": "kg",
+          "poster_stock": 500.0,
+          "prime_cost": 257.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "754",
+          "name": "Pepsi Diet",
+          "unit": "pcs",
+          "poster_stock": 497.0,
+          "prime_cost": 1417.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "810",
+          "name": "Tooth picks",
+          "unit": "pcs",
+          "poster_stock": 390.0,
+          "prime_cost": 752.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "813",
+          "name": "Rolle Stretch 35cm",
+          "unit": "pcs",
+          "poster_stock": 331.0,
+          "prime_cost": 24653.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "802",
+          "name": "Soap 20 Liter Without Smell",
+          "unit": "pcs",
+          "poster_stock": 306.0,
+          "prime_cost": 44102.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "961",
+          "name": "Brisket Cubes",
+          "unit": "kg",
+          "poster_stock": 298.067,
+          "prime_cost": 43732.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "977",
+          "name": "Brisket dobre",
+          "unit": "kg",
+          "poster_stock": 294.9,
+          "prime_cost": 10967.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "828",
+          "name": "Dettol 500ml",
+          "unit": "pcs",
+          "poster_stock": 288.0,
+          "prime_cost": 8578.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "482",
+          "name": "Egg",
+          "unit": "pcs",
+          "poster_stock": 287.948,
+          "prime_cost": 433.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "837",
+          "name": "Shish Kebab Sticks",
+          "unit": "pcs",
+          "poster_stock": 287.0,
+          "prime_cost": 1158.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "789",
+          "name": "Gas Cylender Small",
+          "unit": "pcs",
+          "poster_stock": 285.0,
+          "prime_cost": 29189.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "483",
+          "name": "French Fries",
+          "unit": "kg",
+          "poster_stock": 270.57,
+          "prime_cost": 6610.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "805",
+          "name": "Wips Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 266.0,
+          "prime_cost": 50886.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "775",
+          "name": "Sparkling Water",
+          "unit": "pcs",
+          "poster_stock": 236.0,
+          "prime_cost": 1438.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "821",
+          "name": "Fat Remover 5Liter",
+          "unit": "pcs",
+          "poster_stock": 226.0,
+          "prime_cost": 20204.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "806",
+          "name": "Napkin 33*33 Fox",
+          "unit": "pcs",
+          "poster_stock": 210.0,
+          "prime_cost": 77471.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "505",
+          "name": "Flour",
+          "unit": "kg",
+          "poster_stock": 205.395,
+          "prime_cost": 3700.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "994",
+          "name": "Soda Bottle",
+          "unit": "pcs",
+          "poster_stock": 199.0,
+          "prime_cost": 2392.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "979",
+          "name": "Minced meat staff",
+          "unit": "kg",
+          "poster_stock": 194.993,
+          "prime_cost": 34917.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "725",
+          "name": "7up",
+          "unit": "pcs",
+          "poster_stock": 177.0,
+          "prime_cost": 1417.0,
+          "min_limit": 80.0
+        },
+        {
+          "poster_id": "827",
+          "name": "Air Fresh Fredal",
+          "unit": "pcs",
+          "poster_stock": 169.0,
+          "prime_cost": 7359.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "787",
+          "name": "Wipes Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 165.0,
+          "prime_cost": 54257.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "890",
+          "name": "Edit Hand Paper",
+          "unit": "pcs",
+          "poster_stock": 163.0,
+          "prime_cost": 72424.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "803",
+          "name": "Silver Rolle 100mtr",
+          "unit": "pcs",
+          "poster_stock": 162.0,
+          "prime_cost": 31291.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "755",
+          "name": "7Up Diet",
+          "unit": "pcs",
+          "poster_stock": 141.0,
+          "prime_cost": 1408.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "743",
+          "name": "Beer Stella",
+          "unit": "pcs",
+          "poster_stock": 133.0,
+          "prime_cost": 5000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "814",
+          "name": "Stainless Steal Flashing",
+          "unit": "pcs",
+          "poster_stock": 125.0,
+          "prime_cost": 7762.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "742",
+          "name": "Beer Heineken",
+          "unit": "pcs",
+          "poster_stock": 123.0,
+          "prime_cost": 4583.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "892",
+          "name": "Plastic Bag Ahla Wa Sahla",
+          "unit": "kg",
+          "poster_stock": 123.0,
+          "prime_cost": 7153.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "898",
+          "name": "Broom stick",
+          "unit": "pcs",
+          "poster_stock": 122.0,
+          "prime_cost": 4096.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "650",
+          "name": "Tonic",
+          "unit": "pcs",
+          "poster_stock": 116.0,
+          "prime_cost": 2034.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "829",
+          "name": "Mop Change Sheret",
+          "unit": "pcs",
+          "poster_stock": 112.0,
+          "prime_cost": 4695.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "822",
+          "name": "Descaler 5 Liter",
+          "unit": "pcs",
+          "poster_stock": 111.0,
+          "prime_cost": 22050.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "826",
+          "name": "Floor Smell Fredal",
+          "unit": "pcs",
+          "poster_stock": 102.0,
+          "prime_cost": 5507.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "656",
+          "name": "Wague Fat - Raw",
+          "unit": "kg",
+          "poster_stock": 100.018,
+          "prime_cost": 33315.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "744",
+          "name": "Beer Desperados",
+          "unit": "pcs",
+          "poster_stock": 100.0,
+          "prime_cost": 4584.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "959",
+          "name": "Shoulder Cubes",
+          "unit": "kg",
+          "poster_stock": 99.779,
+          "prime_cost": 48375.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "703",
+          "name": "Beer Sakara Gold",
+          "unit": "pcs",
+          "poster_stock": 96.0,
+          "prime_cost": 5417.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "893",
+          "name": "Towel Cloth",
+          "unit": "pcs",
+          "poster_stock": 94.0,
+          "prime_cost": 2821.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "823",
+          "name": "Garbage Basket hk",
+          "unit": "kg",
+          "poster_stock": 82.0,
+          "prime_cost": 10094.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "724",
+          "name": "Mirinda",
+          "unit": "pcs",
+          "poster_stock": 80.0,
+          "prime_cost": 1417.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "835",
+          "name": "Steller",
+          "unit": "pcs",
+          "poster_stock": 80.0,
+          "prime_cost": 4510.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "891",
+          "name": "Hairnet",
+          "unit": "pcs",
+          "poster_stock": 79.0,
+          "prime_cost": 5067.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "470",
+          "name": "Milk Full Cream",
+          "unit": "kg",
+          "poster_stock": 75.111,
+          "prime_cost": 4680.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "471",
+          "name": "Cream Fresh Wipping",
+          "unit": "kg",
+          "poster_stock": 74.413,
+          "prime_cost": 23178.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "816",
+          "name": "Stainless Steal Brush",
+          "unit": "pcs",
+          "poster_stock": 66.0,
+          "prime_cost": 3592.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "809",
+          "name": "Shemex",
+          "unit": "pcs",
+          "poster_stock": 63.0,
+          "prime_cost": 3671.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "476",
+          "name": "Mayonnaise",
+          "unit": "kg",
+          "poster_stock": 58.353,
+          "prime_cost": 14887.0,
+          "min_limit": 0.0
+        }
+      ]
+    },
+    "cairo": {
+      "id": "cairo",
+      "name": "Le Garage Cairo",
+      "city": "New Cairo",
+      "poster_account": "le-garage-uvenue",
+      "is_pilot": false,
+      "storages": [
+        {
+          "id": "1",
+          "name": "Kitchen storage"
+        },
+        {
+          "id": "2",
+          "name": "Food Store"
+        },
+        {
+          "id": "3",
+          "name": "Beverage Store"
+        },
+        {
+          "id": "4",
+          "name": "General Store"
+        },
+        {
+          "id": "6",
+          "name": "Bar restaurant Storage"
+        },
+        {
+          "id": "7",
+          "name": "General restaurant storage"
+        }
+      ],
+      "suppliers_count": 56,
+      "suppliers": [
+        {
+          "poster_supplier_id": "3",
+          "name": "Abu Saleh",
+          "phone": "",
+          "address": "El Gouna",
+          "comment": "Meat & Grocery"
+        },
+        {
+          "poster_supplier_id": "7",
+          "name": "Bagheera Service For Food Supply",
+          "phone": "010007666221-0123127177",
+          "address": "Hurghada Town",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "8",
+          "name": "Pest Control",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "10",
+          "name": "Cash",
+          "phone": "",
+          "address": "",
+          "comment": "Cash Purchasing"
+        },
+        {
+          "poster_supplier_id": "11",
+          "name": "Coca Cola",
+          "phone": "",
+          "address": "",
+          "comment": "Hurghada"
+        },
+        {
+          "poster_supplier_id": "12",
+          "name": "Diamon For Cheese",
+          "phone": "",
+          "address": "",
+          "comment": "Cheese Supply"
+        },
+        {
+          "poster_supplier_id": "13",
+          "name": "El Helaly For Trading & Supplies",
+          "phone": "01001119926-01222660520",
+          "address": "Hurghada Town",
+          "comment": "Grocery & Meat"
+        },
+        {
+          "poster_supplier_id": "14",
+          "name": "El Kods For Fish",
+          "phone": "",
+          "address": "",
+          "comment": "Hurghada"
+        },
+        {
+          "poster_supplier_id": "15",
+          "name": "Farm Cheese 6th October",
+          "phone": "",
+          "address": "Red Sea",
+          "comment": "Food Dairy & Food Products"
+        },
+        {
+          "poster_supplier_id": "17",
+          "name": "Fruit Store For Fruit & Vegetaples",
+          "phone": "01006494565-01149204096",
+          "address": "Hurghada Town",
+          "comment": "Supplied Lettuce Capuche"
+        },
+        {
+          "poster_supplier_id": "18",
+          "name": "House Cleaning",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "19",
+          "name": "Hydro Food For Juice Fresh",
+          "phone": "",
+          "address": "",
+          "comment": "Fresh Juices"
+        },
+        {
+          "poster_supplier_id": "20",
+          "name": "Magdi For Gas",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "21",
+          "name": "Mohamed Butcher Hurghada",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "22",
+          "name": "Nestle For Water (Alanboly)",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "23",
+          "name": "Octubus For Printing",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "24",
+          "name": "Opening Inventory",
+          "phone": "",
+          "address": "Elgouna",
+          "comment": "Opening Food Inventory"
+        },
+        {
+          "poster_supplier_id": "25",
+          "name": "Oroots",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "26",
+          "name": "Pepsi Cola",
+          "phone": "",
+          "address": "Hurghada Town",
+          "comment": "Soft Drink Supplier"
+        },
+        {
+          "poster_supplier_id": "27",
+          "name": "Ramses Fresh",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "28",
+          "name": "Reach For Trading & Marketing",
+          "phone": "01270261313",
+          "address": "Hurghada Town",
+          "comment": "Beer & Wine Supply"
+        },
+        {
+          "poster_supplier_id": "29",
+          "name": "Red Sea For Supplies",
+          "phone": "01227114242",
+          "address": "Hurghada Town",
+          "comment": "Fish & Chicken Supply"
+        },
+        {
+          "poster_supplier_id": "30",
+          "name": "S.M For Food Supply",
+          "phone": "01203285983",
+          "address": "",
+          "comment": "Grocery Supply"
+        },
+        {
+          "poster_supplier_id": "33",
+          "name": "Seven Stars For Supply Of Fresh Juices",
+          "phone": "01015753963-01203013066",
+          "address": "Hurghada Town",
+          "comment": "Fresh Juice & Ice Cream"
+        },
+        {
+          "poster_supplier_id": "35",
+          "name": "Tasweek Hurghada",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "36",
+          "name": "Tulima Farms",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "37",
+          "name": "West Food",
+          "phone": "",
+          "address": "Cairo",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "38",
+          "name": "Ramadan For Fruit",
+          "phone": "",
+          "address": "",
+          "comment": "Fruit & Vegetables"
+        },
+        {
+          "poster_supplier_id": "39",
+          "name": "El masa For Fruit",
+          "phone": "",
+          "address": "",
+          "comment": "Fruit & Vegetables"
+        },
+        {
+          "poster_supplier_id": "40",
+          "name": "Yahia",
+          "phone": "",
+          "address": "",
+          "comment": "Yahia For Fruit"
+        },
+        {
+          "poster_supplier_id": "41",
+          "name": "Saudi",
+          "phone": "",
+          "address": "",
+          "comment": "Saudi For Chicken & Meat"
+        },
+        {
+          "poster_supplier_id": "42",
+          "name": "El Motahida Sami",
+          "phone": "",
+          "address": "",
+          "comment": "General Supply"
+        },
+        {
+          "poster_supplier_id": "43",
+          "name": "Katzela For Coffe",
+          "phone": "",
+          "address": "",
+          "comment": "Coffe Beans Supplier"
+        },
+        {
+          "poster_supplier_id": "44",
+          "name": "Le Garage Gouna",
+          "phone": "",
+          "address": "Gouna",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "45",
+          "name": "Hany Elmesalami",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        }
+      ],
+      "total_ingredients_in_poster": 533,
+      "items": [
+        {
+          "poster_id": "1004",
+          "name": "transparent gloves",
+          "unit": "pcs",
+          "poster_stock": 4903.0,
+          "prime_cost": 47.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "830",
+          "name": "Straw Plastic 10ml",
+          "unit": "pcs",
+          "poster_stock": 3015.0,
+          "prime_cost": 30.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1061",
+          "name": "Pastry gloves",
+          "unit": "pcs",
+          "poster_stock": 1400.0,
+          "prime_cost": 89.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "630",
+          "name": "Ketchup Portion p.c",
+          "unit": "pcs",
+          "poster_stock": 937.0,
+          "prime_cost": 55.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "728",
+          "name": "Water Small",
+          "unit": "pcs",
+          "poster_stock": 594.0,
+          "prime_cost": 649.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1018",
+          "name": "table napkins",
+          "unit": "pcs",
+          "poster_stock": 502.0,
+          "prime_cost": 2602.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "765",
+          "name": "Mayonnaise portion",
+          "unit": "pcs",
+          "poster_stock": 467.0,
+          "prime_cost": 301.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "847",
+          "name": "Cup Take Away",
+          "unit": "pcs",
+          "poster_stock": 436.0,
+          "prime_cost": 168.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "799",
+          "name": "Sauce Bowel Square",
+          "unit": "pcs",
+          "poster_stock": 350.0,
+          "prime_cost": 87.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "837",
+          "name": "Shish Kapap Sticks",
+          "unit": "pcs",
+          "poster_stock": 200.0,
+          "prime_cost": 80.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "798",
+          "name": "Silver Plate 1135 With Cover",
+          "unit": "pcs",
+          "poster_stock": 200.0,
+          "prime_cost": 581.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "943",
+          "name": "Phoam Plate 1 Kg",
+          "unit": "pcs",
+          "poster_stock": 175.0,
+          "prime_cost": 117.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "755",
+          "name": "Sprite Diet",
+          "unit": "pcs",
+          "poster_stock": 166.0,
+          "prime_cost": 1734.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "723",
+          "name": "Coca Cola",
+          "unit": "pcs",
+          "poster_stock": 160.0,
+          "prime_cost": 1925.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1020",
+          "name": "towel pullss",
+          "unit": "pcs",
+          "poster_stock": 157.0,
+          "prime_cost": 2253.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1021",
+          "name": "black cover",
+          "unit": "pcs",
+          "poster_stock": 154.0,
+          "prime_cost": 240.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1017",
+          "name": "Foam Plates",
+          "unit": "pcs",
+          "poster_stock": 150.0,
+          "prime_cost": 81.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "754",
+          "name": "Cola Zero",
+          "unit": "pcs",
+          "poster_stock": 146.0,
+          "prime_cost": 1925.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "800",
+          "name": "Take Away Bowel 1 Eye",
+          "unit": "pcs",
+          "poster_stock": 125.0,
+          "prime_cost": 642.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "873",
+          "name": "Rolle Cashier",
+          "unit": "pcs",
+          "poster_stock": 112.0,
+          "prime_cost": 3203.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "839",
+          "name": "Bags With Logo take away",
+          "unit": "pcs",
+          "poster_stock": 109.0,
+          "prime_cost": 10248.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "725",
+          "name": "Sprite",
+          "unit": "pcs",
+          "poster_stock": 105.0,
+          "prime_cost": 1842.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "944",
+          "name": "Burger Box With Logo",
+          "unit": "pcs",
+          "poster_stock": 100.0,
+          "prime_cost": 340.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "804",
+          "name": "Soap Bowel one Way paper",
+          "unit": "pcs",
+          "poster_stock": 100.0,
+          "prime_cost": 398.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "470",
+          "name": "Milk Full Cream",
+          "unit": "kg",
+          "poster_stock": 93.773,
+          "prime_cost": 4867.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "964",
+          "name": "Lava Cake Form",
+          "unit": "pcs",
+          "poster_stock": 90.0,
+          "prime_cost": 169.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "984",
+          "name": "Ahmed tea breacfast",
+          "unit": "pcs",
+          "poster_stock": 88.0,
+          "prime_cost": 292.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "703",
+          "name": "Beer Sakara Gold",
+          "unit": "pcs",
+          "poster_stock": 83.0,
+          "prime_cost": 5420.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "996",
+          "name": "liquid soap",
+          "unit": "L",
+          "poster_stock": 83.0,
+          "prime_cost": 3609.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "806",
+          "name": "Napken 33*33 Fox",
+          "unit": "pcs",
+          "poster_stock": 82.0,
+          "prime_cost": 2302.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1059",
+          "name": "T.K black plates",
+          "unit": "pcs",
+          "poster_stock": 75.0,
+          "prime_cost": 684.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "805",
+          "name": "Wips Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 75.0,
+          "prime_cost": 2375.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "801",
+          "name": "Garbage Bag Blue",
+          "unit": "kg",
+          "poster_stock": 71.0,
+          "prime_cost": 6910.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "446",
+          "name": "Chicken Breast",
+          "unit": "kg",
+          "poster_stock": 69.563,
+          "prime_cost": 28000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "650",
+          "name": "Tonic",
+          "unit": "pcs",
+          "poster_stock": 65.0,
+          "prime_cost": 2734.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "787",
+          "name": "Wipes Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 61.0,
+          "prime_cost": 2407.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1071",
+          "name": "PF Tomato",
+          "unit": "kg",
+          "poster_stock": 53.8,
+          "prime_cost": 2499.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1070",
+          "name": "PF Cucumber Slice",
+          "unit": "kg",
+          "poster_stock": 52.25,
+          "prime_cost": 3233.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "963",
+          "name": "Napkin for kitchen",
+          "unit": "pcs",
+          "poster_stock": 52.0,
+          "prime_cost": 13105.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "834",
+          "name": "Sponghe Lahlouba",
+          "unit": "pcs",
+          "poster_stock": 51.0,
+          "prime_cost": 997.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1060",
+          "name": "silver plate 230",
+          "unit": "pcs",
+          "poster_stock": 50.0,
+          "prime_cost": 322.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "987",
+          "name": "Red Onion",
+          "unit": "kg",
+          "poster_stock": 46.58,
+          "prime_cost": 2500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "498",
+          "name": "Ice Cream",
+          "unit": "kg",
+          "poster_stock": 45.48,
+          "prime_cost": 10380.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "476",
+          "name": "Mayonnaise",
+          "unit": "kg",
+          "poster_stock": 41.509,
+          "prime_cost": 14354.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1087",
+          "name": "PF Chicken Nuggets",
+          "unit": "kg",
+          "poster_stock": 41.43,
+          "prime_cost": 20858.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "942",
+          "name": "Medical Gloves Black",
+          "unit": "pcs",
+          "poster_stock": 41.0,
+          "prime_cost": 24025.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "743",
+          "name": "Beer Stella",
+          "unit": "pcs",
+          "poster_stock": 40.0,
+          "prime_cost": 5002.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "808",
+          "name": "Straw 6ml Platic",
+          "unit": "pcs",
+          "poster_stock": 40.0,
+          "prime_cost": 1763.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "449",
+          "name": "Chicken Whole",
+          "unit": "kg",
+          "poster_stock": 37.5,
+          "prime_cost": 17420.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "658",
+          "name": "Sweet Potatoe Fries",
+          "unit": "kg",
+          "poster_stock": 37.325,
+          "prime_cost": 9688.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1055",
+          "name": "Staff Meat",
+          "unit": "kg",
+          "poster_stock": 37.292,
+          "prime_cost": 41086.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "661",
+          "name": "Chedar Creamy Sauce",
+          "unit": "kg",
+          "poster_stock": 36.7,
+          "prime_cost": 19947.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "483",
+          "name": "French Fries",
+          "unit": "kg",
+          "poster_stock": 36.37,
+          "prime_cost": 7327.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "556",
+          "name": "Mushroom Fresh",
+          "unit": "kg",
+          "poster_stock": 36.096,
+          "prime_cost": 25000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "726",
+          "name": "Soda",
+          "unit": "pcs",
+          "poster_stock": 35.0,
+          "prime_cost": 3469.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "576",
+          "name": "Ketchup",
+          "unit": "kg",
+          "poster_stock": 33.563,
+          "prime_cost": 11619.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "454",
+          "name": "Chedar",
+          "unit": "kg",
+          "poster_stock": 29.475,
+          "prime_cost": 45000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "448",
+          "name": "Chicken Wings",
+          "unit": "kg",
+          "poster_stock": 29.322,
+          "prime_cost": 13000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "945",
+          "name": "Fille portion",
+          "unit": "kg",
+          "poster_stock": 28.0,
+          "prime_cost": 144000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "471",
+          "name": "Cream Fresh Wipping",
+          "unit": "kg",
+          "poster_stock": 25.462,
+          "prime_cost": 23118.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "811",
+          "name": "Plastic Bag 20cm refridge",
+          "unit": "kg",
+          "poster_stock": 25.0,
+          "prime_cost": 12135.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "414",
+          "name": "Potatoes Fresh",
+          "unit": "kg",
+          "poster_stock": 24.754,
+          "prime_cost": 2994.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "664",
+          "name": "shrimps 30-40",
+          "unit": "kg",
+          "poster_stock": 24.15,
+          "prime_cost": 114992.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1119",
+          "name": "Soda 1 liter",
+          "unit": "L",
+          "poster_stock": 23.944,
+          "prime_cost": 3883.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "505",
+          "name": "Flour",
+          "unit": "kg",
+          "poster_stock": 23.675,
+          "prime_cost": 3780.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "673",
+          "name": "Green Tea Jasmine",
+          "unit": "pcs",
+          "poster_stock": 23.0,
+          "prime_cost": 129.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "407",
+          "name": "Lemon Fresh",
+          "unit": "kg",
+          "poster_stock": 21.566,
+          "prime_cost": 3574.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "496",
+          "name": "White Vinegar",
+          "unit": "kg",
+          "poster_stock": 21.103,
+          "prime_cost": 2234.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "729",
+          "name": "Red Bull",
+          "unit": "pcs",
+          "poster_stock": 21.0,
+          "prime_cost": 5125.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "995",
+          "name": "lamb",
+          "unit": "kg",
+          "poster_stock": 20.8,
+          "prime_cost": 75000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "582",
+          "name": "BBQ Sauce",
+          "unit": "kg",
+          "poster_stock": 20.69,
+          "prime_cost": 9246.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "895",
+          "name": "Mozzarella",
+          "unit": "kg",
+          "poster_stock": 19.0,
+          "prime_cost": 21000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "1069",
+          "name": "PF Mashed potato",
+          "unit": "kg",
+          "poster_stock": 18.73,
+          "prime_cost": 5365.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "468",
+          "name": "Corn Flour",
+          "unit": "kg",
+          "poster_stock": 18.247,
+          "prime_cost": 6722.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "997",
+          "name": "cloth duster",
+          "unit": "pcs",
+          "poster_stock": 18.0,
+          "prime_cost": 1564.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "405",
+          "name": "Carrot Fresh",
+          "unit": "kg",
+          "poster_stock": 17.916,
+          "prime_cost": 3000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "803",
+          "name": "Silver Rolle 100mtr",
+          "unit": "pcs",
+          "poster_stock": 17.0,
+          "prime_cost": 26400.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "417",
+          "name": "Avocado Fresh",
+          "unit": "kg",
+          "poster_stock": 16.95,
+          "prime_cost": 20000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "827",
+          "name": "Air Fresh Fredal",
+          "unit": "pcs",
+          "poster_stock": 15.0,
+          "prime_cost": 6599.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "812",
+          "name": "Butter Paper 20x20",
+          "unit": "pcs",
+          "poster_stock": 15.0,
+          "prime_cost": 20077.0,
+          "min_limit": 0.0
+        }
+      ]
+    },
+    "saigon": {
+      "id": "saigon",
+      "name": "Saigon",
+      "city": "El Gouna",
+      "poster_account": "saigon-el-gouna",
+      "is_pilot": false,
+      "storages": [
+        {
+          "id": "1",
+          "name": "Kitchen store"
+        },
+        {
+          "id": "2",
+          "name": "Bar store"
+        },
+        {
+          "id": "3",
+          "name": "General Store"
+        },
+        {
+          "id": "4",
+          "name": "boho cafe"
+        }
+      ],
+      "suppliers_count": 21,
+      "suppliers": [
+        {
+          "poster_supplier_id": "1",
+          "name": "Supplier",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "2",
+          "name": "Reach For Trading & Marketing",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "3",
+          "name": "El Helaly For Trading & Supplies",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "4",
+          "name": "lavour for bread",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "5",
+          "name": "magde gass",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "6",
+          "name": "abu amer",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "7",
+          "name": "general amire",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "8",
+          "name": "fish kods",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "9",
+          "name": "coca cola",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "10",
+          "name": "ruts",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "11",
+          "name": "Quanta",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "12",
+          "name": "al sony",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "13",
+          "name": "TEST",
+          "phone": "",
+          "address": "",
+          "comment": "L&C Stock API spike — test only"
+        },
+        {
+          "poster_supplier_id": "14",
+          "name": "boho coffe",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "15",
+          "name": "Tasweek for wine",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "16",
+          "name": "al bustan werhawes",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "17",
+          "name": "farm frites",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "18",
+          "name": "ann",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "19",
+          "name": "el hassan company",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "20",
+          "name": "puvana",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        },
+        {
+          "poster_supplier_id": "21",
+          "name": "cash",
+          "phone": "",
+          "address": "",
+          "comment": ""
+        }
+      ],
+      "total_ingredients_in_poster": 381,
+      "items": [
+        {
+          "poster_id": "183",
+          "name": "Soap Towel one Way paper",
+          "unit": "pcs",
+          "poster_stock": 2000.0,
+          "prime_cost": 501.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "195",
+          "name": "Take Away Bowel 1 Eye",
+          "unit": "pcs",
+          "poster_stock": 1900.0,
+          "prime_cost": 524.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "140",
+          "name": "Cover 7*1",
+          "unit": "pcs",
+          "poster_stock": 1600.0,
+          "prime_cost": 430.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "177",
+          "name": "Sauce Bowel Square",
+          "unit": "pcs",
+          "poster_stock": 1576.0,
+          "prime_cost": 219.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "157",
+          "name": "Foam Plate 1 Kg",
+          "unit": "pcs",
+          "poster_stock": 1002.0,
+          "prime_cost": 162.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "191",
+          "name": "Straw Plastic 10ml",
+          "unit": "pcs",
+          "poster_stock": 1000.0,
+          "prime_cost": 74.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "190",
+          "name": "Straw 6ml Platic",
+          "unit": "pcs",
+          "poster_stock": 750.0,
+          "prime_cost": 36.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "141",
+          "name": "Cup Take Away",
+          "unit": "pcs",
+          "poster_stock": 650.0,
+          "prime_cost": 372.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "196",
+          "name": "Tooth picks",
+          "unit": "pcs",
+          "poster_stock": 417.0,
+          "prime_cost": 1264.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "429",
+          "name": "PF Duck",
+          "unit": "kg",
+          "poster_stock": 353.78,
+          "prime_cost": 3783.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "6",
+          "name": "Cover 250ml",
+          "unit": "pcs",
+          "poster_stock": 352.0,
+          "prime_cost": 514.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "116",
+          "name": "coca cola",
+          "unit": "pcs",
+          "poster_stock": 318.0,
+          "prime_cost": 1396.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "179",
+          "name": "Shish Kebab Sticks",
+          "unit": "pcs",
+          "poster_stock": 300.0,
+          "prime_cost": 260.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "185",
+          "name": "Sponge Stainless",
+          "unit": "pcs",
+          "poster_stock": 221.0,
+          "prime_cost": 682.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "7",
+          "name": "Paper cup 250ml",
+          "unit": "pcs",
+          "poster_stock": 200.0,
+          "prime_cost": 64.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "159",
+          "name": "Garbage Bag Blue",
+          "unit": "kg",
+          "poster_stock": 198.25,
+          "prime_cost": 6335.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "26",
+          "name": "Water Small",
+          "unit": "pcs",
+          "poster_stock": 183.0,
+          "prime_cost": 599.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "28",
+          "name": "Sparkling Water Small",
+          "unit": "pcs",
+          "poster_stock": 161.0,
+          "prime_cost": 2547.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "219",
+          "name": "Coriander Fresh",
+          "unit": "kg",
+          "poster_stock": 129.092,
+          "prime_cost": 300.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "358",
+          "name": "Orange Fresh",
+          "unit": "kg",
+          "poster_stock": 124.421,
+          "prime_cost": 4022.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "84",
+          "name": "coconut cream (old, pcs)",
+          "unit": "pcs",
+          "poster_stock": 122.0,
+          "prime_cost": 11280.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "132",
+          "name": "rice stick 300g",
+          "unit": "pcs",
+          "poster_stock": 116.0,
+          "prime_cost": 10122.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "389",
+          "name": "Sprite",
+          "unit": "pcs",
+          "poster_stock": 102.0,
+          "prime_cost": 1396.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "255",
+          "name": "Red Cabbage",
+          "unit": "kg",
+          "poster_stock": 101.823,
+          "prime_cost": 2001.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "282",
+          "name": "Glass Noodles",
+          "unit": "kg",
+          "poster_stock": 87.693,
+          "prime_cost": 8533.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "420",
+          "name": "duck",
+          "unit": "pcs",
+          "poster_stock": 74.0,
+          "prime_cost": 36037.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "161",
+          "name": "Gas Cylender Big",
+          "unit": "pcs",
+          "poster_stock": 74.0,
+          "prime_cost": 75000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "35",
+          "name": "Beer Heineken",
+          "unit": "pcs",
+          "poster_stock": 70.0,
+          "prime_cost": 4583.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "258",
+          "name": "Red Onion",
+          "unit": "kg",
+          "poster_stock": 66.515,
+          "prime_cost": 2500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "37",
+          "name": "Beer Stella",
+          "unit": "pcs",
+          "poster_stock": 66.0,
+          "prime_cost": 5000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "446",
+          "name": "Soda",
+          "unit": "L",
+          "poster_stock": 63.46,
+          "prime_cost": 2583.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "13",
+          "name": "Sugar",
+          "unit": "kg",
+          "poster_stock": 63.314,
+          "prime_cost": 3500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "390",
+          "name": "Sprite Diet",
+          "unit": "pcs",
+          "poster_stock": 63.0,
+          "prime_cost": 1396.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "298",
+          "name": "Carrot Fresh",
+          "unit": "kg",
+          "poster_stock": 59.808,
+          "prime_cost": 3353.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "131",
+          "name": "milk full cream",
+          "unit": "L",
+          "poster_stock": 56.0,
+          "prime_cost": 4708.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "134",
+          "name": "bread",
+          "unit": "pcs",
+          "poster_stock": 55.0,
+          "prime_cost": 200.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "27",
+          "name": "Tonic",
+          "unit": "pcs",
+          "poster_stock": 55.0,
+          "prime_cost": 2583.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "173",
+          "name": "Plastic Bag Ahla Wa Sahla",
+          "unit": "kg",
+          "poster_stock": 54.0,
+          "prime_cost": 1343.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "241",
+          "name": "Lemongrass",
+          "unit": "kg",
+          "poster_stock": 52.292,
+          "prime_cost": 5000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "184",
+          "name": "Sponge Lahlouba",
+          "unit": "pcs",
+          "poster_stock": 52.0,
+          "prime_cost": 2027.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "78",
+          "name": "chicken breasts",
+          "unit": "kg",
+          "poster_stock": 51.326,
+          "prime_cost": 26937.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "175",
+          "name": "Rolls Cashier",
+          "unit": "pcs",
+          "poster_stock": 45.0,
+          "prime_cost": 4397.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "96",
+          "name": "oil 4,5 liters",
+          "unit": "L",
+          "poster_stock": 42.818,
+          "prime_cost": 40804.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "86",
+          "name": "white vinegar",
+          "unit": "L",
+          "poster_stock": 42.769,
+          "prime_cost": 1834.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "92",
+          "name": "fish fillet",
+          "unit": "kg",
+          "poster_stock": 39.6,
+          "prime_cost": 15000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "212",
+          "name": "Butter",
+          "unit": "kg",
+          "poster_stock": 37.1,
+          "prime_cost": 59500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "135",
+          "name": "Air Fresh Fredal",
+          "unit": "pcs",
+          "poster_stock": 36.0,
+          "prime_cost": 6782.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "182",
+          "name": "Soap 20 Liter Without Smell",
+          "unit": "pcs",
+          "poster_stock": 34.0,
+          "prime_cost": 51543.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "319",
+          "name": "Lemon local",
+          "unit": "kg",
+          "poster_stock": 32.14,
+          "prime_cost": 3242.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "388",
+          "name": "Cola Zero",
+          "unit": "pcs",
+          "poster_stock": 32.0,
+          "prime_cost": 1396.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "110",
+          "name": "fava beans",
+          "unit": "pcs",
+          "poster_stock": 32.0,
+          "prime_cost": 1562.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "114",
+          "name": "jasmine rice",
+          "unit": "kg",
+          "poster_stock": 31.6,
+          "prime_cost": 16500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "124",
+          "name": "chicken wings",
+          "unit": "kg",
+          "poster_stock": 31.146,
+          "prime_cost": 10487.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "392",
+          "name": "Club Soda",
+          "unit": "pcs",
+          "poster_stock": 30.0,
+          "prime_cost": 2364.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "112",
+          "name": "water gallon",
+          "unit": "L",
+          "poster_stock": 30.0,
+          "prime_cost": 11000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "271",
+          "name": "Vanilla Ice Cream",
+          "unit": "kg",
+          "poster_stock": 28.35,
+          "prime_cost": 9362.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "277",
+          "name": "Yellow Bell Pepper",
+          "unit": "kg",
+          "poster_stock": 28.145,
+          "prime_cost": 5499.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "36",
+          "name": "Beer Sakara",
+          "unit": "pcs",
+          "poster_stock": 28.0,
+          "prime_cost": 5417.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "206",
+          "name": "Beef",
+          "unit": "kg",
+          "poster_stock": 27.33,
+          "prime_cost": 57995.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "174",
+          "name": "Rolle Stretch 35cm",
+          "unit": "pcs",
+          "poster_stock": 27.0,
+          "prime_cost": 26405.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "105",
+          "name": "oyster sauce (old, pcs)",
+          "unit": "pcs",
+          "poster_stock": 26.0,
+          "prime_cost": 14000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "270",
+          "name": "Tomato",
+          "unit": "kg",
+          "poster_stock": 25.32,
+          "prime_cost": 2809.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "39",
+          "name": "Beausoleil White Bottle",
+          "unit": "pcs",
+          "poster_stock": 25.0,
+          "prime_cost": 30000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "312",
+          "name": "Green Beans",
+          "unit": "kg",
+          "poster_stock": 24.8,
+          "prime_cost": 8002.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "172",
+          "name": "Plastic Bag 20cm refridge",
+          "unit": "kg",
+          "poster_stock": 24.0,
+          "prime_cost": 13375.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "125",
+          "name": "sweet potato noodls",
+          "unit": "kg",
+          "poster_stock": 24.0,
+          "prime_cost": 17000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "260",
+          "name": "Rice Noodle Dry",
+          "unit": "kg",
+          "poster_stock": 23.7,
+          "prime_cost": 9539.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "128",
+          "name": "fish sauce",
+          "unit": "L",
+          "poster_stock": 23.506,
+          "prime_cost": 11260.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "238",
+          "name": "Honey",
+          "unit": "kg",
+          "poster_stock": 23.487,
+          "prime_cost": 23325.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "325",
+          "name": "Mushroom Fresh",
+          "unit": "kg",
+          "poster_stock": 21.4,
+          "prime_cost": 26290.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "148",
+          "name": "Dettol 500ml",
+          "unit": "kg",
+          "poster_stock": 21.0,
+          "prime_cost": 8671.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "304",
+          "name": "Cucumber Fresh",
+          "unit": "kg",
+          "poster_stock": 20.8,
+          "prime_cost": 2612.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "87",
+          "name": "loca rice",
+          "unit": "kg",
+          "poster_stock": 20.0,
+          "prime_cost": 3400.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "284",
+          "name": "Hoisin Sauce",
+          "unit": "kg",
+          "poster_stock": 19.602,
+          "prime_cost": 61289.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "344",
+          "name": "Banana local",
+          "unit": "kg",
+          "poster_stock": 19.0,
+          "prime_cost": 3500.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "130",
+          "name": "ketchup 10 k",
+          "unit": "kg",
+          "poster_stock": 18.88,
+          "prime_cost": 5176.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "418",
+          "name": "Wips Paper Fox",
+          "unit": "pcs",
+          "poster_stock": 18.0,
+          "prime_cost": 63681.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "70",
+          "name": "Shrimps 20-30 whith cover",
+          "unit": "kg",
+          "poster_stock": 17.86,
+          "prime_cost": 75000.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "138",
+          "name": "Broom stick",
+          "unit": "pcs",
+          "poster_stock": 17.0,
+          "prime_cost": 11514.0,
+          "min_limit": 0.0
+        },
+        {
+          "poster_id": "321",
+          "name": "Lettuce Kori",
+          "unit": "kg",
+          "poster_stock": 17.0,
+          "prime_cost": 5079.0,
+          "min_limit": 0.0
+        }
+      ]
+    }
+  }
+}

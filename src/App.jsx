@@ -53,7 +53,7 @@ function loadState() {
 export default function App() {
   const [state, setState] = useState(loadState)
   const [roleId, setRoleId] = useState('owner')
-  const [branchFilter, setBranchFilter] = useState('all')
+  const [branchFilter, setBranchFilter] = useState('boho')
   const [lang, setLang] = useState('en')
   const [activeTab, setActiveTab] = useState('overview')
   const [navHistory, setNavHistory] = useState([])
@@ -139,9 +139,6 @@ export default function App() {
     setActiveTab(nextRole.defaultTab)
     setFocusedLineId(null)
     window.history.replaceState({ tab: nextRole.defaultTab, lineId: null }, '', `#${nextRole.defaultTab}`)
-    if (newRoleId === 'manager' || newRoleId === 'staff' || newRoleId === 'receiving') {
-      if (branchFilter === 'all') setBranchFilter('boho')
-    }
   }
 
   const handleResetDemo = () => {
@@ -576,6 +573,7 @@ export default function App() {
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-brand">
           <span>{t.brand}</span>
+          <span style={{ fontSize: 11.5, fontWeight: 500, color: 'var(--text-muted)' }}>{t.brandSub}</span>
         </div>
         <nav className="sidebar-nav">
           {navItems.map((item) => {
@@ -593,8 +591,10 @@ export default function App() {
           })}
         </nav>
         <div className="sidebar-footer">
-          <div style={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>{role.labelEn}</div>
-          <div style={{ opacity: 0.8 }}>{lang === 'ar' ? role.scopeNoteAr : role.scopeNoteEn}</div>
+          <div style={{ fontWeight: 700, color: 'var(--text-main)', marginBottom: 3 }}>
+            {lang === 'ar' ? role.labelAr : role.labelEn}
+          </div>
+          <div>{lang === 'ar' ? role.scopeNoteAr : role.scopeNoteEn}</div>
         </div>
       </aside>
 
@@ -609,7 +609,6 @@ export default function App() {
               <Store size={15} color="var(--primary)" />
               <span>{t.restaurant}:</span>
               <select value={branchFilter} onChange={(e) => setBranchFilter(e.target.value)}>
-                <option value="all">{t.allRestaurants}</option>
                 {BRANCHES.map((b) => (
                   <option key={b.id} value={b.id}>
                     {lang === 'ar' ? b.nameAr : b.name} {b.pilot ? '★' : ''}
@@ -622,7 +621,7 @@ export default function App() {
           <div className="topbar-right">
             <div className="lang-toggle">
               <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
-              <button className={lang === 'ar' ? 'active' : ''} onClick={() => setLang('ar')}>العربية</button>
+              <button className={lang === 'ar' ? 'active' : ''} onClick={() => setLang('ar')}>مصري</button>
             </div>
 
             <div className="select-pill" title="Switch user perspective / role">

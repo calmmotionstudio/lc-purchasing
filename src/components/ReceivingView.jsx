@@ -10,7 +10,9 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
   const po = state.pos.find((p) => p.id === selectedPoId) || receivablePOs[0]
 
   const [categoryTab, setCategoryTab] = useState(po?.category || 'Food')
+  const [broughtInput, setBroughtInput] = useState(po ? String(Math.max(0, po.orderedQty - po.receivedQty)) : '0')
   const [acceptedInput, setAcceptedInput] = useState(po ? String(Math.max(0, po.orderedQty - po.receivedQty - 0.5)) : '0')
+  const [problemReason, setProblemReason] = useState('Damaged packaging')
   const [tempC, setTempC] = useState('4')
   const [condition, setCondition] = useState('Accepted')
   const [expiryDate, setExpiryDate] = useState('2026-11-24')
@@ -326,31 +328,66 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 16 }}>
             <div className="card" style={{ background: 'var(--bg-subtle)', padding: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Ordered / Remaining</div>
-              <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4 }}>{po.orderedQty} / {remainingBefore} {po.unit}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t.ordered}:</div>
+              <div style={{ fontSize: 22, fontWeight: 700, marginTop: 4 }}>{remainingBefore} {po.unit}</div>
             </div>
             <div className="card" style={{ padding: 12 }}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>Received & accepted *</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 4 }}>{t.brought}:</div>
               <input
                 type="number"
                 step="any"
                 min="0"
                 max={remainingBefore}
                 className="input"
-                style={{ width: '100%', fontWeight: 700, fontSize: 17 }}
+                style={{ width: '100%', fontWeight: 700, fontSize: 18 }}
+                value={broughtInput}
+                onChange={(e) => setBroughtInput(e.target.value)}
+              />
+            </div>
+            <div className="card" style={{ padding: 12, borderColor: 'var(--primary)' }}>
+              <div style={{ fontSize: 12, color: 'var(--primary)', fontWeight: 600, marginBottom: 4 }}>{t.accepted} *</div>
+              <input
+                type="number"
+                step="any"
+                min="0"
+                max={remainingBefore}
+                className="input"
+                style={{ width: '100%', fontWeight: 700, fontSize: 18 }}
                 value={acceptedInput}
                 onChange={(e) => setAcceptedInput(e.target.value)}
               />
             </div>
-            <div className="card" style={{ background: stillDue > 0 ? 'var(--amber-bg)' : 'var(--green-bg)', padding: 12 }}>
-              <div style={{ fontSize: 12, color: stillDue > 0 ? 'var(--amber-text)' : 'var(--green-text)' }}>Still due</div>
-              <div style={{ fontSize: 20, fontWeight: 700, marginTop: 4, color: stillDue > 0 ? 'var(--amber-text)' : 'var(--green-text)' }}>
-                {stillDue} {po.unit}
+          </div>
+
+          {stillDue > 0 && (
+            <div className="card" style={{ background: '#fff9ee', borderColor: 'var(--amber-border)', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: 'var(--amber-text)', marginBottom: 10 }}>
+                <AlertTriangle size={18} /> {t.thereIsProblem}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 10, marginBottom: 10 }}>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>{t.rejectedMissing}:</label>
+                  <div className="input" style={{ display: 'flex', alignItems: 'center', fontWeight: 700, background: '#fdecc8', borderColor: 'var(--amber-border)' }}>
+                    {stillDue} {po.unit}
+                  </div>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>{t.reason}:</label>
+                  <select className="input" style={{ width: '100%' }} value={problemReason} onChange={(e) => setProblemReason(e.target.value)}>
+                    <option value="Damaged packaging">{lang === 'ar' ? 'التغليف مقطوع / بايظ' : 'Damaged packaging'}</option>
+                    <option value="Short delivery">{lang === 'ar' ? 'ناقص من المورد' : 'Short delivery'}</option>
+                    <option value="Wrong item / size">{lang === 'ar' ? 'صنف أو مقاس غلط' : 'Wrong item / size'}</option>
+                    <option value="Bad quality / expired">{lang === 'ar' ? 'جودة وحشة / منتهي الصلاحية' : 'Bad quality / expired'}</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--amber-text)' }}>
+                ℹ {lang === 'ar' ? `بخصوص الـ ${stillDue} ${po.unit} المشتريات هتتصرف فيها` : `Purchasing will handle the missing ${stillDue} ${po.unit}`}
               </div>
             </div>
-          </div>
+          )}
 
           {/* Category-Specific Checklist (RCV02) */}
           <div className="notice notice-green" style={{ marginBottom: 12, fontWeight: 600 }}>

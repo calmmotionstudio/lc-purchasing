@@ -10,8 +10,139 @@ const branchName = (id, lang) => {
 export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed, onRequestReport, onNavigate }) {
   const canSeePrices = role.canViewPrices
   const prs = state.prs.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
+  const branchPOs = state.pos.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
   const [reportModalPr, setReportModalPr] = useState(null)
   const [reportNote, setReportNote] = useState('')
+  const [selectedOrderId, setSelectedOrderId] = useState(branchPOs[1]?.id || branchPOs[0]?.id || prs[0]?.id)
+
+  // ULTRA-SIMPLE TWO-PANE "MY ORDERS" FOR STAFF (Screenshot #1)
+  if (role.id === 'staff') {
+    const simpleCards = [
+      ...prs.map((pr) => ({
+        id: pr.id,
+        title: `${pr.createdAt.slice(5, 10)} · ${pr.lines[0]?.itemName || 'Order'}`,
+        emoji: pr.lines[0]?.emoji || '🛒',
+        status: pr.lines.every((l) => l.needApproved) ? (lang === 'ar' ? 'اتوافق عليه' : 'Approved') : (lang === 'ar' ? 'مستني موافقة' : 'Waiting approval'),
+        pillClass: pr.lines.every((l) => l.needApproved) ? 'pill-green' : 'pill-amber',
+        ordered: pr.lines[0]?.qty || 0,
+        received: 0,
+        unit: pr.lines[0]?.unit || '',
+        itemName: pr.lines[0]?.itemName || pr.id,
+        itemNameAr: pr.lines[0]?.itemNameAr || pr.id,
+        buyer: 'Mohamed Noman',
+        note: lang === 'ar' ? 'في انتظار المراجعة والشراء' : 'Waiting for Manager & Purchasing',
+        nextTask: lang === 'ar' ? 'متابعة التوريد' : 'Wait for delivery confirmation',
+        isShort: false,
+      })),
+      ...branchPOs.map((po) => {
+        const missing = Math.max(0, Number((po.orderedQty - po.receivedQty).toFixed(3)))
+        const isShort = po.status === 'Part received' && missing > 0
+        return {
+          id: po.id,
+          title: `${po.expectedDate} · ${lang === 'ar' ? po.itemNameAr || po.itemName : po.itemName}`,
+          emoji: po.emoji,
+          status: isShort ? (lang === 'ar' ? 'ناقص' : 'Shortage') : po.status,
+          pillClass: po.status === 'Received' ? 'pill-green' : isShort ? 'pill-amber' : 'pill-blue',
+          ordered: po.orderedQty,
+          received: po.receivedQty,
+          missing,
+          unit: po.unit,
+          itemName: po.itemName,
+          itemNameAr: po.itemNameAr || po.itemName,
+          buyer: 'Mohamed Noman',
+          note: isShort
+            ? (lang === 'ar' ? 'المورد وعد يجيب الباقي بكرة' : 'Supplier promised remaining delivery tomorrow')
+            : (lang === 'ar' ? `المورد: ${po.supplier}` : `Supplier: ${po.supplier}`),
+          nextTask: isShort
+            ? (lang === 'ar' ? 'تأكيد استلام الباقي بكرة الساعة ١٢:٠٠' : 'Check remaining delivery tomorrow by 12:00')
+            : (lang === 'ar' ? 'متابعة الوصول' : 'Track arrival'),
+          isShort,
+        }
+      }),
+    ]
+    const activeCard = simpleCards.find((c) => c.id === selectedOrderId) || simpleCards[0]
+
+    return (
+      <div>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">{lang === 'ar' ? 'طلباتي' : 'My orders'}</h1>
+            <p className="page-subtitle">{branchName(branchFilter, lang)}</p>
+          </div>
+        </div>
+        <div className="grid-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {simpleCards.map((c) => (
+              <div
+                key={c.id}
+                className="card"
+                style={{
+                  cursor: 'pointer',
+                  borderColor: activeCard?.id === c.id ? 'var(--primary)' : 'var(--border)',
+                  background: activeCard?.id === c.id ? '#eff7f2' : '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+                onClick={() => setSelectedOrderId(c.id)}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="item-thumb">{c.emoji}</div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14.5 }}>{c.title}</div>
+                    <span className={`pill ${c.pillClass}`} style={{ marginTop: 4 }}>{c.status}</span>
+                  </div>
+                </div>
+                <span style={{ color: 'var(--text-light)', fontSize: 18 }}>›</span>
+              </div>
+            ))}
+          </div>
+
+          {activeCard && (
+            <div className="card">
+              <h2 style={{ margin: '0 0 14px', fontSize: 22 }}>
+                {activeCard.isShort
+                  ? (lang === 'ar' ? `ناقص ${activeCard.missing} ${activeCard.unit}` : `Missing ${activeCard.missing} ${activeCard.unit}`)
+                  : (lang === 'ar' ? activeCard.itemNameAr : activeCard.itemName)}
+              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                <div className="item-thumb" style={{ width: 64, height: 64, fontSize: 34 }}>{activeCard.emoji}</div>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'طلبنا:' : 'Ordered:'}</span>
+                    <strong>{activeCard.ordered} {activeCard.unit}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'استلمنا:' : 'Received:'}</span>
+                    <strong>{activeCard.received} {activeCard.unit}</strong>
+                  </div>
+                  {activeCard.isShort && (
+                    <div className="pill pill-red" style={{ justifyContent: 'space-between', marginTop: 2 }}>
+                      <span>{lang === 'ar' ? 'ناقص:' : 'Missing:'}</span>
+                      <strong>{activeCard.missing} {activeCard.unit}</strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="notice notice-green" style={{ marginBottom: 12, fontWeight: 600 }}>
+                {activeCard.note}
+              </div>
+              <div style={{ fontSize: 13.5, display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
+                <div>👤 {lang === 'ar' ? 'المسؤول:' : 'Responsible:'} <strong>{activeCard.buyer}</strong></div>
+                <div>📅 {lang === 'ar' ? 'الخطوة الجاية:' : 'Next step:'} <strong>{activeCard.nextTask}</strong></div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <button className="btn btn-primary" onClick={() => onNavigate('new_request')}>
+                  {lang === 'ar' ? 'اطلب تاني كطلب جديد' : 'Repeat as new order'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -491,6 +622,94 @@ export function StockChecksView({ state, branchFilter, role, lang, onResolveChec
   const checks = state.stockChecks.filter((c) => branchFilter === 'all' || c.branchId === branchFilter)
   const openCount = checks.filter((c) => c.status === 'Open').length
   const matchedCount = checks.filter((c) => c.status === 'Resolved' || c.status === 'Matched').length
+
+  const [staffCounts, setStaffCounts] = useState({
+    'CAT-CHK': '7',
+    'CAT-MOZ': '5',
+    'CAT-PAT': '40',
+    'CAT-BUN': '',
+  })
+
+  // ULTRA-SIMPLE "WHAT IS IN STOCK?" FOR STAFF (Screenshot #6)
+  if (role.id === 'staff') {
+    const itemsToCount = CURATED_CATALOG.slice(0, 5)
+    const remainingToCount = itemsToCount.filter((it) => !staffCounts[it.id] && staffCounts[it.id] !== '0').length
+    return (
+      <div>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">{lang === 'ar' ? 'إيه اللي في المخزن؟' : 'What is in stock?'}</h1>
+            <p className="page-subtitle">
+              {branchName(activeBranch, lang)} · {lang === 'ar' ? 'عدّ واكتب الكمية' : 'Count and write the number'}
+            </p>
+          </div>
+        </div>
+        <div className="table-wrap" style={{ marginBottom: 14 }}>
+          <table>
+            <thead>
+              <tr>
+                <th>{lang === 'ar' ? 'الصنف' : 'Item'}</th>
+                <th>{lang === 'ar' ? 'اللي عدّيته' : 'Counted'}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {itemsToCount.map((it) => (
+                <tr key={it.id}>
+                  <td>
+                    <div className="item-cell">
+                      <div className="item-thumb">{it.emoji}</div>
+                      <strong>{lang === 'ar' ? it.nameAr : it.name}</strong>
+                    </div>
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <input
+                        type="number"
+                        step="any"
+                        className="input"
+                        style={{ width: 120, fontWeight: 700, fontSize: 16 }}
+                        placeholder={lang === 'ar' ? 'اكتب' : 'Enter'}
+                        value={staffCounts[it.id] ?? ''}
+                        onChange={(e) => setStaffCounts((p) => ({ ...p, [it.id]: e.target.value }))}
+                      />
+                      <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{it.unit}</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {remainingToCount > 0 && (
+          <div className="notice notice-amber" style={{ marginBottom: 14, fontWeight: 600 }}>
+            <AlertTriangle size={18} />
+            <span>{lang === 'ar' ? `فاضل ${remainingToCount} صنف يتعدّ` : `${remainingToCount} item left to count`}</span>
+          </div>
+        )}
+
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={() => {
+            itemsToCount.forEach((it) => {
+              const val = staffCounts[it.id]
+              if (val !== undefined && val !== '') {
+                const poster = it.posterStock[activeBranch] ?? 0
+                onSaveStockCheck({
+                  branchId: activeBranch,
+                  item: { ...it, stock: poster },
+                  countedQty: Number(val),
+                  diff: Number((Number(val) - poster).toFixed(3)),
+                })
+              }
+            })
+          }}
+        >
+          <CheckCircle2 size={18} /> {lang === 'ar' ? 'احفظ وابعت للمدير' : 'Save & send to Manager'}
+        </button>
+      </div>
+    )
+  }
 
   const [countItemId, setCountItemId] = useState(CURATED_CATALOG[0].id)
   const [countedVal, setCountedVal] = useState('7')

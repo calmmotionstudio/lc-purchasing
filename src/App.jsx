@@ -561,6 +561,7 @@ export default function App() {
     { id: 'purchasing', label: t.purchasing, icon: ShoppingCart },
     { id: 'price_review', label: t.priceReview, icon: Tag },
     { id: 'deliveries', label: role.id === 'purchasing' ? (lang === 'ar' ? 'متابعة التوريدات' : 'Delivery tracking') : t.deliveries, icon: Truck },
+    { id: 'stock_checks', label: t.stockChecks, icon: ClipboardList },
     { id: 'transfers', label: t.transfers, icon: ArrowRightLeft },
     { id: 'non_food', label: t.nonFood, icon: Layers },
     { id: 'accounting', label: t.accounting, icon: Calculator },
@@ -748,6 +749,7 @@ export default function App() {
               role={role}
               lang={lang}
               onResolveCheck={handleResolveCheck}
+              onSaveStockCheck={handleSaveStockCheck}
             />
           )}
         </main>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { CheckCircle2, ArrowRightLeft, Database, ShieldAlert, Lock, History, Plus } from 'lucide-react'
-import { BRANCHES } from '../data/seedData'
+import { CheckCircle2, ArrowRightLeft, Database, ShieldAlert, Lock, History, Plus, AlertTriangle, ClipboardCheck } from 'lucide-react'
+import { BRANCHES, CURATED_CATALOG } from '../data/seedData'
 
 const branchName = (id, lang) => {
   const b = BRANCHES.find((x) => x.id === id)
@@ -486,61 +486,194 @@ export function HistoryView({ state, branchFilter, lang }) {
   )
 }
 
-export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck }) {
+export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck, onSaveStockCheck }) {
+  const activeBranch = branchFilter === 'all' ? 'boho' : branchFilter
   const checks = state.stockChecks.filter((c) => branchFilter === 'all' || c.branchId === branchFilter)
+  const openCount = checks.filter((c) => c.status === 'Open').length
+  const matchedCount = checks.filter((c) => c.status === 'Resolved' || c.status === 'Matched').length
+
+  const [countItemId, setCountItemId] = useState(CURATED_CATALOG[0].id)
+  const [countedVal, setCountedVal] = useState('7')
+  const selectedItem = CURATED_CATALOG.find((x) => x.id === countItemId) || CURATED_CATALOG[0]
+  const posterQty = selectedItem.posterStock[activeBranch] ?? 0
+  const liveDiff = Number((Number(countedVal || 0) - posterQty).toFixed(3))
+
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">{lang === 'ar' ? 'جرد المخزون والفروقات' : 'Targeted Stock Checks & Discrepancies (STK02–STK03)'}</h1>
-          <p className="page-subtitle">Physical count observations vs Poster snapshot. Poster balance is never silently overwritten.</p>
+          <h1 className="page-title">{lang === 'ar' ? 'مراقبة المخزون والجرد' : 'Stock Control & Cycle Counts (STK01–STK07)'}</h1>
+          <p className="page-subtitle">
+            Physical count observations vs Poster snapshot. Variances create assigned tasks without silently altering Poster (STK03).
+          </p>
+        </div>
+        <span className="pill pill-green">Poster sync: {state.posterSnapshot?.fetched_at_utc}</span>
+      </div>
+
+      <div className="kpi-grid">
+        <div className="kpi-card">
+          <div className="kpi-icon"><ClipboardCheck size={20} /></div>
+          <div>
+            <div className="kpi-label">Critical daily items</div>
+            <div className="kpi-value">{CURATED_CATALOG.filter((i) => i.checkPolicy === 'Count due').length}</div>
+          </div>
+        </div>
+        <div className={`kpi-card ${openCount > 0 ? 'amber' : ''}`}>
+          <div className="kpi-icon"><AlertTriangle size={20} /></div>
+          <div>
+            <div className="kpi-label">Open variances</div>
+            <div className="kpi-value">{openCount}</div>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-icon"><CheckCircle2 size={20} /></div>
+          <div>
+            <div className="kpi-label">Reviewed / Matched</div>
+            <div className="kpi-value">{matchedCount}</div>
+          </div>
+        </div>
+        <div className="kpi-card">
+          <div className="kpi-icon"><Database size={20} /></div>
+          <div>
+            <div className="kpi-label">Poster feed status</div>
+            <div className="kpi-value" style={{ fontSize: 18 }}>Fresh (&lt;5m)</div>
+          </div>
         </div>
       </div>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Branch</th>
-              <th>Item</th>
-              <th>Poster Stock</th>
-              <th>Counted</th>
-              <th>Difference</th>
-              <th>Counted By</th>
-              <th>Assigned To</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {checks.map((c) => (
-              <tr key={c.id}>
-                <td><strong>{c.id}</strong></td>
-                <td>{branchName(c.branchId, lang)}</td>
-                <td><strong>{c.itemName}</strong></td>
-                <td>{c.posterStock} {c.unit}</td>
-                <td><strong>{c.countedQty} {c.unit}</strong></td>
-                <td>
-                  <span className={`pill ${c.diff === 0 ? 'pill-green' : 'pill-amber'}`}>
-                    {c.diff > 0 ? `+${c.diff}` : c.diff} {c.unit}
-                  </span>
-                </td>
-                <td>{c.countedBy} <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{c.countedAt}</div></td>
-                <td>{c.assignedTo}</td>
-                <td><span className={`pill ${c.status === 'Resolved' || c.status === 'Matched' ? 'pill-green' : 'pill-amber'}`}>{c.status}</span></td>
-                <td>
-                  {c.status === 'Open' && (role.canApproveNeed || role.canApproveBudget || role.canApprovePrice) ? (
-                    <button className="btn btn-primary" style={{ minHeight: 32, fontSize: 12 }} onClick={() => onResolveCheck(c.id)}>
-                      Mark Reviewed
-                    </button>
-                  ) : (
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.status}</span>
-                  )}
-                </td>
+
+      {/* Perform New Physical Count */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-title">Record Physical Count Observation ({branchName(activeBranch, lang)})</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, alignItems: 'end' }}>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Item</label>
+            <select
+              className="input"
+              style={{ width: '100%' }}
+              value={countItemId}
+              onChange={(e) => {
+                const next = CURATED_CATALOG.find((x) => x.id === e.target.value)
+                setCountItemId(e.target.value)
+                if (next) setCountedVal(String(Math.max(0, (next.posterStock[activeBranch] ?? 0) - 1)))
+              }}
+            >
+              {CURATED_CATALOG.map((it) => (
+                <option key={it.id} value={it.id}>{it.emoji} {it.name} ({it.unit})</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Poster Stock</label>
+            <input className="input" style={{ width: '100%', background: 'var(--bg-subtle)' }} readOnly value={`${posterQty} ${selectedItem.unit}`} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Counted Physically ({selectedItem.unit})</label>
+            <input type="number" step="any" className="input" style={{ width: '100%', fontWeight: 700 }} value={countedVal} onChange={(e) => setCountedVal(e.target.value)} />
+          </div>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600 }}>Live Variance</label>
+            <div className={`pill ${liveDiff === 0 ? 'pill-green' : 'pill-amber'}`} style={{ height: 38, width: '100%', justifyContent: 'center' }}>
+              {liveDiff > 0 ? `+${liveDiff}` : liveDiff} {selectedItem.unit}
+            </div>
+          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() =>
+              onSaveStockCheck({
+                branchId: activeBranch,
+                item: { ...selectedItem, stock: posterQty },
+                countedQty: Number(countedVal || 0),
+                diff: liveDiff,
+              })
+            }
+          >
+            <Plus size={16} /> Save Count
+          </button>
+        </div>
+      </div>
+
+      {/* Count Observations & Variances */}
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="card-title">Count Observations & Variance Tasks</div>
+        <div className="table-wrap" style={{ border: 'none' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Branch</th>
+                <th>Item</th>
+                <th>Poster Stock</th>
+                <th>Counted</th>
+                <th>Difference</th>
+                <th>Counted By</th>
+                <th>Assigned To</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {checks.map((c) => (
+                <tr key={c.id}>
+                  <td><strong>{c.id}</strong></td>
+                  <td>{branchName(c.branchId, lang)}</td>
+                  <td><strong>{c.itemName}</strong></td>
+                  <td>{c.posterStock} {c.unit}</td>
+                  <td><strong>{c.countedQty} {c.unit}</strong></td>
+                  <td>
+                    <span className={`pill ${c.diff === 0 ? 'pill-green' : 'pill-amber'}`}>
+                      {c.diff > 0 ? `+${c.diff}` : c.diff} {c.unit}
+                    </span>
+                  </td>
+                  <td>{c.countedBy} <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{c.countedAt}</div></td>
+                  <td>{c.assignedTo}</td>
+                  <td><span className={`pill ${c.status === 'Resolved' || c.status === 'Matched' ? 'pill-green' : 'pill-amber'}`}>{c.status}</span></td>
+                  <td>
+                    {c.status === 'Open' && (role.canApproveNeed || role.canApproveBudget || role.canApprovePrice) ? (
+                      <button className="btn btn-primary" style={{ minHeight: 32, fontSize: 12 }} onClick={() => onResolveCheck(c.id)}>
+                        Mark Reviewed
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.status}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Cycle Count Policies */}
+      <div className="card">
+        <div className="card-title">Configured Count Policies (STK02)</div>
+        <div className="table-wrap" style={{ border: 'none' }}>
+          <table>
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Category</th>
+                <th>Poster Stock ({branchName(activeBranch, lang)})</th>
+                <th>Target Coverage</th>
+                <th>Count Policy</th>
+              </tr>
+            </thead>
+            <tbody>
+              {CURATED_CATALOG.slice(0, 6).map((it) => (
+                <tr key={it.id}>
+                  <td><strong>{it.emoji} {it.name}</strong></td>
+                  <td>{it.category}</td>
+                  <td>{it.posterStock[activeBranch] ?? 0} {it.unit}</td>
+                  <td>{it.targetCoverage[activeBranch] ?? 10} {it.unit}</td>
+                  <td>
+                    <span className={`pill ${it.checkPolicy === 'Count due' ? 'pill-amber' : 'pill-gray'}`}>
+                      {it.checkPolicy === 'Count due' ? 'Critical daily check' : it.checkPolicy}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

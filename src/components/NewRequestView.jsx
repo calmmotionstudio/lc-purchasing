@@ -8,6 +8,8 @@ export default function NewRequestView({
   role,
   lang,
   t,
+  prefillOrderQty,
+  onClearPrefill,
   onSaveStockCheck,
   onSubmitPR,
   onNavigate,
@@ -22,6 +24,13 @@ export default function NewRequestView({
   const [neededBy, setNeededBy] = useState('2026-11-21')
   const [quantities, setQuantities] = useState({})
   const [checkItem, setCheckItem] = useState(null)
+
+  React.useEffect(() => {
+    if (prefillOrderQty && prefillOrderQty.itemId) {
+      setQuantities((prev) => ({ ...prev, [prefillOrderQty.itemId]: String(prefillOrderQty.qty) }))
+      if (onClearPrefill) onClearPrefill()
+    }
+  }, [prefillOrderQty, onClearPrefill])
   const [countedInput, setCountedInput] = useState('')
   const [showBasket, setShowBasket] = useState(false)
   const [priority, setPriority] = useState('Normal')

@@ -7,13 +7,39 @@ const branchName = (id, lang) => {
   return b ? (lang === 'ar' ? b.nameAr : b.name) : id
 }
 
-export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed, onRequestReport, onAskForUpdate, onNavigate }) {
+export function MyRequestsView({
+  state,
+  branchFilter,
+  role,
+  lang,
+  onApproveNeed,
+  onApproveFoodBatch,
+  onReturnPRForClarification,
+  onRequestReport,
+  onAskForUpdate,
+  onAddOrderNote,
+  onNavigate,
+}) {
   const canSeePrices = role.canViewPrices
   const prs = state.prs.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
   const branchPOs = state.pos.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
   const [reportModalPr, setReportModalPr] = useState(null)
   const [reportNote, setReportNote] = useState('')
   const [selectedOrderId, setSelectedOrderId] = useState(branchPOs[1]?.id || branchPOs[0]?.id || prs[0]?.id)
+  const [noteInputOpen, setNoteInputOpen] = useState(false)
+  const [noteText, setNoteText] = useState('')
+  const [showOriginalModal, setShowOriginalModal] = useState(false)
+  const [checkedFoodIds, setCheckedFoodIds] = useState(() => {
+    const map = {}
+    prs.forEach((pr) =>
+      pr.lines.filter((l) => l.category === 'Food').forEach((l) => {
+        map[l.lineId] = true
+      })
+    )
+    return map
+  })
+  const [clarifyPrId, setClarifyPrId] = useState(null)
+  const [clarifyNote, setClarifyNote] = useState('')
 
   // ULTRA-SIMPLE TWO-PANE "MY ORDERS" FOR STAFF (Screenshot #1)
   if (role.id === 'staff') {
@@ -56,6 +82,9 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
           nextTask: isShort
             ? (lang === 'ar' ? 'تأكيد استلام الباقي بكرة الساعة ١٢:٠٠' : 'Check remaining delivery tomorrow by 12:00')
             : (lang === 'ar' ? 'متابعة الوصول' : 'Track arrival'),
+          extraNotes: po.extraNotes || [],
+          prId: po.prId,
+          supplier: po.supplier,
           isShort,
         }
       }),
@@ -144,6 +173,9 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
                   {activeCard.isShort && (
                     <div className="timeline-item"><span className="timeline-dot" /><span><strong>{lang === 'ar' ? `ناقص ${activeCard.missing} ${activeCard.unit}` : `Missing ${activeCard.missing} ${activeCard.unit} reported`}</strong></span></div>
                   )}
+                  {(activeCard.extraNotes || []).map((n, i) => (
+                    <div key={i} className="timeline-item"><span className="timeline-dot" /><span>{n.text} <span style={{ color: 'var(--text-light)', fontSize: 12 }}>({n.time})</span></span></div>
+                  ))}
                   <div className="timeline-item"><span className="timeline-dot pending" /><span style={{ color: 'var(--text-muted)' }}>{activeCard.nextTask}</span></div>
                 </div>
               </div>
@@ -155,17 +187,221 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
                 </div>
               )}
 
+              {noteInputOpen && (
+                <div className="card" style={{ background: 'var(--bg-subtle)', marginBottom: 12 }}>
+                  <input
+                    className="input"
+                    style={{ width: '100%', marginBottom: 8 }}
+                    placeholder={lang === 'ar' ? 'اكتب ملاحظة أو اسم صورة...' : 'Write a note or attach photo filename...'}
+                    value={noteText}
+                    onChange={(e) => setNoteText(e.target.value)}
+                  />
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button
+                      className="btn btn-primary"
+                      disabled={!noteText.trim()}
+                      onClick={() => {
+                        onAddOrderNote(activeCard.id, noteText.trim())
+                        setNoteText('')
+                        setNoteInputOpen(false)
+                      }}
+                    >
+                      Save note
+                    </button>
+                    <button className="btn btn-outline" onClick={() => setNoteInputOpen(false)}>Cancel</button>
+                  </div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <button className="btn btn-primary btn-lg btn-full" onClick={() => onAskForUpdate(activeCard.id, activeCard.itemName)}>
                   {lang === 'ar' ? 'اسأل على التحديث' : 'Ask for update'}
                 </button>
-                <button className="btn btn-outline btn-lg btn-full" onClick={() => onNavigate('new_request')}>
-                  {lang === 'ar' ? 'اطلب تاني كطلب جديد' : 'Repeat as new order'}
+                <button className="btn btn-outline btn-lg btn-full" onClick={() => setNoteInputOpen((v) => !v)}>
+                  📎 {lang === 'ar' ? 'إضافة صورة أو ملاحظة' : 'Add a photo or note'}
                 </button>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 4 }}>
+                  <button
+                    type="button"
+                    style={{ border: 'none', background: 'transparent', color: 'var(--text-muted)', textDecoration: 'underline', cursor: 'pointer', fontSize: 13 }}
+                    onClick={() => setShowOriginalModal(true)}
+                  >
+                    {lang === 'ar' ? 'عرض الطلب الأصلي' : 'View original order'}
+                  </button>
+                  <button
+                    type="button"
+                    style={{ border: 'none', background: 'transparent', color: 'var(--text-main)', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+                    onClick={() => onNavigate('new_request')}
+                  >
+                    {lang === 'ar' ? 'اطلب تاني' : 'Repeat as new order'}
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
+
+        {showOriginalModal && activeCard && (
+          <div className="modal-backdrop" onClick={() => setShowOriginalModal(false)}>
+            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+              <h2 style={{ marginTop: 0 }}>Original Order — {activeCard.id}</h2>
+              <p className="page-subtitle">Linked PR: {activeCard.prId || activeCard.id} · Supplier: {activeCard.supplier || 'Pending'}</p>
+              <div style={{ margin: '12px 0', fontSize: 14 }}>
+                <div>Item: <strong>{activeCard.itemName}</strong></div>
+                <div>Ordered: <strong>{activeCard.ordered} {activeCard.unit}</strong></div>
+                <div>Accepted: <strong>{activeCard.received} {activeCard.unit}</strong></div>
+              </div>
+              <button className="btn btn-primary" onClick={() => setShowOriginalModal(false)}>Close</button>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // MANAGER "REVIEW REQUEST" WITH APPROVE CHECKBOXES & BATCH FOOD APPROVAL (Screenshot #1)
+  if (role.id === 'manager') {
+    return (
+      <div>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">{lang === 'ar' ? 'مراجعة الطلب' : 'Review request'}</h1>
+            <p className="page-subtitle">
+              {branchName(branchFilter, lang)} · {lang === 'ar' ? 'الأكل يكمل عادي بينما غير الغذائي يتراجع' : 'Food can continue while uniforms & equipment are checked (WF02)'}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {prs.map((pr) => {
+            const foodLines = pr.lines.filter((l) => l.category === 'Food')
+            const nonFoodLines = pr.lines.filter((l) => l.category !== 'Food')
+            const checkedIds = foodLines.filter((l) => checkedFoodIds[l.lineId]).map((l) => l.lineId)
+            const foodEstimate = foodLines
+              .filter((l) => checkedFoodIds[l.lineId])
+              .reduce((s, l) => s + l.qty * l.lastPaid, 0)
+
+            return (
+              <div key={pr.id} className="card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                  <div>
+                    <h2 style={{ margin: 0, fontSize: 18 }}>{pr.id} · Needed by {pr.neededBy}</h2>
+                    <div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Requester: {pr.requester} · {pr.reason}</div>
+                  </div>
+                </div>
+
+                {foodLines.length > 0 && (
+                  <div className="card" style={{ background: 'var(--bg-subtle)', marginBottom: 12 }}>
+                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Food items ({foodLines.length})</div>
+                    {foodLines.map((l) => (
+                      <div key={l.lineId} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid var(--border)' }}>
+                        <div className="item-cell">
+                          <div className="item-thumb">{l.emoji}</div>
+                          <div>
+                            <div style={{ fontWeight: 700 }}>{lang === 'ar' ? l.itemNameAr : l.itemName}</div>
+                            <div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>
+                              {l.qty} {l.unit} · Last supply · EGP {l.lastPaid}/{l.unit}
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'end' }}>
+                          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>
+                            <input
+                              type="checkbox"
+                              checked={!!checkedFoodIds[l.lineId]}
+                              onChange={(e) => setCheckedFoodIds((p) => ({ ...p, [l.lineId]: e.target.checked }))}
+                            />
+                            Approve need
+                          </label>
+                          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 2 }}>
+                            Est. EGP {(l.qty * l.lastPaid).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {nonFoodLines.map((l) => (
+                  <div key={l.lineId} className="card" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+                    <div className="item-cell">
+                      <div className="item-thumb">{l.emoji}</div>
+                      <div>
+                        <div style={{ fontWeight: 700 }}>{l.itemName} · {l.qty} {l.unit}</div>
+                        <span className="pill pill-amber" style={{ marginTop: 4 }}>{l.stage}</span>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>Assigned to: {l.owner} · {l.due}</div>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'end' }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Estimate</div>
+                      <strong>EGP {(l.qty * l.lastPaid).toLocaleString()}</strong>
+                    </div>
+                  </div>
+                ))}
+
+                {foodLines.length > 0 && (
+                  <>
+                    <div className="card" style={{ background: 'var(--bg-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                      <div>
+                        <strong>Food estimate</strong>
+                        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Estimates are not supplier quotes.</div>
+                      </div>
+                      <strong style={{ fontSize: 18 }}>EGP {foodEstimate.toLocaleString()}</strong>
+                    </div>
+                    <div className="notice notice-gray" style={{ marginBottom: 12 }}>
+                      <span>Food can continue while uniforms & equipment are checked.</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <button
+                        className="btn btn-primary btn-lg btn-full"
+                        disabled={checkedIds.length === 0}
+                        onClick={() => onApproveFoodBatch(pr.id, checkedIds)}
+                      >
+                        Approve food needs ({checkedIds.length})
+                      </button>
+                      <button
+                        className="btn btn-outline btn-lg btn-full"
+                        onClick={() => {
+                          setClarifyPrId(pr.id)
+                          setClarifyNote('')
+                        }}
+                      >
+                        Return for clarification
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {clarifyPrId && (
+          <div className="modal-backdrop" onClick={() => setClarifyPrId(null)}>
+            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+              <h2 style={{ marginTop: 0 }}>Return {clarifyPrId} for clarification</h2>
+              <textarea
+                className="textarea"
+                placeholder="What needs to be clarified by the requester?"
+                value={clarifyNote}
+                onChange={(e) => setClarifyNote(e.target.value)}
+              />
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 12 }}>
+                <button className="btn btn-outline" onClick={() => setClarifyPrId(null)}>Cancel</button>
+                <button
+                  className="btn btn-primary"
+                  disabled={!clarifyNote.trim()}
+                  onClick={() => {
+                    onReturnPRForClarification(clarifyPrId, clarifyNote.trim())
+                    setClarifyPrId(null)
+                  }}
+                >
+                  Send back to requester
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -643,7 +879,7 @@ export function HistoryView({ state, branchFilter, lang }) {
   )
 }
 
-export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck, onSaveStockCheck, onNavigate }) {
+export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck, onSaveStockCheck, onApplySuggestedOrder, onNavigate }) {
   const activeBranch = branchFilter === 'all' ? 'boho' : branchFilter
   const checks = state.stockChecks.filter((c) => branchFilter === 'all' || c.branchId === branchFilter)
   const openCount = checks.filter((c) => c.status === 'Open').length
@@ -771,16 +1007,21 @@ export function StockChecksView({ state, branchFilter, role, lang, onResolveChec
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <button
             className="btn btn-primary btn-lg btn-full"
-            onClick={() =>
+            onClick={() => {
               onSaveStockCheck({
                 branchId: activeBranch,
                 item: { ...item, stock: recorded },
                 countedQty: countedNum,
                 diff,
               })
-            }
+              if (suggested > 0 && onApplySuggestedOrder) {
+                onApplySuggestedOrder(item.id, suggested)
+              }
+            }}
           >
-            {lang === 'ar' ? 'احفظ العدّ' : 'Save count'}
+            {suggested > 0
+              ? (lang === 'ar' ? `احفظ واطلب ${suggested} ${item.unit}` : `Save count & order ${suggested} ${item.unit}`)
+              : (lang === 'ar' ? 'احفظ العدّ' : 'Save count')}
           </button>
           <button className="btn btn-outline btn-lg btn-full" onClick={() => onNavigate('new_request')}>
             {lang === 'ar' ? 'ارجع للطلب' : 'Back to order'}

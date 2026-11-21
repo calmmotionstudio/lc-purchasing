@@ -58,6 +58,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('overview')
   const [navHistory, setNavHistory] = useState([])
   const [focusedLineId, setFocusedLineId] = useState(null)
+  const [prefillOrderQty, setPrefillOrderQty] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [toast, setToast] = useState(null)
 
@@ -559,6 +560,57 @@ export default function App() {
     notify(`Update request sent to Mohamed Noman for ${itemName}`)
   }
 
+  const handleApproveFoodBatch = (prId, lineIds) => {
+    setState((prev) => ({
+      ...prev,
+      prs: prev.prs.map((pr) =>
+        pr.id !== prId
+          ? pr
+          : {
+              ...pr,
+              lines: pr.lines.map((l) =>
+                lineIds.includes(l.lineId)
+                  ? { ...l, needApproved: true, stage: 'Need approved', owner: 'Mona' }
+                  : l
+              ),
+            }
+      ),
+      auditLog: appendAudit(prev, branchFilter, `${prId}: Approved ${lineIds.length} food line(s) & sent to Purchasing (WF02)`),
+    }))
+    notify(`Approved ${lineIds.length} food item(s) — sent to Purchasing`)
+  }
+
+  const handleReturnPRForClarification = (prId, note) => {
+    setState((prev) => ({
+      ...prev,
+      prs: prev.prs.map((pr) =>
+        pr.id !== prId
+          ? pr
+          : {
+              ...pr,
+              lines: pr.lines.map((l) =>
+                !l.needApproved ? { ...l, stage: 'Returned for clarification', owner: pr.requester } : l
+              ),
+            }
+      ),
+      auditLog: appendAudit(prev, branchFilter, `${prId} returned for clarification: ${note}`),
+    }))
+    notify(`${prId} returned for clarification`)
+  }
+
+  const handleAddOrderNote = (orderId, noteText) => {
+    setState((prev) => ({
+      ...prev,
+      pos: prev.pos.map((p) =>
+        p.id === orderId
+          ? { ...p, extraNotes: [...(p.extraNotes || []), { time: nowStr(), text: noteText }] }
+          : p
+      ),
+      auditLog: appendAudit(prev, branchFilter, `Note/photo added on ${orderId}: ${noteText}`),
+    }))
+    notify(`Note added to ${orderId}`)
+  }
+
   const allNavItems = [
     { id: 'overview', label: t.overview, icon: Home },
     { id: 'new_request', label: t.newRequest, icon: PlusSquare },
@@ -678,6 +730,8 @@ export default function App() {
               role={role}
               lang={lang}
               t={t}
+              prefillOrderQty={prefillOrderQty}
+              onClearPrefill={() => setPrefillOrderQty(null)}
               onSaveStockCheck={handleSaveStockCheck}
               onSubmitPR={handleSubmitPR}
               onNavigate={handleNavigate}
@@ -690,8 +744,11 @@ export default function App() {
               role={role}
               lang={lang}
               onApproveNeed={handleApproveNeed}
+              onApproveFoodBatch={handleApproveFoodBatch}
+              onReturnPRForClarification={handleReturnPRForClarification}
               onRequestReport={handleRequestReport}
               onAskForUpdate={handleAskForUpdate}
+              onAddOrderNote={handleAddOrderNote}
               onNavigate={handleNavigate}
             />
           )}
@@ -760,6 +817,10 @@ export default function App() {
               lang={lang}
               onResolveCheck={handleResolveCheck}
               onSaveStockCheck={handleSaveStockCheck}
+              onApplySuggestedOrder={(itemId, qty) => {
+                setPrefillOrderQty({ itemId, qty })
+                handleNavigate('new_request')
+              }}
               onNavigate={handleNavigate}
             />
           )}

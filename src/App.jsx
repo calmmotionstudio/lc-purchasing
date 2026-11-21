@@ -761,6 +761,23 @@ export default function App() {
         </footer>
       </div>
 
+      {/* Mobile Monobank-style Bottom Nav */}
+      <nav className="mobile-bottom-nav">
+        {navItems.slice(0, 5).map((item) => {
+          const Icon = item.icon
+          return (
+            <button
+              key={item.id}
+              className={`mobile-bottom-btn ${activeTab === item.id ? 'active' : ''}`}
+              onClick={() => handleNavigate(item.id)}
+            >
+              <Icon size={18} />
+              <span>{item.label}</span>
+            </button>
+          )
+        })}
+      </nav>
+
       {toast && (
         <div
           style={{

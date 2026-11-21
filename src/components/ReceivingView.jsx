@@ -313,7 +313,7 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
       <div className="grid-2">
         {/* Left: Physical Acceptance & Category Checklist */}
         <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
             <div className="item-cell">
               <div className="item-thumb" style={{ width: 52, height: 52, fontSize: 28 }}>{po.emoji}</div>
               <div>
@@ -321,10 +321,18 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
                 <div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{po.spec}</div>
               </div>
             </div>
-            {canSeePrices ? (
-              <span className="pill pill-green">Approved price: EGP {po.approvedPrice}/{po.unit}</span>
-            ) : (
-              <span className="pill pill-gray">{t.priceRestricted}</span>
+            {remainingBefore > 0 && (
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ background: 'var(--green-bg)', color: 'var(--green-text)', borderColor: '#bfe3cd' }}
+                onClick={() => {
+                  setBroughtInput(String(remainingBefore))
+                  setAcceptedInput(String(remainingBefore))
+                }}
+              >
+                <CheckCircle2 size={15} /> {lang === 'ar' ? `كله وصل تمام (${remainingBefore} ${po.unit})` : `All ${remainingBefore} ${po.unit} arrived OK`}
+              </button>
             )}
           </div>
 

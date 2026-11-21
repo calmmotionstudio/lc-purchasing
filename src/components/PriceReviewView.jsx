@@ -165,9 +165,27 @@ export default function PriceReviewView({
         <label style={{ fontWeight: 700, fontSize: 15, display: 'block', marginBottom: 8 }}>
           {t.whyMoreExpensive} {needsJustification ? '*' : ''}
         </label>
+        {needsJustification && (
+          <div className="chip-row" style={{ marginBottom: 10 }}>
+            {[
+              lang === 'ar' ? 'المورد الأساسي مخلص' : 'Regular supplier out of stock',
+              lang === 'ar' ? 'جودة أحسن' : 'Better quality',
+              lang === 'ar' ? 'محتاجينه ضروري النهاردة' : 'Urgent delivery today',
+            ].map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                className={`chip-btn ${reason === chip ? 'active' : ''}`}
+                onClick={() => setReason(chip)}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        )}
         <textarea
           className="textarea"
-          placeholder={lang === 'ar' ? 'المشتريات لازم تكتب السبب هنا...' : 'Purchasing must explain the reason here...'}
+          placeholder={lang === 'ar' ? 'أو اكتب السبب هنا...' : 'Or type another reason here...'}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />

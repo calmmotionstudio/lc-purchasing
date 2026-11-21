@@ -268,21 +268,41 @@ export default function NewRequestView({
                       )}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div className="stepper-box">
+                        <button
+                          type="button"
+                          className="stepper-btn"
+                          onClick={() => {
+                            const cur = Number(qty || 0)
+                            const next = Math.max(0, Number((cur - 1).toFixed(2)))
+                            setQuantities((prev) => ({ ...prev, [item.id]: next === 0 ? '' : String(next) }))
+                          }}
+                        >
+                          −
+                        </button>
                         <input
                           type="number"
                           min="0"
                           step="any"
-                          className="input"
-                          style={{ width: 88 }}
+                          className="stepper-val"
                           placeholder="0"
                           value={qty}
                           onChange={(e) =>
                             setQuantities((prev) => ({ ...prev, [item.id]: e.target.value }))
                           }
                         />
-                        <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{item.unit}</span>
+                        <button
+                          type="button"
+                          className="stepper-btn plus"
+                          onClick={() => {
+                            const cur = Number(qty || 0)
+                            setQuantities((prev) => ({ ...prev, [item.id]: String(Number((cur + 1).toFixed(2))) }))
+                          }}
+                        >
+                          +
+                        </button>
                       </div>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)', marginInlineStart: 6 }}>{item.unit}</span>
                       {showTotalLitres && (
                         <div style={{ fontSize: 11.5, color: 'var(--green-text)', marginTop: 3 }}>
                           = {Number(qty) * item.packFactor} bottles ({(Number(qty) * item.packFactor * item.volumePerUnitL).toFixed(2)} L)

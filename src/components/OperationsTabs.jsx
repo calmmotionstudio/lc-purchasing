@@ -663,15 +663,36 @@ export function StockChecksView({ state, branchFilter, role, lang, onResolveChec
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <input
-                        type="number"
-                        step="any"
-                        className="input"
-                        style={{ width: 120, fontWeight: 700, fontSize: 16 }}
-                        placeholder={lang === 'ar' ? 'اكتب' : 'Enter'}
-                        value={staffCounts[it.id] ?? ''}
-                        onChange={(e) => setStaffCounts((p) => ({ ...p, [it.id]: e.target.value }))}
-                      />
+                      <div className="stepper-box">
+                        <button
+                          type="button"
+                          className="stepper-btn"
+                          onClick={() => {
+                            const cur = Number(staffCounts[it.id] || 0)
+                            setStaffCounts((p) => ({ ...p, [it.id]: String(Math.max(0, cur - 1)) }))
+                          }}
+                        >
+                          −
+                        </button>
+                        <input
+                          type="number"
+                          step="any"
+                          className="stepper-val"
+                          placeholder="0"
+                          value={staffCounts[it.id] ?? ''}
+                          onChange={(e) => setStaffCounts((p) => ({ ...p, [it.id]: e.target.value }))}
+                        />
+                        <button
+                          type="button"
+                          className="stepper-btn plus"
+                          onClick={() => {
+                            const cur = Number(staffCounts[it.id] || 0)
+                            setStaffCounts((p) => ({ ...p, [it.id]: String(cur + 1) }))
+                          }}
+                        >
+                          +
+                        </button>
+                      </div>
                       <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{it.unit}</span>
                     </div>
                   </td>

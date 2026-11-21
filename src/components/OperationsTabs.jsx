@@ -7,7 +7,7 @@ const branchName = (id, lang) => {
   return b ? (lang === 'ar' ? b.nameAr : b.name) : id
 }
 
-export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed, onRequestReport, onNavigate }) {
+export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed, onRequestReport, onAskForUpdate, onNavigate }) {
   const canSeePrices = role.canViewPrices
   const prs = state.prs.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
   const branchPOs = state.pos.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
@@ -128,12 +128,38 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
               <div className="notice notice-green" style={{ marginBottom: 12, fontWeight: 600 }}>
                 {activeCard.note}
               </div>
-              <div style={{ fontSize: 13.5, display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16 }}>
-                <div>👤 {lang === 'ar' ? 'المسؤول:' : 'Responsible:'} <strong>{activeCard.buyer}</strong></div>
-                <div>📅 {lang === 'ar' ? 'الخطوة الجاية:' : 'Next step:'} <strong>{activeCard.nextTask}</strong></div>
+              <div style={{ fontSize: 13.5, display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+                <div>👤 {lang === 'ar' ? 'مين متابعها؟' : 'Who is handling it?'} <strong>{activeCard.buyer} · Purchasing</strong></div>
+                <div>📅 {lang === 'ar' ? 'التحديث الجاي:' : 'Next update due:'} <strong>{activeCard.nextTask}</strong></div>
               </div>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <button className="btn btn-primary" onClick={() => onNavigate('new_request')}>
+
+              {/* Monobank-style Timeline (Screenshot #2) */}
+              <div className="card" style={{ background: 'var(--bg-subtle)', padding: 14, marginBottom: 14 }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, marginBottom: 10 }}>{lang === 'ar' ? 'خطوات الطلب' : 'Timeline'}</div>
+                <div className="timeline-list">
+                  <div className="timeline-item"><span className="timeline-dot" /><span>{lang === 'ar' ? 'الطلب اتبعت للمورد' : 'Order sent to supplier'}</span></div>
+                  {activeCard.received > 0 && (
+                    <div className="timeline-item"><span className="timeline-dot" /><span><strong>{activeCard.received} {activeCard.unit}</strong> {lang === 'ar' ? 'استلمناهم' : 'accepted'}</span></div>
+                  )}
+                  {activeCard.isShort && (
+                    <div className="timeline-item"><span className="timeline-dot" /><span><strong>{lang === 'ar' ? `ناقص ${activeCard.missing} ${activeCard.unit}` : `Missing ${activeCard.missing} ${activeCard.unit} reported`}</strong></span></div>
+                  )}
+                  <div className="timeline-item"><span className="timeline-dot pending" /><span style={{ color: 'var(--text-muted)' }}>{activeCard.nextTask}</span></div>
+                </div>
+              </div>
+
+              {activeCard.isShort && (
+                <div className="notice notice-amber" style={{ marginBottom: 14, alignItems: 'center' }}>
+                  <span style={{ fontSize: 20 }}>🍅</span>
+                  <strong>{lang === 'ar' ? 'الطلب هيفضل مفتوح لحد ما الباقي يوصل.' : 'The order stays open until resolved.'}</strong>
+                </div>
+              )}
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button className="btn btn-primary btn-lg btn-full" onClick={() => onAskForUpdate(activeCard.id, activeCard.itemName)}>
+                  {lang === 'ar' ? 'اسأل على التحديث' : 'Ask for update'}
+                </button>
+                <button className="btn btn-outline btn-lg btn-full" onClick={() => onNavigate('new_request')}>
                   {lang === 'ar' ? 'اطلب تاني كطلب جديد' : 'Repeat as new order'}
                 </button>
               </div>
@@ -617,117 +643,149 @@ export function HistoryView({ state, branchFilter, lang }) {
   )
 }
 
-export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck, onSaveStockCheck }) {
+export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck, onSaveStockCheck, onNavigate }) {
   const activeBranch = branchFilter === 'all' ? 'boho' : branchFilter
   const checks = state.stockChecks.filter((c) => branchFilter === 'all' || c.branchId === branchFilter)
   const openCount = checks.filter((c) => c.status === 'Open').length
   const matchedCount = checks.filter((c) => c.status === 'Resolved' || c.status === 'Matched').length
 
-  const [staffCounts, setStaffCounts] = useState({
-    'CAT-CHK': '7',
-    'CAT-MOZ': '5',
-    'CAT-PAT': '40',
-    'CAT-BUN': '',
-  })
+  const [staffItemId, setStaffItemId] = useState(CURATED_CATALOG[0].id)
+  const [staffCount, setStaffCount] = useState('7')
 
-  // ULTRA-SIMPLE "WHAT IS IN STOCK?" FOR STAFF (Screenshot #6)
+  // ULTRA-SIMPLE MONOBANK-STYLE "CHECK STOCK" FOR STAFF (Screenshot #3)
   if (role.id === 'staff') {
-    const itemsToCount = CURATED_CATALOG.slice(0, 5)
-    const remainingToCount = itemsToCount.filter((it) => !staffCounts[it.id] && staffCounts[it.id] !== '0').length
+    const item = CURATED_CATALOG.find((x) => x.id === staffItemId) || CURATED_CATALOG[0]
+    const recorded = item.posterStock[activeBranch] ?? 0
+    const target = item.targetCoverage[activeBranch] ?? 20
+    const incoming = item.incomingQty[activeBranch] ?? 0
+    const countedNum = Number(staffCount || 0)
+    const diff = Number((countedNum - recorded).toFixed(2))
+    const suggested = Math.max(0, Number((target - countedNum - incoming).toFixed(2)))
+
     return (
-      <div>
+      <div style={{ maxWidth: 680 }}>
         <div className="page-header">
           <div>
-            <h1 className="page-title">{lang === 'ar' ? 'إيه اللي في المخزن؟' : 'What is in stock?'}</h1>
+            <h1 className="page-title">{lang === 'ar' ? 'جرد المخزن' : 'Check stock'}</h1>
             <p className="page-subtitle">
-              {branchName(activeBranch, lang)} · {lang === 'ar' ? 'عدّ واكتب الكمية' : 'Count and write the number'}
+              {branchName(activeBranch, lang)} · {lang === 'ar' ? 'عدّ واكتب الكمية الموجودة دلوقتي' : 'Operational check'}
             </p>
           </div>
-        </div>
-        <div className="table-wrap" style={{ marginBottom: 14 }}>
-          <table>
-            <thead>
-              <tr>
-                <th>{lang === 'ar' ? 'الصنف' : 'Item'}</th>
-                <th>{lang === 'ar' ? 'اللي عدّيته' : 'Counted'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {itemsToCount.map((it) => (
-                <tr key={it.id}>
-                  <td>
-                    <div className="item-cell">
-                      <div className="item-thumb">{it.emoji}</div>
-                      <strong>{lang === 'ar' ? it.nameAr : it.name}</strong>
-                    </div>
-                  </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <div className="stepper-box">
-                        <button
-                          type="button"
-                          className="stepper-btn"
-                          onClick={() => {
-                            const cur = Number(staffCounts[it.id] || 0)
-                            setStaffCounts((p) => ({ ...p, [it.id]: String(Math.max(0, cur - 1)) }))
-                          }}
-                        >
-                          −
-                        </button>
-                        <input
-                          type="number"
-                          step="any"
-                          className="stepper-val"
-                          placeholder="0"
-                          value={staffCounts[it.id] ?? ''}
-                          onChange={(e) => setStaffCounts((p) => ({ ...p, [it.id]: e.target.value }))}
-                        />
-                        <button
-                          type="button"
-                          className="stepper-btn plus"
-                          onClick={() => {
-                            const cur = Number(staffCounts[it.id] || 0)
-                            setStaffCounts((p) => ({ ...p, [it.id]: String(cur + 1) }))
-                          }}
-                        >
-                          +
-                        </button>
-                      </div>
-                      <span style={{ color: 'var(--text-muted)', fontWeight: 600 }}>{it.unit}</span>
-                    </div>
-                  </td>
-                </tr>
+          <div className="select-pill">
+            <select
+              value={staffItemId}
+              onChange={(e) => {
+                const next = CURATED_CATALOG.find((x) => x.id === e.target.value)
+                setStaffItemId(e.target.value)
+                if (next) setStaffCount(String(Math.max(0, (next.posterStock[activeBranch] ?? 1) - 1)))
+              }}
+            >
+              {CURATED_CATALOG.slice(0, 8).map((it) => (
+                <option key={it.id} value={it.id}>{it.emoji} {lang === 'ar' ? it.nameAr : it.name}</option>
               ))}
-            </tbody>
-          </table>
+            </select>
+          </div>
         </div>
 
-        {remainingToCount > 0 && (
-          <div className="notice notice-amber" style={{ marginBottom: 14, fontWeight: 600 }}>
-            <AlertTriangle size={18} />
-            <span>{lang === 'ar' ? `فاضل ${remainingToCount} صنف يتعدّ` : `${remainingToCount} item left to count`}</span>
+        {/* Item Summary Card */}
+        <div className="card" style={{ marginBottom: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div className="item-cell">
+            <div className="item-thumb" style={{ width: 52, height: 52, fontSize: 28 }}>{item.emoji}</div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 16 }}>{lang === 'ar' ? item.nameAr : item.name} · {item.unit}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{item.spec}</div>
+            </div>
           </div>
-        )}
+          <div style={{ textAlign: 'end' }}>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{lang === 'ar' ? 'المسجل في بوستر' : 'Recorded stock'}</div>
+            <div style={{ fontWeight: 700, fontSize: 18 }}>{recorded} {item.unit}</div>
+          </div>
+        </div>
 
-        <button
-          className="btn btn-primary btn-lg"
-          onClick={() => {
-            itemsToCount.forEach((it) => {
-              const val = staffCounts[it.id]
-              if (val !== undefined && val !== '') {
-                const poster = it.posterStock[activeBranch] ?? 0
-                onSaveStockCheck({
-                  branchId: activeBranch,
-                  item: { ...it, stock: poster },
-                  countedQty: Number(val),
-                  diff: Number((Number(val) - poster).toFixed(3)),
-                })
-              }
-            })
-          }}
-        >
-          <CheckCircle2 size={18} /> {lang === 'ar' ? 'احفظ وابعت للمدير' : 'Save & send to Manager'}
-        </button>
+        {/* How much is there now? */}
+        <div className="card" style={{ marginBottom: 14, textAlign: 'center' }}>
+          <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 12 }}>
+            {lang === 'ar' ? 'موجود كام دلوقتي؟' : 'How much is there now?'}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+            <div className="stepper-box" style={{ padding: 6, gap: 12 }}>
+              <button
+                type="button"
+                className="stepper-btn"
+                style={{ width: 46, height: 46, background: 'var(--accent-soft)', color: '#b5381e' }}
+                onClick={() => setStaffCount(String(Math.max(0, countedNum - 1)))}
+              >
+                −
+              </button>
+              <input
+                type="number"
+                step="any"
+                className="stepper-val"
+                style={{ fontSize: 28, minWidth: 74 }}
+                value={staffCount}
+                onChange={(e) => setStaffCount(e.target.value)}
+              />
+              <span style={{ fontSize: 18, color: 'var(--text-muted)', fontWeight: 600 }}>{item.unit}</span>
+              <button
+                type="button"
+                className="stepper-btn"
+                style={{ width: 46, height: 46, background: 'var(--accent-soft)', color: '#b5381e' }}
+                onClick={() => setStaffCount(String(countedNum + 1))}
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          {diff !== 0 && (
+            <div className="notice notice-amber" style={{ justifyContent: 'center', fontWeight: 600 }}>
+              <AlertTriangle size={18} />
+              <span>
+                {lang === 'ar'
+                  ? `الفرق: ${Math.abs(diff)} ${item.unit} ${diff < 0 ? 'أقل' : 'زيادة'} (المسجل ${recorded} · عدّيت ${countedNum})`
+                  : `Difference: ${Math.abs(diff)} ${item.unit} ${diff < 0 ? 'less' : 'more'} (Recorded ${recorded} · Counted ${countedNum})`}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Ordering guide */}
+        <div className="card" style={{ marginBottom: 14 }}>
+          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10 }}>
+            🛒 {lang === 'ar' ? 'دليل الطلب' : 'Ordering guide'}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 6 }}>
+            <span style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'المطلوب لبكرة:' : 'Needed through tomorrow:'}</span>
+            <strong>{target} {item.unit}</strong>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 10 }}>
+            <span style={{ color: 'var(--text-muted)' }}>{lang === 'ar' ? 'جاي في الطريق:' : 'Confirmed incoming:'}</span>
+            <strong>{incoming} {item.unit}</strong>
+          </div>
+          <div className="notice" style={{ background: 'var(--accent-soft)', color: '#b5381e', justifyContent: 'space-between', fontWeight: 700 }}>
+            <span>{lang === 'ar' ? 'الكمية المقترحة للطلب:' : 'Suggested order:'}</span>
+            <span>{suggested} {item.unit}</span>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <button
+            className="btn btn-primary btn-lg btn-full"
+            onClick={() =>
+              onSaveStockCheck({
+                branchId: activeBranch,
+                item: { ...item, stock: recorded },
+                countedQty: countedNum,
+                diff,
+              })
+            }
+          >
+            {lang === 'ar' ? 'احفظ العدّ' : 'Save count'}
+          </button>
+          <button className="btn btn-outline btn-lg btn-full" onClick={() => onNavigate('new_request')}>
+            {lang === 'ar' ? 'ارجع للطلب' : 'Back to order'}
+          </button>
+        </div>
       </div>
     )
   }

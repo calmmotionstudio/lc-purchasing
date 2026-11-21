@@ -551,6 +551,14 @@ export default function App() {
     notify(`Stock check ${checkId} marked resolved`)
   }
 
+  const handleAskForUpdate = (orderId, itemName) => {
+    setState((prev) => ({
+      ...prev,
+      auditLog: appendAudit(prev, branchFilter, `Update requested from Mohamed Noman on ${orderId} (${itemName})`),
+    }))
+    notify(`Update request sent to Mohamed Noman for ${itemName}`)
+  }
+
   const allNavItems = [
     { id: 'overview', label: t.overview, icon: Home },
     { id: 'new_request', label: t.newRequest, icon: PlusSquare },
@@ -572,7 +580,10 @@ export default function App() {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-brand">
-          <span>{t.brand}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span>{t.brand}</span>
+            <span style={{ background: 'var(--accent-soft)', color: '#b5381e', fontSize: 13, padding: '2px 8px', borderRadius: 999 }}>🍅</span>
+          </div>
           <span style={{ fontSize: 11.5, fontWeight: 500, color: 'var(--text-muted)' }}>{t.brandSub}</span>
         </div>
         <nav className="sidebar-nav">
@@ -624,9 +635,8 @@ export default function App() {
               <button className={lang === 'ar' ? 'active' : ''} onClick={() => setLang('ar')}>مصري</button>
             </div>
 
-            <div className="select-pill" title="Switch user perspective / role">
-              <UserCircle size={16} color="var(--primary)" />
-              <span style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>{lang === 'ar' ? 'الدور:' : 'Role:'}</span>
+            <div className="role-pill" title="Switch user role">
+              <UserCircle size={15} />
               <select value={roleId} onChange={(e) => handleRoleChange(e.target.value)}>
                 {ROLES.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -644,9 +654,9 @@ export default function App() {
 
         <main className="page-body">
           {navHistory.length > 0 && (
-            <div style={{ marginBottom: 12 }}>
-              <button className="btn btn-outline" style={{ minHeight: 34, fontSize: 13 }} onClick={handleBack}>
-                ← {lang === 'ar' ? 'رجوع' : 'Back'}
+            <div style={{ marginBottom: 14 }}>
+              <button className="btn btn-outline" style={{ minHeight: 36, fontSize: 13 }} onClick={handleBack}>
+                ← {lang === 'ar' ? 'رجوع للشاشة اللي فاتت' : 'Back to previous screen'}
               </button>
             </div>
           )}
@@ -681,6 +691,7 @@ export default function App() {
               lang={lang}
               onApproveNeed={handleApproveNeed}
               onRequestReport={handleRequestReport}
+              onAskForUpdate={handleAskForUpdate}
               onNavigate={handleNavigate}
             />
           )}
@@ -749,6 +760,7 @@ export default function App() {
               lang={lang}
               onResolveCheck={handleResolveCheck}
               onSaveStockCheck={handleSaveStockCheck}
+              onNavigate={handleNavigate}
             />
           )}
         </main>

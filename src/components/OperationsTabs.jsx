@@ -485,3 +485,63 @@ export function HistoryView({ state, branchFilter, lang }) {
     </div>
   )
 }
+
+export function StockChecksView({ state, branchFilter, role, lang, onResolveCheck }) {
+  const checks = state.stockChecks.filter((c) => branchFilter === 'all' || c.branchId === branchFilter)
+  return (
+    <div>
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">{lang === 'ar' ? 'جرد المخزون والفروقات' : 'Targeted Stock Checks & Discrepancies (STK02–STK03)'}</h1>
+          <p className="page-subtitle">Physical count observations vs Poster snapshot. Poster balance is never silently overwritten.</p>
+        </div>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Branch</th>
+              <th>Item</th>
+              <th>Poster Stock</th>
+              <th>Counted</th>
+              <th>Difference</th>
+              <th>Counted By</th>
+              <th>Assigned To</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {checks.map((c) => (
+              <tr key={c.id}>
+                <td><strong>{c.id}</strong></td>
+                <td>{branchName(c.branchId, lang)}</td>
+                <td><strong>{c.itemName}</strong></td>
+                <td>{c.posterStock} {c.unit}</td>
+                <td><strong>{c.countedQty} {c.unit}</strong></td>
+                <td>
+                  <span className={`pill ${c.diff === 0 ? 'pill-green' : 'pill-amber'}`}>
+                    {c.diff > 0 ? `+${c.diff}` : c.diff} {c.unit}
+                  </span>
+                </td>
+                <td>{c.countedBy} <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{c.countedAt}</div></td>
+                <td>{c.assignedTo}</td>
+                <td><span className={`pill ${c.status === 'Resolved' || c.status === 'Matched' ? 'pill-green' : 'pill-amber'}`}>{c.status}</span></td>
+                <td>
+                  {c.status === 'Open' && (role.canApproveNeed || role.canApproveBudget || role.canApprovePrice) ? (
+                    <button className="btn btn-primary" style={{ minHeight: 32, fontSize: 12 }} onClick={() => onResolveCheck(c.id)}>
+                      Mark Reviewed
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.status}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}

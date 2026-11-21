@@ -32,6 +32,7 @@ import {
   AccountingView,
   IntegrationsView,
   HistoryView,
+  StockChecksView,
 } from './components/OperationsTabs'
 
 const STORAGE_KEY = 'lc_purchasing_v2_2_state'
@@ -530,6 +531,15 @@ export default function App() {
     notify(`Report request sent to Noman & Cost Control for ${prId}`)
   }
 
+  const handleResolveCheck = (checkId) => {
+    setState((prev) => ({
+      ...prev,
+      stockChecks: prev.stockChecks.map((c) => (c.id === checkId ? { ...c, status: 'Resolved' } : c)),
+      auditLog: appendAudit(prev, 'all', `Stock check ${checkId} reviewed and resolved`),
+    }))
+    notify(`Stock check ${checkId} marked resolved`)
+  }
+
   const allNavItems = [
     { id: 'overview', label: t.overview, icon: Home },
     { id: 'new_request', label: t.newRequest, icon: PlusSquare },
@@ -715,6 +725,15 @@ export default function App() {
           )}
           {activeTab === 'history' && (
             <HistoryView state={state} branchFilter={branchFilter} lang={lang} />
+          )}
+          {activeTab === 'stock_checks' && (
+            <StockChecksView
+              state={state}
+              branchFilter={branchFilter}
+              role={role}
+              lang={lang}
+              onResolveCheck={handleResolveCheck}
+            />
           )}
         </main>
 

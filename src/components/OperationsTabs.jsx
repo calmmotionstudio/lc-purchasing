@@ -273,36 +273,6 @@ export function TransfersView({ state, lang, onCreateTransfer, onAcceptTransfer 
           </tbody>
         </table>
       </div>
-
-      {reportModalPr && (
-        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
-            <p className="page-subtitle" style={{ marginBottom: 12 }}>
-              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
-            </p>
-            <textarea
-              className="textarea"
-              placeholder="What should Noman / Cost Control verify or report on this request?"
-              value={reportNote}
-              onChange={(e) => setReportNote(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
-              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
-              <button
-                className="btn btn-primary"
-                disabled={!reportNote.trim()}
-                onClick={() => {
-                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
-                  setReportModalPr(null)
-                }}
-              >
-                Send report request
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -345,36 +315,6 @@ export function NonFoodView({ state, branchFilter, lang }) {
           </tbody>
         </table>
       </div>
-
-      {reportModalPr && (
-        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
-            <p className="page-subtitle" style={{ marginBottom: 12 }}>
-              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
-            </p>
-            <textarea
-              className="textarea"
-              placeholder="What should Noman / Cost Control verify or report on this request?"
-              value={reportNote}
-              onChange={(e) => setReportNote(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
-              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
-              <button
-                className="btn btn-primary"
-                disabled={!reportNote.trim()}
-                onClick={() => {
-                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
-                  setReportModalPr(null)
-                }}
-              >
-                Send report request
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -439,36 +379,6 @@ export function AccountingView({ state, role, lang, onMarkPosted }) {
           </tbody>
         </table>
       </div>
-
-      {reportModalPr && (
-        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
-            <p className="page-subtitle" style={{ marginBottom: 12 }}>
-              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
-            </p>
-            <textarea
-              className="textarea"
-              placeholder="What should Noman / Cost Control verify or report on this request?"
-              value={reportNote}
-              onChange={(e) => setReportNote(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
-              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
-              <button
-                className="btn btn-primary"
-                disabled={!reportNote.trim()}
-                onClick={() => {
-                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
-                  setReportModalPr(null)
-                }}
-              >
-                Send report request
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -533,36 +443,6 @@ export function IntegrationsView({ state, role }) {
           </table>
         </div>
       </div>
-
-      {reportModalPr && (
-        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
-            <p className="page-subtitle" style={{ marginBottom: 12 }}>
-              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
-            </p>
-            <textarea
-              className="textarea"
-              placeholder="What should Noman / Cost Control verify or report on this request?"
-              value={reportNote}
-              onChange={(e) => setReportNote(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
-              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
-              <button
-                className="btn btn-primary"
-                disabled={!reportNote.trim()}
-                onClick={() => {
-                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
-                  setReportModalPr(null)
-                }}
-              >
-                Send report request
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -602,36 +482,6 @@ export function HistoryView({ state, branchFilter, lang }) {
           </tbody>
         </table>
       </div>
-
-      {reportModalPr && (
-        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
-            <p className="page-subtitle" style={{ marginBottom: 12 }}>
-              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
-            </p>
-            <textarea
-              className="textarea"
-              placeholder="What should Noman / Cost Control verify or report on this request?"
-              value={reportNote}
-              onChange={(e) => setReportNote(e.target.value)}
-            />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
-              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
-              <button
-                className="btn btn-primary"
-                disabled={!reportNote.trim()}
-                onClick={() => {
-                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
-                  setReportModalPr(null)
-                }}
-              >
-                Send report request
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

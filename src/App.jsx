@@ -405,7 +405,7 @@ export default function App() {
     notify(`${poId} marked ${status}`)
   }
 
-  const handleConfirmReceipt = (poId, { acceptedQty, stillDue, unmatchedEgp, deliveryNoteNo, missingAction, techAccepted }) => {
+  const handleConfirmReceipt = (poId, { acceptedQty, stillDue, unmatchedEgp, deliveryNoteNo, missingAction, techAccepted, receiptSummary }) => {
     setState((prev) => {
       const targetPo = prev.pos.find((p) => p.id === poId)
       const newReceived = Number(((targetPo?.receivedQty || 0) + acceptedQty).toFixed(3))
@@ -442,6 +442,7 @@ export default function App() {
                 receivedQty: newReceived,
                 status: !techAccepted ? 'On hold (Tech)' : fully ? 'Received' : 'Part received',
                 postingStatus: 'Pending authorized review',
+                lastReceiptNote: receiptSummary || `DN ${deliveryNoteNo} · Accepted ${acceptedQty} ${targetPo.unit}`,
               }
         ),
         discrepancies: nextDiscrepancies,
@@ -452,7 +453,18 @@ export default function App() {
         ),
       }
     })
-    notify(`Receipt saved for ${poId}`)
+    notify(`Receipt saved & sent to Purchasing for ${poId}`)
+  }
+
+  const handleResolveDiscrepancy = (issueId, resolutionNote) => {
+    setState((prev) => ({
+      ...prev,
+      discrepancies: prev.discrepancies.map((d) =>
+        d.id === issueId ? { ...d, status: 'Closed', nextAction: resolutionNote } : d
+      ),
+      auditLog: appendAudit(prev, 'all', `${issueId} resolved by Purchasing: ${resolutionNote}`),
+    }))
+    notify(`${issueId} resolved`)
   }
 
   const handleCreateTransfer = ({ sourceBranchId, destBranchId, type, itemName, qty, unit }) => {
@@ -546,7 +558,7 @@ export default function App() {
     { id: 'my_requests', label: role.id === 'owner' ? (lang === 'ar' ? 'الطلبات والأوامر' : 'Requests & Orders') : t.myRequests, icon: FileText },
     { id: 'purchasing', label: t.purchasing, icon: ShoppingCart },
     { id: 'price_review', label: t.priceReview, icon: Tag },
-    { id: 'deliveries', label: t.deliveries, icon: Truck },
+    { id: 'deliveries', label: role.id === 'purchasing' ? (lang === 'ar' ? 'متابعة التوريدات' : 'Delivery tracking') : t.deliveries, icon: Truck },
     { id: 'transfers', label: t.transfers, icon: ArrowRightLeft },
     { id: 'non_food', label: t.nonFood, icon: Layers },
     { id: 'accounting', label: t.accounting, icon: Calculator },
@@ -704,6 +716,7 @@ export default function App() {
               lang={lang}
               t={t}
               onConfirmReceipt={handleConfirmReceipt}
+              onResolveDiscrepancy={handleResolveDiscrepancy}
             />
           )}
           {activeTab === 'transfers' && (

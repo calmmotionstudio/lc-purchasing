@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { CheckCircle2, AlertTriangle, Database, Camera, Utensils, Shirt, Wrench } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, Database, Camera, Utensils, Shirt, Wrench, Truck, Clock, PhoneCall } from 'lucide-react'
 import { BRANCHES } from '../data/seedData'
 
-export default function ReceivingView({ state, branchFilter, role, lang, t, onConfirmReceipt }) {
+export default function ReceivingView({ state, branchFilter, role, lang, t, onConfirmReceipt, onResolveDiscrepancy }) {
   const canSeePrices = role.canViewPrices
+  const isPurchasing = role.id === 'purchasing'
   const receivablePOs = state.pos.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
   const [selectedPoId, setSelectedPoId] = useState(receivablePOs[0]?.id || state.pos[0]?.id)
   const po = state.pos.find((p) => p.id === selectedPoId) || receivablePOs[0]
@@ -22,6 +23,150 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
     return b ? (lang === 'ar' ? b.nameAr : b.name) : id
   }
 
+  // PURCHASING VIEW: Tracks what was sent, sees branch receiver's confirmation & resolves shortages
+  if (isPurchasing) {
+    const openIssues = state.discrepancies.filter(
+      (d) => (branchFilter === 'all' || d.branchId === branchFilter) && d.status !== 'Closed'
+    )
+    return (
+      <div>
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">{lang === 'ar' ? 'متابعة التوريدات والعجز (المشتريات)' : 'Delivery Tracking & Supplier Shortages'}</h1>
+            <p className="page-subtitle">
+              Purchasing tracks supplier deliveries and resolves shortages reported by the branch Receiver. Physical arrival is confirmed only by Receiving / Restaurant Manager (OWN01).
+            </p>
+          </div>
+        </div>
+
+        {/* Open Shortages / Issues from Receiver */}
+        <div className="card" style={{ marginBottom: 16 }}>
+          <div className="card-title">
+            <span>Reported by Branch Receiver — Action Required</span>
+            <span className="pill pill-amber">{openIssues.length} open</span>
+          </div>
+          {openIssues.length === 0 ? (
+            <div className="notice notice-green">
+              <CheckCircle2 size={18} />
+              <span>All reported shortages and delivery issues are resolved.</span>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {openIssues.map((iss) => (
+                <div
+                  key={iss.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                    padding: '12px 14px',
+                    borderRadius: 10,
+                    background: '#fff9ee',
+                    border: '1px solid var(--amber-border)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 14 }}>
+                      {iss.id} · {iss.refDoc} · {branchName(iss.branchId)} · {iss.itemName}
+                    </div>
+                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {iss.expectedQty > 0
+                        ? `Ordered: ${iss.expectedQty} ${iss.unit} → Receiver accepted: ${iss.actualQty} ${iss.unit}`
+                        : iss.nextAction}
+                      {canSeePrices && iss.unmatchedEgp > 0 ? ` · Unmatched: EGP ${iss.unmatchedEgp}` : ''}
+                    </div>
+                    <div style={{ fontSize: 12, color: 'var(--amber-text)', marginTop: 3 }}>
+                      Action: {iss.nextAction} · Due: {iss.due}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button
+                      className="btn btn-outline"
+                      style={{ minHeight: 34, fontSize: 12 }}
+                      onClick={() => onResolveDiscrepancy(iss.id, 'Credit note confirmed with supplier')}
+                    >
+                      <PhoneCall size={14} /> Confirm Credit Note
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      style={{ minHeight: 34, fontSize: 12 }}
+                      onClick={() => onResolveDiscrepancy(iss.id, 'Remaining delivery scheduled & closed')}
+                    >
+                      <CheckCircle2 size={14} /> Resolve Issue
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* All POs Delivery & Receiver Confirmation Log */}
+        <div className="card">
+          <div className="card-title">
+            <span>All Sent POs & Branch Receiver Confirmations</span>
+            <span className="pill pill-gray">{receivablePOs.length} POs</span>
+          </div>
+          <div className="table-wrap" style={{ border: 'none' }}>
+            <table>
+              <thead>
+                <tr>
+                  <th>PO #</th>
+                  <th>{t.restaurant}</th>
+                  <th>Supplier</th>
+                  <th>Item</th>
+                  <th>Ordered / Accepted</th>
+                  <th>Receiver Evidence</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {receivablePOs.map((p) => (
+                  <tr key={p.id}>
+                    <td><strong>{p.id}</strong></td>
+                    <td>{branchName(p.branchId)}</td>
+                    <td>{p.supplier}</td>
+                    <td>{p.emoji} <strong>{p.itemName}</strong></td>
+                    <td>
+                      <strong>{p.receivedQty}</strong> / {p.orderedQty} {p.unit}
+                    </td>
+                    <td style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>
+                      {p.lastReceiptNote
+                        ? p.lastReceiptNote
+                        : p.receivedQty > 0
+                        ? 'Confirmed by branch receiver'
+                        : 'Awaiting branch physical arrival'}
+                    </td>
+                    <td>
+                      <span
+                        className={`pill ${
+                          p.status === 'Received'
+                            ? 'pill-green'
+                            : p.status === 'Part received'
+                            ? 'pill-amber'
+                            : 'pill-blue'
+                        }`}
+                      >
+                        {p.status === 'Confirmed' || p.status === 'Sent' ? (
+                          <><Clock size={12} /> {p.status}</>
+                        ) : (
+                          p.status
+                        )}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // RECEIVING / RESTAURANT MANAGER VIEW: Confirms physical arrival, temp, quality & sends confirmation back to Purchasing
   if (!po) return <div className="card">No purchase orders available.</div>
 
   const remainingBefore = Number((po.orderedQty - po.receivedQty).toFixed(3))
@@ -34,14 +179,17 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Receive {po.id}</h1>
+          <h1 className="page-title">
+            <Truck size={22} style={{ verticalAlign: 'middle', marginInlineEnd: 8 }} />
+            Receive {po.id}
+          </h1>
           <p className="page-subtitle">
-            Supplier: <strong>{po.supplier}</strong> · Requested by: <strong>{branchName(po.branchId)}</strong> · Expected: <strong>{po.expectedDate}</strong>
+            Sent by Purchasing · Supplier: <strong>{po.supplier}</strong> · Destination: <strong>{branchName(po.branchId)}</strong> · Expected: <strong>{po.expectedDate}</strong>
           </p>
         </div>
 
         <div className="select-pill">
-          <span>Order:</span>
+          <span>Expected PO:</span>
           <select
             value={po.id}
             onChange={(e) => {
@@ -205,7 +353,7 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
               </>
             ) : (
               <div className="notice notice-gray">
-                <span>Monetary totals hidden for Receiver role (ACC02). Quantities & quality checks are saved normally.</span>
+                <span>Monetary totals hidden for Receiver role (ACC02). Your confirmation sends accepted quantities to Purchasing & Accounting.</span>
               </div>
             )}
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>
@@ -219,7 +367,7 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
                 <AlertTriangle size={18} /> Issue: Missing {stillDue} {po.unit}
               </div>
               <div style={{ fontSize: 13, marginBottom: 10 }}>
-                <div>Follow-up: <strong>Mona · Purchasing</strong></div>
+                <div>Follow-up sent to: <strong>Mona · Purchasing</strong></div>
                 <div>Due: <strong>Tomorrow 10:00</strong></div>
               </div>
               <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Missing quantity action *</label>
@@ -247,10 +395,11 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
                   deliveryNoteNo,
                   missingAction,
                   techAccepted: categoryTab === 'Equipment' ? techAccepted : true,
+                  receiptSummary: `DN ${deliveryNoteNo} · ${condition} (${tempC}°C) · Accepted ${acceptedNum} ${po.unit}`,
                 })
               }}
             >
-              <CheckCircle2 size={18} /> {remainingBefore <= 0 ? 'Fully received' : `Save ${acceptedNum} ${po.unit} receipt`}
+              <CheckCircle2 size={18} /> {remainingBefore <= 0 ? 'Fully received' : `Confirm & Send ${acceptedNum} ${po.unit} Receipt`}
             </button>
           </div>
         </div>

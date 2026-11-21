@@ -55,6 +55,7 @@ export default function App() {
   const [branchFilter, setBranchFilter] = useState('all')
   const [lang, setLang] = useState('en')
   const [activeTab, setActiveTab] = useState('overview')
+  const [navHistory, setNavHistory] = useState([])
   const [focusedLineId, setFocusedLineId] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [toast, setToast] = useState(null)
@@ -99,16 +100,44 @@ export default function App() {
     ...prev.auditLog,
   ]
 
+  useEffect(() => {
+    const onPopState = (e) => {
+      if (e.state && e.state.tab) {
+        setActiveTab(e.state.tab)
+        setFocusedLineId(e.state.lineId || null)
+        setNavHistory((prev) => prev.slice(0, -1))
+      }
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
   const handleNavigate = (tab, lineId = null) => {
+    if (tab !== activeTab) {
+      setNavHistory((prev) => [...prev, { tab: activeTab, lineId: focusedLineId }])
+      window.history.pushState({ tab, lineId }, '', `#${tab}`)
+    }
     setActiveTab(tab)
-    if (lineId) setFocusedLineId(lineId)
+    setFocusedLineId(lineId || null)
+    setSidebarOpen(false)
+  }
+
+  const handleBack = () => {
+    if (navHistory.length === 0) return
+    const prev = navHistory[navHistory.length - 1]
+    setNavHistory((h) => h.slice(0, -1))
+    setActiveTab(prev.tab)
+    setFocusedLineId(prev.lineId || null)
     setSidebarOpen(false)
   }
 
   const handleRoleChange = (newRoleId) => {
     const nextRole = ROLES.find((r) => r.id === newRoleId) || ROLES[0]
     setRoleId(newRoleId)
+    setNavHistory([])
     setActiveTab(nextRole.defaultTab)
+    setFocusedLineId(null)
+    window.history.replaceState({ tab: nextRole.defaultTab, lineId: null }, '', `#${nextRole.defaultTab}`)
     if (newRoleId === 'manager' || newRoleId === 'staff' || newRoleId === 'receiving') {
       if (branchFilter === 'all') setBranchFilter('boho')
     }
@@ -475,10 +504,36 @@ export default function App() {
     notify(`${poId} reconciled (${supplyId})`)
   }
 
-  const navItems = [
+  const handleRequestReport = (prId, branchId, note) => {
+    setState((prev) => ({
+      ...prev,
+      discrepancies: [
+        {
+          id: `RPT-${410 + prev.discrepancies.length}`,
+          branchId,
+          type: 'Owner Report Request',
+          refDoc: prId,
+          itemName: `${prId} Verification`,
+          expectedQty: 0,
+          actualQty: 0,
+          unit: '',
+          unmatchedEgp: 0,
+          owner: 'Noman · Cost Control',
+          due: 'Today 18:00',
+          nextAction: note,
+          status: 'Open',
+        },
+        ...prev.discrepancies,
+      ],
+      auditLog: appendAudit(prev, branchId, `Owner requested report on ${prId}: ${note}`),
+    }))
+    notify(`Report request sent to Noman & Cost Control for ${prId}`)
+  }
+
+  const allNavItems = [
     { id: 'overview', label: t.overview, icon: Home },
     { id: 'new_request', label: t.newRequest, icon: PlusSquare },
-    { id: 'my_requests', label: t.myRequests, icon: FileText },
+    { id: 'my_requests', label: role.id === 'owner' ? (lang === 'ar' ? 'الطلبات والأوامر' : 'Requests & Orders') : t.myRequests, icon: FileText },
     { id: 'purchasing', label: t.purchasing, icon: ShoppingCart },
     { id: 'price_review', label: t.priceReview, icon: Tag },
     { id: 'deliveries', label: t.deliveries, icon: Truck },
@@ -488,6 +543,7 @@ export default function App() {
     { id: 'integrations', label: t.integrations, icon: Database },
     { id: 'history', label: t.history, icon: History },
   ]
+  const navItems = allNavItems.filter((item) => role.navTabs.includes(item.id))
 
   return (
     <div className="app-shell">
@@ -544,8 +600,9 @@ export default function App() {
               <button className={lang === 'ar' ? 'active' : ''} onClick={() => setLang('ar')}>العربية</button>
             </div>
 
-            <div className="select-pill">
+            <div className="select-pill" title="Switch user perspective / role">
               <UserCircle size={16} color="var(--primary)" />
+              <span style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>{lang === 'ar' ? 'الدور:' : 'Role:'}</span>
               <select value={roleId} onChange={(e) => handleRoleChange(e.target.value)}>
                 {ROLES.map((r) => (
                   <option key={r.id} value={r.id}>
@@ -562,6 +619,13 @@ export default function App() {
         </header>
 
         <main className="page-body">
+          {navHistory.length > 0 && (
+            <div style={{ marginBottom: 12 }}>
+              <button className="btn btn-outline" style={{ minHeight: 34, fontSize: 13 }} onClick={handleBack}>
+                ← {lang === 'ar' ? 'رجوع' : 'Back'}
+              </button>
+            </div>
+          )}
           {activeTab === 'overview' && (
             <OverviewView
               state={state}
@@ -592,6 +656,7 @@ export default function App() {
               role={role}
               lang={lang}
               onApproveNeed={handleApproveNeed}
+              onRequestReport={handleRequestReport}
               onNavigate={handleNavigate}
             />
           )}
@@ -611,6 +676,7 @@ export default function App() {
           {activeTab === 'price_review' && (
             <PriceReviewView
               state={state}
+              branchFilter={branchFilter}
               focusedLineId={focusedLineId}
               role={role}
               lang={lang}

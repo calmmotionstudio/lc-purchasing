@@ -4,6 +4,7 @@ import { BRANCHES } from '../data/seedData'
 
 export default function PriceReviewView({
   state,
+  branchFilter,
   focusedLineId,
   role,
   lang,
@@ -13,9 +14,11 @@ export default function PriceReviewView({
   onRejectPrice,
 }) {
   const canSeePrices = role.canViewPrices
-  const allLines = state.prs.flatMap((pr) =>
-    pr.lines.map((l) => ({ ...l, prId: pr.id, branchId: pr.branchId, createdAt: pr.createdAt }))
-  )
+  const allLines = state.prs
+    .filter((pr) => branchFilter === 'all' || pr.branchId === branchFilter)
+    .flatMap((pr) =>
+      pr.lines.map((l) => ({ ...l, prId: pr.id, branchId: pr.branchId, createdAt: pr.createdAt }))
+    )
   const reviewable = allLines.filter((l) => !l.priceApproved && l.needApproved)
   const [selectedId, setSelectedId] = useState(focusedLineId || reviewable[0]?.lineId || allLines[0]?.lineId)
   const line = allLines.find((l) => l.lineId === selectedId) || reviewable[0] || allLines[0]

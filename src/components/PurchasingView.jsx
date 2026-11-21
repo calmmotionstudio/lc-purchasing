@@ -39,7 +39,7 @@ export default function PurchasingView({
     return true
   })
 
-  const selectedLine = allLines.find((l) => l.lineId === selectedLineId) || filteredLines[0]
+  const selectedLine = filteredLines.find((l) => l.lineId === selectedLineId) || filteredLines[0] || null
 
   const branchSuppliers = selectedLine
     ? state.posterSnapshot?.branches?.[selectedLine.branchId]?.suppliers || []
@@ -147,7 +147,13 @@ export default function PurchasingView({
               </tr>
             </thead>
             <tbody>
-              {filteredLines.map((line) => (
+              {filteredLines.length === 0 ? (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: 24, color: 'var(--text-muted)' }}>
+                    No requests match the selected branch/filter.
+                  </td>
+                </tr>
+              ) : filteredLines.map((line) => (
                 <tr
                   key={line.lineId}
                   className={`clickable ${selectedLine?.lineId === line.lineId ? 'selected' : ''}`}
@@ -209,7 +215,7 @@ export default function PurchasingView({
                         Price review
                       </button>
                     ) : (
-                      <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>Select to quote</span>
+                      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Quote</span>
                     )}
                   </td>
                 </tr>

@@ -7,16 +7,26 @@ const branchName = (id, lang) => {
   return b ? (lang === 'ar' ? b.nameAr : b.name) : id
 }
 
-export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed, onNavigate }) {
+export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed, onRequestReport, onNavigate }) {
   const canSeePrices = role.canViewPrices
   const prs = state.prs.filter((p) => branchFilter === 'all' || p.branchId === branchFilter)
+  const [reportModalPr, setReportModalPr] = useState(null)
+  const [reportNote, setReportNote] = useState('')
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">{lang === 'ar' ? 'طلباتي' : 'Branch Requests (PRs)'}</h1>
-          <p className="page-subtitle">WF02: Food lines can proceed independently while Non-food / Equipment approvals wait.</p>
+          <h1 className="page-title">
+            {role.id === 'owner'
+              ? (lang === 'ar' ? 'الطلبات وأوامر الشراء' : 'Branch Requests & Orders')
+              : (lang === 'ar' ? 'طلباتي' : 'Branch Requests (PRs)')}
+          </h1>
+          <p className="page-subtitle">
+            {role.id === 'owner'
+              ? 'Read-only executive view of branch requests. Owner can review exceptions or request a report from Noman / Cost Control.'
+              : 'WF02: Food lines can proceed independently while Non-food / Equipment approvals wait.'}
+          </p>
         </div>
       </div>
 
@@ -35,12 +45,24 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
                     Needed by {pr.neededBy} · Requester: {pr.requester} · {pr.reason}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                   {canSeePrices && (
                     <span className="pill pill-green">Food est: EGP {foodTotal.toLocaleString()}</span>
                   )}
                   {canSeePrices && nonFoodTotal > 0 && (
                     <span className="pill pill-amber">Non-food est: EGP {nonFoodTotal.toLocaleString()}</span>
+                  )}
+                  {role.canRequestReport && (
+                    <button
+                      className="btn btn-outline"
+                      style={{ minHeight: 32, fontSize: 12 }}
+                      onClick={() => {
+                        setReportModalPr(pr)
+                        setReportNote('')
+                      }}
+                    >
+                      Request report
+                    </button>
                   )}
                 </div>
               </div>
@@ -78,7 +100,7 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
                             >
                               <CheckCircle2 size={14} /> Approve need
                             </button>
-                          ) : l.needApproved ? (
+                          ) : role.id === 'purchasing' && l.needApproved ? (
                             <button
                               className="btn btn-outline"
                               style={{ minHeight: 32, fontSize: 12 }}
@@ -86,8 +108,18 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
                             >
                               Open in Purchasing
                             </button>
+                          ) : role.canApprovePrice && !l.priceApproved && l.needApproved ? (
+                            <button
+                              className="btn btn-outline"
+                              style={{ minHeight: 32, fontSize: 12 }}
+                              onClick={() => onNavigate('price_review', l.lineId)}
+                            >
+                              Review price
+                            </button>
                           ) : (
-                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Awaiting Manager/HR</span>
+                            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                              {l.needApproved ? `Owner: ${l.owner}` : 'Awaiting Manager/HR'}
+                            </span>
                           )}
                         </td>
                       </tr>
@@ -99,6 +131,36 @@ export function MyRequestsView({ state, branchFilter, role, lang, onApproveNeed,
           )
         })}
       </div>
+
+      {reportModalPr && (
+        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
+            <p className="page-subtitle" style={{ marginBottom: 12 }}>
+              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
+            </p>
+            <textarea
+              className="textarea"
+              placeholder="What should Noman / Cost Control verify or report on this request?"
+              value={reportNote}
+              onChange={(e) => setReportNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!reportNote.trim()}
+                onClick={() => {
+                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
+                  setReportModalPr(null)
+                }}
+              >
+                Send report request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -211,6 +273,36 @@ export function TransfersView({ state, lang, onCreateTransfer, onAcceptTransfer 
           </tbody>
         </table>
       </div>
+
+      {reportModalPr && (
+        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
+            <p className="page-subtitle" style={{ marginBottom: 12 }}>
+              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
+            </p>
+            <textarea
+              className="textarea"
+              placeholder="What should Noman / Cost Control verify or report on this request?"
+              value={reportNote}
+              onChange={(e) => setReportNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!reportNote.trim()}
+                onClick={() => {
+                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
+                  setReportModalPr(null)
+                }}
+              >
+                Send report request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -253,6 +345,36 @@ export function NonFoodView({ state, branchFilter, lang }) {
           </tbody>
         </table>
       </div>
+
+      {reportModalPr && (
+        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
+            <p className="page-subtitle" style={{ marginBottom: 12 }}>
+              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
+            </p>
+            <textarea
+              className="textarea"
+              placeholder="What should Noman / Cost Control verify or report on this request?"
+              value={reportNote}
+              onChange={(e) => setReportNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!reportNote.trim()}
+                onClick={() => {
+                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
+                  setReportModalPr(null)
+                }}
+              >
+                Send report request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -317,6 +439,36 @@ export function AccountingView({ state, role, lang, onMarkPosted }) {
           </tbody>
         </table>
       </div>
+
+      {reportModalPr && (
+        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
+            <p className="page-subtitle" style={{ marginBottom: 12 }}>
+              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
+            </p>
+            <textarea
+              className="textarea"
+              placeholder="What should Noman / Cost Control verify or report on this request?"
+              value={reportNote}
+              onChange={(e) => setReportNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!reportNote.trim()}
+                onClick={() => {
+                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
+                  setReportModalPr(null)
+                }}
+              >
+                Send report request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -381,6 +533,36 @@ export function IntegrationsView({ state, role }) {
           </table>
         </div>
       </div>
+
+      {reportModalPr && (
+        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
+            <p className="page-subtitle" style={{ marginBottom: 12 }}>
+              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
+            </p>
+            <textarea
+              className="textarea"
+              placeholder="What should Noman / Cost Control verify or report on this request?"
+              value={reportNote}
+              onChange={(e) => setReportNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!reportNote.trim()}
+                onClick={() => {
+                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
+                  setReportModalPr(null)
+                }}
+              >
+                Send report request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -420,6 +602,36 @@ export function HistoryView({ state, branchFilter, lang }) {
           </tbody>
         </table>
       </div>
+
+      {reportModalPr && (
+        <div className="modal-backdrop" onClick={() => setReportModalPr(null)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginTop: 0 }}>Request Report — {reportModalPr.id}</h2>
+            <p className="page-subtitle" style={{ marginBottom: 12 }}>
+              Assigns a report / verification task to Mohamed Noman & Cost Control for {branchName(reportModalPr.branchId, lang)}.
+            </p>
+            <textarea
+              className="textarea"
+              placeholder="What should Noman / Cost Control verify or report on this request?"
+              value={reportNote}
+              onChange={(e) => setReportNote(e.target.value)}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 14 }}>
+              <button className="btn btn-outline" onClick={() => setReportModalPr(null)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={!reportNote.trim()}
+                onClick={() => {
+                  onRequestReport(reportModalPr.id, reportModalPr.branchId, reportNote.trim())
+                  setReportModalPr(null)
+                }}
+              >
+                Send report request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

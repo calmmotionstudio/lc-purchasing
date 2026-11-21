@@ -35,7 +35,7 @@ import {
   StockChecksView,
 } from './components/OperationsTabs'
 
-const STORAGE_KEY = 'lc_purchasing_v2_2_state'
+const STORAGE_KEY = 'lc_purchasing_v2_2_state_r2'
 
 function loadState() {
   try {

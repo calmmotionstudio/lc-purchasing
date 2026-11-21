@@ -9,11 +9,14 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
   const [selectedPoId, setSelectedPoId] = useState(receivablePOs[0]?.id || state.pos[0]?.id)
   const po = state.pos.find((p) => p.id === selectedPoId) || receivablePOs[0]
 
-  const [categoryTab, setCategoryTab] = useState(po?.category === 'Food' ? 'Food' : 'Equipment')
+  const [categoryTab, setCategoryTab] = useState(po?.category || 'Food')
   const [acceptedInput, setAcceptedInput] = useState(po ? String(Math.max(0, po.orderedQty - po.receivedQty - 0.5)) : '0')
   const [tempC, setTempC] = useState('4')
   const [condition, setCondition] = useState('Accepted')
   const [expiryDate, setExpiryDate] = useState('2026-11-24')
+  const [damagedCount, setDamagedCount] = useState('0')
+  const [sizeVerified, setSizeVerified] = useState('Size M · Matches approved sample')
+  const [serialNo, setSerialNo] = useState('EQ014-8821')
   const [deliveryNoteNo, setDeliveryNoteNo] = useState('DN-8841')
   const [missingAction, setMissingAction] = useState('Keep remaining delivery open')
   const [techAccepted, setTechAccepted] = useState(true)
@@ -259,6 +262,7 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
               const next = state.pos.find((x) => x.id === e.target.value)
               setSelectedPoId(e.target.value)
               if (next) {
+                setCategoryTab(next.category || 'Food')
                 const rem = Math.max(0, next.orderedQty - next.receivedQty)
                 setAcceptedInput(String(rem))
               }
@@ -282,7 +286,22 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
             ['Uniforms', <Shirt size={14} key="u" />],
             ['Equipment', <Wrench size={14} key="e" />],
           ].map(([cat, icon]) => (
-            <button key={cat} className={`seg-btn ${categoryTab === cat ? 'active' : ''}`} onClick={() => setCategoryTab(cat)}>
+            <button
+              key={cat}
+              className={`seg-btn ${categoryTab === cat ? 'active' : ''}`}
+              onClick={() => {
+                setCategoryTab(cat)
+                const matchingPo =
+                  receivablePOs.find((p) => p.category === cat && p.orderedQty > p.receivedQty) ||
+                  receivablePOs.find((p) => p.category === cat) ||
+                  state.pos.find((p) => p.category === cat)
+                if (matchingPo) {
+                  setSelectedPoId(matchingPo.id)
+                  const rem = Math.max(0, matchingPo.orderedQty - matchingPo.receivedQty)
+                  setAcceptedInput(String(rem))
+                }
+              }}
+            >
               {icon} <span style={{ marginInlineStart: 5 }}>{cat}</span>
             </button>
           ))}
@@ -364,19 +383,45 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
               <Wrench size={18} />
               <div style={{ flex: 1 }}>
                 <strong>EQP03 Technical Acceptance Gate:</strong> Delivery does NOT equal acceptance (e.g. undersized fryer case).
-                <div style={{ marginTop: 6 }}>
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-                    <input type="checkbox" checked={techAccepted} onChange={(e) => setTechAccepted(e.target.checked)} />
-                    Capacity, dimensions & site fit verified by Technical Acceptor
-                  </label>
+                <div style={{ marginTop: 8, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Model / Serial #</label>
+                    <input className="input" style={{ width: '100%' }} value={serialNo} onChange={(e) => setSerialNo(e.target.value)} />
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', paddingTop: 18 }}>
+                    <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600, fontSize: 12.5 }}>
+                      <input type="checkbox" checked={techAccepted} onChange={(e) => setTechAccepted(e.target.checked)} />
+                      Capacity & site fit verified
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {(categoryTab === 'Uniforms' || categoryTab === 'Tableware') && (
-            <div className="notice notice-gray" style={{ marginBottom: 14 }}>
-              <span>Verified against approved sample, size/dimensions & breakage count before store issue (UNI02 / NFD01).</span>
+          {categoryTab === 'Tableware' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Model & Dimensions</label>
+                <input className="input" style={{ width: '100%' }} readOnly value="TW-027 · 27 cm Porcelain" />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Damaged / Broken count</label>
+                <input type="number" min="0" className="input" style={{ width: '100%' }} value={damagedCount} onChange={(e) => setDamagedCount(e.target.value)} />
+              </div>
+            </div>
+          )}
+
+          {categoryTab === 'Uniforms' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Size & Approved Sample *</label>
+                <input className="input" style={{ width: '100%' }} value={sizeVerified} onChange={(e) => setSizeVerified(e.target.value)} />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 4 }}>Store Custody (UNI02)</label>
+                <input className="input" style={{ width: '100%' }} readOnly value="Receive to Uniform Store (before staff issue)" />
+              </div>
             </div>
           )}
 

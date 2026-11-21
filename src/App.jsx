@@ -456,15 +456,17 @@ export default function App() {
     notify(`Receipt saved & sent to Purchasing for ${poId}`)
   }
 
-  const handleResolveDiscrepancy = (issueId, resolutionNote) => {
+  const handleResolveDiscrepancy = (issueId, { outcome, docRef, note }) => {
+    const summary = `${outcome} (Ref: ${docRef}) — ${note}`
+    const nextStatus = outcome === 'Later delivery scheduled' ? 'Awaiting supplier' : 'Closed'
     setState((prev) => ({
       ...prev,
       discrepancies: prev.discrepancies.map((d) =>
-        d.id === issueId ? { ...d, status: 'Closed', nextAction: resolutionNote } : d
+        d.id === issueId ? { ...d, status: nextStatus, nextAction: summary } : d
       ),
-      auditLog: appendAudit(prev, 'all', `${issueId} resolved by Purchasing: ${resolutionNote}`),
+      auditLog: appendAudit(prev, 'all', `${issueId} updated by Purchasing [${nextStatus}]: ${summary}`),
     }))
-    notify(`${issueId} resolved`)
+    notify(`${issueId} -> ${nextStatus}`)
   }
 
   const handleCreateTransfer = ({ sourceBranchId, destBranchId, type, itemName, qty, unit }) => {

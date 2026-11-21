@@ -17,6 +17,10 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
   const [deliveryNoteNo, setDeliveryNoteNo] = useState('DN-8841')
   const [missingAction, setMissingAction] = useState('Keep remaining delivery open')
   const [techAccepted, setTechAccepted] = useState(true)
+  const [resolveModalIss, setResolveModalIss] = useState(null)
+  const [resolveOutcome, setResolveOutcome] = useState('Supplier credit note')
+  const [resolveDocRef, setResolveDocRef] = useState('')
+  const [resolveNote, setResolveNote] = useState('')
 
   const branchName = (id) => {
     const b = BRANCHES.find((x) => x.id === id)
@@ -83,16 +87,14 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <button
-                      className="btn btn-outline"
-                      style={{ minHeight: 34, fontSize: 12 }}
-                      onClick={() => onResolveDiscrepancy(iss.id, 'Credit note confirmed with supplier')}
-                    >
-                      <PhoneCall size={14} /> Confirm Credit Note
-                    </button>
-                    <button
                       className="btn btn-primary"
                       style={{ minHeight: 34, fontSize: 12 }}
-                      onClick={() => onResolveDiscrepancy(iss.id, 'Remaining delivery scheduled & closed')}
+                      onClick={() => {
+                        setResolveModalIss(iss)
+                        setResolveOutcome('Supplier credit note')
+                        setResolveDocRef('')
+                        setResolveNote('')
+                      }}
                     >
                       <CheckCircle2 size={14} /> Resolve Issue
                     </button>
@@ -162,6 +164,67 @@ export default function ReceivingView({ state, branchFilter, role, lang, t, onCo
             </table>
           </div>
         </div>
+
+        {resolveModalIss && (
+          <div className="modal-backdrop" onClick={() => setResolveModalIss(null)}>
+            <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+              <h2 style={{ marginTop: 0 }}>Resolve Issue — {resolveModalIss.id} ({resolveModalIss.refDoc})</h2>
+              <p className="page-subtitle" style={{ marginBottom: 12 }}>
+                ISS01–ISS02: Closing a discrepancy requires a documented outcome and supporting reference. "Done" alone is not allowed.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: 'block', marginBottom: 4 }}>Resolution Outcome *</label>
+                  <select className="input" style={{ width: '100%' }} value={resolveOutcome} onChange={(e) => setResolveOutcome(e.target.value)}>
+                    <option value="Supplier credit note">Supplier credit note (deduct unmatched EGP)</option>
+                    <option value="Later delivery scheduled">Later delivery scheduled (keep balance open)</option>
+                    <option value="Return / Replacement">Return / Replacement arranged</option>
+                    <option value="Approved cancellation">Approved cancellation of remainder</option>
+                    <option value="Verified count correction">Verified count correction</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: 'block', marginBottom: 4 }}>
+                    Supporting Document / Reference # *
+                  </label>
+                  <input
+                    className="input"
+                    style={{ width: '100%' }}
+                    placeholder="e.g. Credit Note #CN-412, New ETA 22 Nov 10:00, or WhatsApp ref"
+                    value={resolveDocRef}
+                    onChange={(e) => setResolveDocRef(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 12.5, fontWeight: 600, display: 'block', marginBottom: 4 }}>Resolution Note *</label>
+                  <textarea
+                    className="textarea"
+                    placeholder="Explain how the shortage/discrepancy was settled with the supplier..."
+                    value={resolveNote}
+                    onChange={(e) => setResolveNote(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+                <button className="btn btn-outline" onClick={() => setResolveModalIss(null)}>Cancel</button>
+                <button
+                  className="btn btn-primary"
+                  disabled={!resolveDocRef.trim() || !resolveNote.trim()}
+                  onClick={() => {
+                    onResolveDiscrepancy(resolveModalIss.id, {
+                      outcome: resolveOutcome,
+                      docRef: resolveDocRef.trim(),
+                      note: resolveNote.trim(),
+                    })
+                    setResolveModalIss(null)
+                  }}
+                >
+                  <CheckCircle2 size={15} /> Save Resolution
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }

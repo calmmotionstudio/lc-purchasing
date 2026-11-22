@@ -20,6 +20,7 @@ export default function NewRequestView({
 
   const [viewMode, setViewMode] = useState('quick') // quick | photo | poster
   const [catFilter, setCatFilter] = useState('Food')
+  const [subCatFilter, setSubCatFilter] = useState('All')
   const [search, setSearch] = useState('')
   const [neededBy, setNeededBy] = useState('2026-11-21')
   const [quantities, setQuantities] = useState({})
@@ -63,6 +64,7 @@ export default function NewRequestView({
     }
 
     return CURATED_CATALOG.filter((it) => it.category === catFilter)
+      .filter((it) => catFilter !== 'Non-food' || subCatFilter === 'All' || it.subType === subCatFilter)
       .filter((it) => {
         if (!search) return true
         const q = search.toLowerCase()
@@ -81,7 +83,7 @@ export default function NewRequestView({
         lastPaid: it.lastPaidPoster,
         ceiling: it.approvedCeiling,
       }))
-  }, [viewMode, catFilter, search, activeBranch, posterBranchData])
+  }, [viewMode, catFilter, subCatFilter, search, activeBranch, posterBranchData])
 
   const selectedLines = useMemo(() => {
     const allPossible = [
@@ -208,7 +210,10 @@ export default function NewRequestView({
                 <button
                   key={k}
                   className={`seg-btn ${catFilter === k ? 'active' : ''}`}
-                  onClick={() => setCatFilter(k)}
+                  onClick={() => {
+                    setCatFilter(k)
+                    setSubCatFilter('All')
+                  }}
                 >
                   {label}
                 </button>
@@ -227,6 +232,27 @@ export default function NewRequestView({
             />
           </div>
         </div>
+
+        {viewMode !== 'poster' && catFilter === 'Non-food' && (
+          <div className="chip-row" style={{ marginTop: 12 }}>
+            {[
+              ['All', lang === 'ar' ? 'الكل' : 'All Supplies'],
+              ['Tableware & Glassware', lang === 'ar' ? 'أطباق وكاسات' : 'Tableware & Glassware'],
+              ['Kitchen & Bar Tools', lang === 'ar' ? 'أدوات المطبخ والبار' : 'Kitchen & Bar Tools'],
+              ['Small Equipment', lang === 'ar' ? 'معدات صغيرة' : 'Small Equipment'],
+              ['Linen & Textiles', lang === 'ar' ? 'مفروشات ولبس' : 'Linen & Textiles'],
+            ].map(([sub, label]) => (
+              <button
+                key={sub}
+                type="button"
+                className={`chip-btn ${subCatFilter === sub ? 'active' : ''}`}
+                onClick={() => setSubCatFilter(sub)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Quick List / Poster Table */}

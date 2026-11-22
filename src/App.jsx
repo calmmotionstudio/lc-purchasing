@@ -634,9 +634,8 @@ export default function App() {
         <div className="sidebar-brand">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span>{t.brand}</span>
-            <span style={{ background: 'var(--accent-soft)', color: '#b5381e', fontSize: 13, padding: '2px 8px', borderRadius: 999 }}>🍅</span>
           </div>
-          <span style={{ fontSize: 11.5, fontWeight: 500, color: 'var(--text-muted)' }}>{t.brandSub}</span>
+          <span style={{ fontSize: 11.5, fontWeight: 500, color: 'rgba(255,255,255,0.72)' }}>{t.brandSub}</span>
         </div>
         <nav className="sidebar-nav">
           {navItems.map((item) => {
@@ -654,7 +653,7 @@ export default function App() {
           })}
         </nav>
         <div className="sidebar-footer">
-          <div style={{ fontWeight: 700, color: 'var(--text-main)', marginBottom: 3 }}>
+          <div style={{ fontWeight: 700, color: '#ffffff', marginBottom: 3 }}>
             {lang === 'ar' ? role.labelAr : role.labelEn}
           </div>
           <div>{lang === 'ar' ? role.scopeNoteAr : role.scopeNoteEn}</div>

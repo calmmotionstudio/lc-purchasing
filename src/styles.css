@@ -1,34 +1,34 @@
 :root {
-  --sidebar-bg: #ffffff;
-  --sidebar-hover: #f5f3ef;
-  --sidebar-active: #141715;
-  --bg-page: #faf8f5;
+  --sidebar-bg: #0e3a2a;
+  --sidebar-hover: rgba(255, 255, 255, 0.1);
+  --sidebar-active: rgba(255, 255, 255, 0.18);
+  --bg-page: #f5f7f4;
   --bg-card: #ffffff;
-  --bg-subtle: #f6f4ef;
-  --bg-muted: #eeebe4;
-  --border: #e8e4dc;
-  --border-strong: #d5cfc4;
-  --text-main: #141715;
-  --text-muted: #5c5e5a;
-  --text-light: #878882;
-  --primary: #141715;
-  --primary-hover: #2a2e2b;
-  --primary-soft: #ffebe6;
-  --accent: #f06449;
-  --accent-soft: #ffebe6;
+  --bg-subtle: #f4f7f3;
+  --bg-muted: #e9efe7;
+  --border: #dfe6dc;
+  --border-strong: #c8d3c3;
+  --text-main: #15221b;
+  --text-muted: #526359;
+  --text-light: #78887f;
+  --primary: #0f4432;
+  --primary-hover: #0a3124;
+  --primary-soft: #e6f4ec;
+  --accent: #d97706;
+  --accent-soft: #fef3dc;
   --green-bg: #e6f4ec;
   --green-text: #146c43;
   --amber-bg: #fef3dc;
-  --amber-text: #a15206;
+  --amber-text: #9a4d06;
   --amber-border: #f5d89a;
-  --red-bg: #ffebe6;
-  --red-text: #c93b22;
+  --red-bg: #fee4e2;
+  --red-text: #b42318;
   --blue-bg: #e0f2fe;
   --blue-text: #0369a1;
-  --gray-bg: #f1efe9;
+  --gray-bg: #eef2ec;
   --gray-text: #4b5563;
-  --shadow-sm: 0 1px 3px rgba(20, 23, 21, 0.04);
-  --shadow-md: 0 6px 20px rgba(20, 23, 21, 0.08);
+  --shadow-sm: 0 1px 3px rgba(14, 58, 42, 0.05);
+  --shadow-md: 0 6px 20px rgba(14, 58, 42, 0.09);
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 20px;
@@ -62,12 +62,12 @@ textarea {
   min-height: 100vh;
 }
 
-/* Sidebar — Light, airy & ultra-simple */
+/* Sidebar — L&C Deep Forest Green */
 .sidebar {
-  width: 220px;
-  background: #ffffff;
-  color: var(--text-main);
-  border-inline-end: 1px solid var(--border);
+  width: 224px;
+  background: var(--sidebar-bg);
+  color: #ffffff;
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -82,11 +82,11 @@ textarea {
   font-size: 20px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: var(--primary);
+  color: #ffffff;
   display: flex;
   flex-direction: column;
   gap: 2px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-nav {
@@ -107,7 +107,7 @@ textarea {
   border-radius: 10px;
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
@@ -117,14 +117,14 @@ textarea {
 }
 
 .nav-item:hover {
-  background: var(--bg-subtle);
-  color: var(--text-main);
+  background: var(--sidebar-hover);
+  color: #ffffff;
 }
 
 .nav-item.active {
-  background: var(--primary);
+  background: var(--sidebar-active);
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .nav-badge {
@@ -139,10 +139,10 @@ textarea {
 
 .sidebar-footer {
   padding: 12px 14px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 11.5px;
-  color: var(--text-muted);
-  background: var(--bg-subtle);
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(0, 0, 0, 0.14);
 }
 
 /* Main Content */
@@ -923,9 +923,9 @@ tr.selected td {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: var(--accent-soft);
-  color: #b5381e;
-  border: 1px solid #f7c7bc;
+  background: var(--green-bg);
+  color: var(--green-text);
+  border: 1px solid #bfe3cd;
   border-radius: 999px;
   padding: 4px 12px;
   font-size: 13px;
@@ -935,7 +935,7 @@ tr.selected td {
 .role-pill select {
   border: none;
   background: transparent;
-  color: #b5381e;
+  color: var(--green-text);
   font-weight: 700;
   font-size: 13px;
   outline: none;

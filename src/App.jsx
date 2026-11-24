@@ -208,6 +208,7 @@ export default function App() {
     { name: 'Nachos Skillet', specs: 'Cast iron', category: 'Kitchen & Bar Tools', inventory: '8', qty: '10' },
   ])
   const [openPerComboIdx, setOpenPerComboIdx] = useState(null)
+  const [openDailyComboIdx, setOpenDailyComboIdx] = useState(null)
 
   const supplyItems = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
 
@@ -247,6 +248,7 @@ export default function App() {
       }))
     if (items.length === 0) return
     const newId = perReqNo.trim() || `PER-00${state.periodicRequests.length + 1}`
+    const time = new Date().toTimeString().slice(0, 5)
     setState((prev) => ({
       ...prev,
       periodicRequests: [
@@ -255,8 +257,13 @@ export default function App() {
           branchId,
           date: perDate,
           department: perDept,
-          status: 'Waiting Restaurant Manager',
-          step1: { approved: false, name: '', sig: '', time: '' },
+          status: 'Waiting Cost Control Manager',
+          step1: {
+            approved: true,
+            name: roleId === 'cost_control' ? 'Cost Control Manager' : 'Restaurant Manager',
+            sig: 'Submitted',
+            time,
+          },
           step2: { approved: false, name: '', sig: '', time: '' },
           step3: { approved: false, name: '', sig: '', time: '' },
           items,
@@ -545,93 +552,90 @@ export default function App() {
               </div>
             )}
 
-            {/* COST CONTROL OFFICE: Approve or Reject Daily Requests (No WhatsApp forwarding) */}
+            {/* COST CONTROL OFFICE: Approve or Reject Daily Requests (Separated cards with clear accents) */}
             {roleId === 'cost_office' && (
-              <div className="wa-card">
-                <h3 style={{ marginTop: 0 }}>👁️ Cost Control Office — Approve or Reject Daily Requests</h3>
-                <div className="wa-table-wrap responsive-cards-table" style={{ marginTop: 8 }}>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>ID / Date</th>
-                        <th>From</th>
-                        <th>Items & Poster Stock</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {branchDaily.map((d) => (
-                        <tr key={d.id}>
-                          <td data-label="ID / Date"><strong>{d.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{d.date}</div></td>
-                          <td data-label="From">{d.department}<div style={{ fontSize: 12, color: '#666' }}>{d.requestedBy}</div></td>
-                          <td data-label="Items" className="td-stack">
-                            {d.items.map((i, idx) => (
-                              <div key={idx} style={{ marginBottom: 4 }}>
-                                <strong>{i.name}</strong>: {i.qty} · <span className="wa-badge green">Stock: {i.stock}</span>
-                              </div>
-                            ))}
-                          </td>
-                          <td data-label="Status">
-                            <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'}`}>
-                              {d.status}
-                            </span>
-                          </td>
-                          <td data-label="Action" className="td-stack">
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                              <button className="wa-btn" style={{ padding: '7px 12px', fontSize: 12.5, flex: '1 1 auto' }} onClick={() => approveDailyByOffice(d.id)}>
-                                ✅ Approve
-                              </button>
-                              <button className="wa-btn red" style={{ padding: '7px 12px', fontSize: 12.5, flex: '1 1 auto' }} onClick={() => rejectDailyByOffice(d.id)}>
-                                ❌ Reject
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
+              <div>
+                <h3 style={{ marginTop: 0, marginBottom: 12 }}>
+                  👁️ {isAr ? 'مكتب مراقبة التكاليف — اعتماد أو رفض الطلبات اليومية' : 'Cost Control Office — Approve or Reject Daily Requests'}
+                </h3>
+                {branchDaily.map((d) => (
+                  <div key={d.id} className="daily-review-card">
+                    <div className="daily-review-head">
+                      <div className="daily-review-meta">
+                        <strong style={{ fontSize: 15, color: '#0e3a2a' }}>{d.id}</strong>
+                        <span className="dept-pill">
+                          {d.department === 'Bar' ? '🍸' : '🍳'} {d.department}
+                        </span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#2b3a31' }}>· {d.requestedBy}</span>
+                        <span className="date-pill">📅 {d.date}</span>
+                      </div>
+                      <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'}`}>
+                        {d.status}
+                      </span>
+                    </div>
+
+                    <div style={{ marginTop: 10 }}>
+                      {d.items.map((i, idx) => (
+                        <div key={idx} className="history-detail-row">
+                          <span>
+                            <strong>{i.name}</strong>
+                            <span className="wa-badge green" style={{ marginInlineStart: 8 }}>Stock: {i.stock}</span>
+                          </span>
+                          <strong style={{ color: '#0e3a2a' }}>× {i.qty}</strong>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+
+                    <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button className="wa-btn" style={{ flex: '1 1 130px' }} onClick={() => approveDailyByOffice(d.id)}>
+                        ✅ {isAr ? 'موافقة' : 'Approve'}
+                      </button>
+                      <button className="wa-btn red" style={{ flex: '1 1 130px' }} onClick={() => rejectDailyByOffice(d.id)}>
+                        ❌ {isAr ? 'رفض' : 'Reject'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
             {/* COST CONTROL MANAGER: Daily is INFORMATION ONLY (no approve button, no order creation) */}
             {roleId === 'cost_control' && (
-              <div className="wa-card">
-                <h3 style={{ marginTop: 0 }}>👁️ Cost Control Manager — Daily Requests (Information Only)</h3>
-                <p style={{ fontSize: 13, color: '#526359', marginTop: 0 }}>
-                  Shown for information only (Cost Control Manager approves Periodic Purchases only).
+              <div>
+                <h3 style={{ marginTop: 0, marginBottom: 4 }}>
+                  👁️ {isAr ? 'مدير مراقبة التكاليف — الطلبات اليومية (للعلم فقط)' : 'Cost Control Manager — Daily Requests (Information Only)'}
+                </h3>
+                <p style={{ fontSize: 13, color: '#526359', marginTop: 0, marginBottom: 12 }}>
+                  {isAr ? 'للعلم فقط (الاعتماد من مكتب مراقبة التكاليف).' : 'Shown for information only (Cost Control Manager approves Periodic Purchases only).'}
                 </p>
-                <div className="wa-table-wrap responsive-cards-table" style={{ marginTop: 8 }}>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>ID / Date</th>
-                        <th>From</th>
-                        <th>Items & Poster Stock</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {branchDaily.map((d) => (
-                        <tr key={d.id}>
-                          <td data-label="ID / Date"><strong>{d.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{d.date}</div></td>
-                          <td data-label="From">{d.department}<div style={{ fontSize: 12, color: '#666' }}>{d.requestedBy}</div></td>
-                          <td data-label="Items" className="td-stack">
-                            {d.items.map((i, idx) => (
-                              <div key={idx}><strong>{i.name}</strong>: {i.qty} · <span className="wa-badge green">Stock: {i.stock}</span></div>
-                            ))}
-                          </td>
-                          <td data-label="Status">
-                            <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'}`}>
-                              {d.status}
-                            </span>
-                          </td>
-                        </tr>
+                {branchDaily.map((d) => (
+                  <div key={d.id} className="daily-review-card">
+                    <div className="daily-review-head">
+                      <div className="daily-review-meta">
+                        <strong style={{ fontSize: 15, color: '#0e3a2a' }}>{d.id}</strong>
+                        <span className="dept-pill">
+                          {d.department === 'Bar' ? '🍸' : '🍳'} {d.department}
+                        </span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: '#2b3a31' }}>· {d.requestedBy}</span>
+                        <span className="date-pill">📅 {d.date}</span>
+                      </div>
+                      <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'}`}>
+                        {d.status}
+                      </span>
+                    </div>
+                    <div style={{ marginTop: 10 }}>
+                      {d.items.map((i, idx) => (
+                        <div key={idx} className="history-detail-row">
+                          <span>
+                            <strong>{i.name}</strong>
+                            <span className="wa-badge green" style={{ marginInlineStart: 8 }}>Stock: {i.stock}</span>
+                          </span>
+                          <strong style={{ color: '#0e3a2a' }}>× {i.qty}</strong>
+                        </div>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -664,25 +668,85 @@ export default function App() {
                     <div>{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
                     <div></div>
                   </div>
-                  {dailyRows.map((row, idx) => (
+                  {dailyRows.map((row, idx) => {
+                    const dq = (row.name || '').trim().toLowerCase()
+                    const dExact = stockOptions.some((s) => s.name.toLowerCase() === dq || s.nameAr === row.name.trim())
+                    const filteredDailyStock = !dq || dExact
+                      ? stockOptions
+                      : stockOptions.filter((s) => s.name.toLowerCase().includes(dq) || s.nameAr.includes(row.name.trim()))
+                    return (
                     <div key={idx} className="daily-row-grid">
+                      <div className="item-card-top-bar">
+                        <strong style={{ color: '#0e3a2a', fontSize: 13.5 }}>
+                          {isAr ? `صنف #${idx + 1}` : `Item #${idx + 1}`}
+                        </strong>
+                        <button
+                          type="button"
+                          className="wa-btn ghost"
+                          style={{ padding: '4px 10px', fontSize: 12 }}
+                          onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}
+                        >
+                          ✕ {isAr ? 'حذف' : 'Remove'}
+                        </button>
+                      </div>
+
                       <div>
-                        <div className="per-cell-label">
-                          <span>{isAr ? 'اسم الصنف / Item' : `Item #${idx + 1}`}</span>
-                          <button
-                            type="button"
-                            className="wa-btn ghost per-remove-mobile-btn"
-                            onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}
-                          >
-                            ✕ Remove
-                          </button>
+                        <div className="per-cell-label">{isAr ? 'اسم الصنف / Item' : 'Item Name'}</div>
+                        <div className="combo-wrap">
+                          <div className="combo-input-row">
+                            <input
+                              type="text"
+                              placeholder={isAr ? 'اكتب أو اختر الصنف...' : 'Type or pick item...'}
+                              value={row.name}
+                              onFocus={() => setOpenDailyComboIdx(idx)}
+                              onBlur={() => setTimeout(() => setOpenDailyComboIdx((cur) => (cur === idx ? null : cur)), 160)}
+                              onChange={(e) => {
+                                setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))
+                                setOpenDailyComboIdx(idx)
+                              }}
+                            />
+                            <button
+                              type="button"
+                              className="combo-toggle-btn"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => setOpenDailyComboIdx((cur) => (cur === idx ? null : idx))}
+                              aria-label="Toggle daily items list"
+                            >
+                              ▾
+                            </button>
+                          </div>
+
+                          {openDailyComboIdx === idx && (
+                            <div className="combo-menu">
+                              {filteredDailyStock.length === 0 ? (
+                                <div className="combo-option" style={{ color: '#526359', cursor: 'default' }}>
+                                  <span>{isAr ? `صنف مخصص: "${row.name}"` : `Custom item: "${row.name}"`}</span>
+                                </div>
+                              ) : (
+                                filteredDailyStock.map((s, si) => (
+                                  <div
+                                    key={si}
+                                    className="combo-option"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault()
+                                      const pickedName = isAr ? s.nameAr : s.name
+                                      setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: pickedName } : r)))
+                                      setOpenDailyComboIdx(null)
+                                    }}
+                                  >
+                                    <span>
+                                      <b>{isAr ? s.nameAr : s.name}</b>
+                                      <span style={{ color: '#526359', marginInlineStart: 6, fontSize: 12 }}>
+                                        {isAr ? s.name : s.nameAr}
+                                      </span>
+                                    </span>
+                                    <small>{s.stock} {s.unit}</small>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
                         </div>
-                        <input
-                          list="poster-stock-datalist"
-                          placeholder="e.g. Tomatoes"
-                          value={row.name}
-                          onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))}
-                        />
                       </div>
 
                       <div className="per-steppers-pair">
@@ -729,7 +793,7 @@ export default function App() {
                       <div>
                         <div className="per-cell-label">{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
                         <input
-                          placeholder="Optional"
+                          placeholder={isAr ? 'اختياري' : 'Optional'}
                           value={row.notes}
                           onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, notes: e.target.value } : r)))}
                         />
@@ -739,16 +803,9 @@ export default function App() {
                         <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
                       </div>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
-
-                <datalist id="poster-stock-datalist">
-                  {stockOptions.map((s, i) => (
-                    <option key={i} value={isAr ? s.nameAr : s.name}>
-                      {s.name} · {s.nameAr} (Stock: {s.stock} {s.unit})
-                    </option>
-                  ))}
-                </datalist>
 
                 <div className="per-actions-bar">
                   <button className="wa-btn ghost" onClick={() => setDailyRows((p) => [...p, { name: '', qty: '1', notes: '' }])}>
@@ -942,10 +999,11 @@ export default function App() {
 
                 <div className="wa-table-wrap">
                   <div className="per-row-head">
-                    <div>Category</div>
-                    <div>Item</div>
-                    <div>Have Now</div>
-                    <div>Need to Order</div>
+                    <div>#</div>
+                    <div>{isAr ? 'الفئة' : 'Category'}</div>
+                    <div>{isAr ? 'الصنف' : 'Item'}</div>
+                    <div>{isAr ? 'الموجود حالياً' : 'Have Now'}</div>
+                    <div>{isAr ? 'المطلوب' : 'Need to Order'}</div>
                     <div></div>
                   </div>
                   {perRows.map((row, idx) => {
@@ -957,16 +1015,23 @@ export default function App() {
                       : catItems.filter((s) => s.name.toLowerCase().includes(q) || s.nameAr.includes(row.name.trim()))
                     return (
                       <div key={idx} className="per-row-grid">
+                        <div className="item-num-desktop">#{idx + 1}</div>
+                        <div className="item-card-top-bar">
+                          <strong style={{ color: '#0e3a2a', fontSize: 13.5 }}>
+                            {isAr ? `صنف #${idx + 1}` : `Item #${idx + 1}`}
+                          </strong>
+                          <button
+                            type="button"
+                            className="wa-btn ghost"
+                            style={{ padding: '4px 10px', fontSize: 12 }}
+                            onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}
+                          >
+                            ✕ {isAr ? 'حذف' : 'Remove'}
+                          </button>
+                        </div>
                         <div>
                           <div className="per-cell-label">
-                            <span>Category</span>
-                            <button
-                              type="button"
-                              className="wa-btn ghost per-remove-mobile-btn"
-                              onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}
-                            >
-                              ✕ Remove
-                            </button>
+                            <span>{isAr ? 'الفئة' : 'Category'}</span>
                           </div>
                           <select
                             value={row.category}
@@ -1187,40 +1252,30 @@ export default function App() {
 
             {/* Approval Workflow — Grouped by Person Whose Approval We Are Waiting For */}
             {branchPeriodic.length > 0 && (() => {
-              const waitingStep1 = branchPeriodic.filter((p) => !p.step1?.approved && !p.status.includes('Rejected'))
-              const waitingStep2 = branchPeriodic.filter((p) => p.step1?.approved && !p.step2?.approved && !p.step2?.rejected && !p.status.includes('Rejected'))
+              const waitingStep2 = branchPeriodic.filter((p) => !p.step2?.approved && !p.step2?.rejected && !p.status.includes('Rejected'))
               const waitingStep3 = branchPeriodic.filter((p) => p.step2?.approved && !p.step3?.approved && !p.step3?.rejected && p.status.includes('Owner') && !p.status.includes('Cost Control Office'))
               const completedOrRejected = branchPeriodic.filter(
-                (p) => !waitingStep1.includes(p) && !waitingStep2.includes(p) && !waitingStep3.includes(p)
+                (p) => !waitingStep2.includes(p) && !waitingStep3.includes(p)
               )
 
               const buckets = [
                 {
-                  num: 1,
-                  title: '1 - Restaurant Manager',
-                  subtitle: isAr ? 'في انتظار اعتماد مدير المطعم' : 'Waiting for Restaurant Manager approval',
-                  items: waitingStep1,
-                  canAct: roleId === 'manager',
-                  reminderPhone: waPhones.office,
-                  reminderLabel: '📱 Send Reminder to Manager',
-                },
-                {
                   num: 2,
-                  title: '2 - Cost Control Manager',
-                  subtitle: isAr ? 'تم اعتمادها من مدير المطعم · في انتظار Cost Control Manager' : 'Approved by Manager · Waiting for Cost Control Manager',
+                  title: '1 - Cost Control Manager',
+                  subtitle: isAr ? 'في انتظار اعتماد Cost Control Manager' : 'Submitted · Waiting for Cost Control Manager',
                   items: waitingStep2,
                   canAct: roleId === 'cost_control',
                   reminderPhone: waPhones.costMgr,
-                  reminderLabel: '📱 Send Reminder to Cost Control Manager',
+                  reminderLabel: isAr ? '📱 تذكير Cost Control Manager' : '📱 Send Reminder to Cost Control Manager',
                 },
                 {
                   num: 3,
-                  title: '3 - Owner (Lyudmyla)',
+                  title: '2 - Owner (Lyudmyla)',
                   subtitle: isAr ? 'في انتظار الاعتماد النهائي من المالكة' : 'Waiting for Owner final approval',
                   items: waitingStep3,
                   canAct: roleId === 'owner',
                   reminderPhone: waPhones.owner,
-                  reminderLabel: '📱 Send Reminder to Owner',
+                  reminderLabel: isAr ? '📱 تذكير المالكة' : '📱 Send Reminder to Owner',
                 },
               ]
 
@@ -1276,10 +1331,10 @@ export default function App() {
 
                           <div className="wf-items-list">
                             <div className="wf-item-row head">
-                              <div>Category</div>
-                              <div>Item</div>
-                              <div>Have Now</div>
-                              <div>Need to Order</div>
+                              <div>{isUk ? 'Категорія' : isAr ? 'الفئة' : 'Category'}</div>
+                              <div>{isUk ? 'Позиція' : isAr ? 'الصنف' : 'Item'}</div>
+                              <div>{isUk ? 'Є зараз' : isAr ? 'الموجود' : 'Have Now'}</div>
+                              <div>{isUk ? 'Замовити' : isAr ? 'المطلوب' : 'Need to Order'}</div>
                             </div>
                             {req.items.map((item, idx) => (
                               <div key={idx} className="wf-item-row">
@@ -1288,8 +1343,8 @@ export default function App() {
                                   <b>{item.name}</b>
                                   {item.specs && <div style={{ fontSize: 11.5, color: '#526359' }}>{item.specs}</div>}
                                 </div>
-                                <div>Have: <b>{item.inventory ?? 0}</b></div>
-                                <div>Order: <b style={{ color: '#0e3a2a' }}>{item.qty}</b></div>
+                                <div>{isUk ? 'Є:' : isAr ? 'موجود:' : 'Have:'} <b>{item.inventory ?? 0}</b></div>
+                                <div>{isUk ? 'Замовити:' : isAr ? 'مطلوب:' : 'Order:'} <b style={{ color: '#0e3a2a' }}>{item.qty}</b></div>
                               </div>
                             ))}
                           </div>
@@ -1298,25 +1353,25 @@ export default function App() {
                             <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #eef2ec' }}>
                               <div className="wa-grid">
                                 <div className="wa-field">
-                                  <label>Name</label>
+                                  <label>{isUk ? "Ім'я" : isAr ? 'الاسم' : 'Name'}</label>
                                   <input
-                                    placeholder="Your name"
+                                    placeholder={isUk ? "Ваше ім'я" : isAr ? 'اكتب الاسم' : 'Your name'}
                                     value={stepInputs[bucket.num].name}
                                     onChange={(e) => setStepInputs((p) => ({ ...p, [bucket.num]: { ...p[bucket.num], name: e.target.value } }))}
                                   />
                                 </div>
                                 <div className="wa-field">
-                                  <label>Signature</label>
+                                  <label>{isUk ? 'Підпис' : isAr ? 'التوقيع' : 'Signature'}</label>
                                   <input
-                                    placeholder="Type name as signature"
+                                    placeholder={isUk ? 'Введіть ім’я як підпис' : isAr ? 'اكتب الاسم كتوقيع' : 'Type name as signature'}
                                     value={stepInputs[bucket.num].sig}
                                     onChange={(e) => setStepInputs((p) => ({ ...p, [bucket.num]: { ...p[bucket.num], sig: e.target.value } }))}
                                   />
                                 </div>
                                 <div className="wa-field">
-                                  <label>Notes</label>
+                                  <label>{isUk ? 'Примітки' : isAr ? 'ملاحظات' : 'Notes'}</label>
                                   <input
-                                    placeholder="Optional (or reject reason)"
+                                    placeholder={isUk ? "Необов'язково (або причина відмови)" : isAr ? 'اختياري (أو سبب الرفض)' : 'Optional (or reject reason)'}
                                     value={stepInputs[bucket.num].notes}
                                     onChange={(e) => setStepInputs((p) => ({ ...p, [bucket.num]: { ...p[bucket.num], notes: e.target.value } }))}
                                   />
@@ -1324,16 +1379,16 @@ export default function App() {
                               </div>
                               <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                 <button className="wa-btn" onClick={() => approvePeriodicStep(req.id, bucket.num, false)}>
-                                  ✅ Approve
+                                  ✅ {isUk ? 'Погодити' : isAr ? 'موافقة' : 'Approve'}
                                 </button>
                                 {bucket.num === 2 && (
                                   <button className="wa-btn amber" onClick={() => approvePeriodicStep(req.id, 2, true)}>
-                                    📤 Approve & Send to Owner
+                                    📤 {isAr ? 'موافقة وإرسال للمالكة' : 'Approve & Send to Owner'}
                                   </button>
                                 )}
                                 {(bucket.num === 2 || bucket.num === 3) && (
                                   <button className="wa-btn red" onClick={() => rejectPeriodicStep(req.id, bucket.num)}>
-                                    ❌ Reject
+                                    ❌ {isUk ? 'Відхилити' : isAr ? 'رفض' : 'Reject'}
                                   </button>
                                 )}
                               </div>
@@ -1598,10 +1653,14 @@ export default function App() {
         {/* ================= TAB 6: SHORTAGES (FACTUAL ONLY, STATUS = PENDING) ================= */}
         {activeTab === 'shortages' && (
           <div>
-            <h2 style={{ marginTop: 0 }}>⚠️ {isAr ? `وصل أقل من المطلوب · ${branchTitle}` : `Arrived Less Than Ordered · ${branchTitle}`}</h2>
+            <h2 style={{ marginTop: 0 }}>
+              ⚠️ {isAr ? `وصل أقل من المطلوب · ${branchTitle}` : isUk ? `Нестачі при прийманні · ${branchTitle}` : `Arrived Less Than Ordered · ${branchTitle}`}
+            </h2>
             <p style={{ color: '#526359', fontSize: 13.5, marginTop: 4 }}>
               {isAr
                 ? 'عرض فعلي للأصناف التي وصلت بكمية أقل من المطلوب (تظهر تلقائياً من الاستلام).'
+                : isUk
+                ? 'Фактичний перелік позицій, які прибули у меншій кількості, ніж замовляли (підтягується з прийомки).'
                 : 'Factual view of items that actually arrived in a smaller quantity than ordered (auto-populated from Receiving).'}
             </p>
 
@@ -1609,13 +1668,13 @@ export default function App() {
               <table>
                 <thead>
                   <tr>
-                    <th>ID / Order</th>
-                    <th>Item</th>
-                    <th>Ordered</th>
-                    <th>Arrived</th>
-                    <th>Missing</th>
-                    <th>Reason / Timeline</th>
-                    <th>Status</th>
+                    <th>{isUk ? 'ID / Замовлення' : 'ID / Order'}</th>
+                    <th>{isUk ? 'Позиція' : 'Item'}</th>
+                    <th>{isUk ? 'Замовлено' : 'Ordered'}</th>
+                    <th>{isUk ? 'Прибуло' : 'Arrived'}</th>
+                    <th>{isUk ? 'Нестача' : 'Missing'}</th>
+                    <th>{isUk ? 'Причина / Історія' : 'Reason / Timeline'}</th>
+                    <th>{isUk ? 'Статус' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody>

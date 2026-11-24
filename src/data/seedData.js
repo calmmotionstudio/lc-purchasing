@@ -2266,8 +2266,8 @@ export const INITIAL_STATE = {
       branchId: 'boho',
       date: '2026-11-24',
       department: 'Kitchen',
-      status: 'Waiting Restaurant Manager',
-      step1: { approved: false, name: '', sig: '', time: '' },
+      status: 'Waiting Cost Control Manager',
+      step1: { approved: true, name: 'Shika (Manager)', sig: 'Submitted', time: '11:45' },
       step2: { approved: false, name: '', sig: '', time: '' },
       step3: { approved: false, name: '', sig: '', time: '' },
       items: [

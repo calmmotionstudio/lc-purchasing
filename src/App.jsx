@@ -35,12 +35,18 @@ export default function App() {
   const role = ROLES.find((r) => r.id === roleId) || ROLES[0]
   const branch = BRANCHES.find((b) => b.id === branchId) || BRANCHES[0]
   const branchTitle = lang === 'ar' ? branch.nameAr : branch.name
-  const isAr = lang === 'ar'
+  const isAr = roleId !== 'owner' && lang === 'ar'
+  const isUk = roleId === 'owner' && lang === 'uk'
+
+  useEffect(() => {
+    if (roleId === 'owner' && lang === 'ar') setLang('en')
+    if (roleId !== 'owner' && lang === 'uk') setLang('en')
+  }, [roleId, lang])
 
   useEffect(() => {
     document.documentElement.dir = isAr ? 'rtl' : 'ltr'
-    document.documentElement.lang = isAr ? 'ar' : 'en'
-  }, [isAr])
+    document.documentElement.lang = isAr ? 'ar' : isUk ? 'uk' : 'en'
+  }, [isAr, isUk])
 
   useEffect(() => {
     try {
@@ -385,6 +391,7 @@ export default function App() {
 
   // ============ MY ORDERS (STAFF) & HISTORY ============
   const [historyFilter, setHistoryFilter] = useState('All')
+  const [expandedHistoryId, setExpandedHistoryId] = useState(null)
   const branchDaily = state.dailyRequests.filter((d) => d.branchId === branchId)
   const [selectedOrderId, setSelectedOrderId] = useState(branchDaily[0]?.id || branchPOs[0]?.id)
   const [orderNoteText, setOrderNoteText] = useState('')
@@ -411,10 +418,12 @@ export default function App() {
       {/* Deep Forest Green Header */}
       <header className="wa-header">
         <div className="header-eyebrow">● 4 RESTAURANTS · EL GOUNA & CAIRO</div>
-        <h1>LNC Operations</h1>
+        <h1>L&amp;C Operations</h1>
         <p>
           {isAr
             ? 'مركز التشغيل والمشتريات · مخزون بوستر · الاستلام وسجل الطلبات'
+            : isUk
+            ? 'Запити на закупівлю · Погодження · Залишки Poster · Прийомка та історія'
             : 'Purchasing Requests · Approvals · Poster Stock · Receiving & Orders History'}
         </p>
       </header>
@@ -423,7 +432,7 @@ export default function App() {
       <div className="wa-controls-bar">
         <div className="wa-control-group">
           <div className="wa-pill-select">
-            <span>🏪 {isAr ? 'المطعم:' : 'Restaurant:'}</span>
+            <span>🏪 {isAr ? 'المطعم:' : isUk ? 'Ресторан:' : 'Restaurant:'}</span>
             <select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
               {BRANCHES.map((b) => (
                 <option key={b.id} value={b.id}>
@@ -434,7 +443,7 @@ export default function App() {
           </div>
 
           <div className="wa-pill-select">
-            <span>👤 {isAr ? 'الدور:' : 'Role:'}</span>
+            <span>👤 {isAr ? 'الدور:' : isUk ? 'Роль:' : 'Role:'}</span>
             <select value={roleId} onChange={(e) => setRoleId(e.target.value)}>
               {ROLES.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -449,9 +458,15 @@ export default function App() {
           <button className={`wa-lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>
             EN
           </button>
-          <button className={`wa-lang-btn ${lang === 'ar' ? 'active' : ''}`} onClick={() => setLang('ar')}>
-            مصري
-          </button>
+          {roleId === 'owner' ? (
+            <button className={`wa-lang-btn ${lang === 'uk' ? 'active' : ''}`} onClick={() => setLang('uk')}>
+              УКР
+            </button>
+          ) : (
+            <button className={`wa-lang-btn ${lang === 'ar' ? 'active' : ''}`} onClick={() => setLang('ar')}>
+              مصري
+            </button>
+          )}
           <button
             className="wa-btn ghost"
             style={{ padding: '6px 10px', fontSize: 12 }}
@@ -482,8 +497,8 @@ export default function App() {
         )}
         {role.tabs.includes('periodic') && (
           <button className={activeTab === 'periodic' ? 'active' : ''} onClick={() => setActiveTab('periodic')}>
-            🍽️ {isAr ? 'مشتريات دورية | Periodic' : 'Periodic Purchases'}
-            <small>{isAr ? 'أدوات المطبخ والبار والمعدات' : 'Manager → Cost Control Manager → Owner'}</small>
+            🍽️ {isAr ? 'مشتريات دورية | Periodic' : isUk ? 'Періодичні закупівлі' : 'Periodic Purchases'}
+            <small>{isAr ? 'أدوات المطبخ والبار والمعدات' : isUk ? 'Погодження власника' : 'Manager → Cost Control Manager → Owner'}</small>
           </button>
         )}
         {role.tabs.includes('receiving') && (
@@ -494,14 +509,14 @@ export default function App() {
         )}
         {role.tabs.includes('history') && (
           <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
-            📋 {isAr ? 'سجل اليومي والدوري' : 'Orders History'}
-            <small>{isAr ? `كل طلبات ${branchTitle}` : `Daily & Periodic · ${branchTitle}`}</small>
+            📋 {isAr ? 'سجل اليومي والدوري' : isUk ? 'Історія замовлень' : 'Orders History'}
+            <small>{isAr ? `كل طلبات ${branchTitle}` : isUk ? `Щоденні та періодичні · ${branchTitle}` : `Daily & Periodic · ${branchTitle}`}</small>
           </button>
         )}
         {role.tabs.includes('shortages') && (
           <button className={activeTab === 'shortages' ? 'active' : ''} onClick={() => setActiveTab('shortages')}>
-            ⚠️ {isAr ? 'وصل أقل من المطلوب' : 'Shortages'}
-            <small>{branchShortages.filter((s) => s.status === 'Pending' || s.status === 'Open').length} pending</small>
+            ⚠️ {isAr ? 'وصل أقل من المطلوب' : isUk ? 'Нестачі' : 'Shortages'}
+            <small>{branchShortages.filter((s) => s.status === 'Pending' || s.status === 'Open').length} {isUk ? 'очікує' : 'pending'}</small>
           </button>
         )}
       </div>
@@ -854,13 +869,13 @@ export default function App() {
             <div className="section-head-clean">
               <h2>
                 {roleId === 'owner'
-                  ? `👑 ${isAr ? `اعتمادات المالكة · ${branchTitle}` : `Owner Approvals · ${branchTitle}`}`
+                  ? `👑 ${isUk ? `Погодження власника · ${branchTitle}` : `Owner Approvals · ${branchTitle}`}`
                   : `🍽️ ${isAr ? `مشتريات دورية · ${branchTitle}` : `Periodic Purchases · ${branchTitle}`}`}
               </h2>
               <p>
                 {roleId === 'owner'
-                  ? (isAr
-                      ? 'الطلبات التي تنتظر موافقتك النهائية فقط. جميع الطلبات الأخرى في سجل الطلبات.'
+                  ? (isUk
+                      ? 'Лише запити, що очікують на ваше фінальне рішення. Уся інша історія — в Історії замовлень.'
                       : 'Only requests waiting for your final approval. All other operations are in Orders History.')
                   : 'Tableware & Glassware · Kitchen & Bar Tools · Small Equipment · Linen & Textiles'}
               </p>
@@ -1218,21 +1233,21 @@ export default function App() {
                       <div className="approval-bucket-head">
                         <div>
                           <b style={{ fontSize: 15, color: '#0e3a2a' }}>
-                            {roleId === 'owner' ? (isAr ? 'طلبات بانتظار موافقتك' : 'Pending Your Final Approval') : bucket.title}
+                            {roleId === 'owner' ? (isUk ? 'Очікують на ваше рішення' : 'Pending Your Final Approval') : bucket.title}
                           </b>
                           {roleId !== 'owner' && (
                             <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{bucket.subtitle}</div>
                           )}
                         </div>
                         <span className={`wa-badge ${bucket.items.length > 0 ? 'amber' : 'gray'}`}>
-                          {bucket.items.length > 0 ? `${bucket.items.length} Pending` : 'No pending'}
+                          {bucket.items.length > 0 ? `${bucket.items.length} ${isUk ? 'очікує' : 'Pending'}` : (isUk ? 'Немає запитів' : 'No pending')}
                         </span>
                       </div>
 
                       {roleId === 'owner' && bucket.items.length === 0 && (
                         <div style={{ marginTop: 10, fontSize: 13, color: '#526359' }}>
-                          {isAr
-                            ? `لا توجد طلبات بانتظار موافقتك في ${branchTitle}.`
+                          {isUk
+                            ? `Немає запитів, які очікують на ваше погодження в ${branchTitle}.`
                             : `No requests waiting for your approval in ${branchTitle}.`}
                         </div>
                       )}
@@ -1469,68 +1484,113 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= TAB 5: ORDERS HISTORY (DAILY & PERIODIC) ================= */}
+        {/* ================= TAB 5: ORDERS HISTORY (DAILY & PERIODIC — COMPACT EXPANDABLE CARDS) ================= */}
         {activeTab === 'history' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-              <h2 style={{ margin: 0 }}>📋 {isAr ? `سجل اليومي والدوري · ${branchTitle}` : `Orders History (Daily & Periodic) · ${branchTitle}`}</h2>
+              <h2 style={{ margin: 0 }}>
+                📋 {isAr ? `سجل اليومي والدوري · ${branchTitle}` : isUk ? `Історія замовлень · ${branchTitle}` : `Orders History · ${branchTitle}`}
+              </h2>
               <div style={{ display: 'flex', gap: 6 }}>
                 {['All', 'Daily', 'Periodic'].map((f) => (
                   <button key={f} className={`wa-lang-btn ${historyFilter === f ? 'active' : ''}`} onClick={() => setHistoryFilter(f)}>
-                    {f}
+                    {isUk ? (f === 'All' ? 'Усі' : f === 'Daily' ? 'Щоденні' : 'Періодичні') : f}
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="wa-table-wrap responsive-cards-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Type</th>
-                    <th>ID / Date</th>
-                    <th>Department</th>
-                    <th>Items Ordered</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ...(historyFilter !== 'Periodic'
-                      ? state.dailyRequests
-                          .filter((d) => d.branchId === branchId)
-                          .map((d) => ({
-                            type: 'Daily',
-                            id: d.id,
-                            date: d.date,
-                            dept: `${d.department} (${d.requestedBy})`,
-                            items: d.items.map((i) => `${i.name}: ${i.qty} (Stock: ${i.stock})`).join(' · '),
-                            status: d.status,
-                          }))
-                      : []),
-                    ...(historyFilter !== 'Daily'
-                      ? state.periodicRequests
-                          .filter((p) => p.branchId === branchId)
-                          .map((p) => ({
-                            type: 'Periodic',
-                            id: p.id,
-                            date: p.date,
-                            dept: p.department,
-                            items: p.items.map((i) => `${i.name}: Need ${i.qty} (Inv: ${i.inventory ?? 0})`).join(' · '),
-                            status: p.status,
-                          }))
-                      : []),
-                  ].map((r) => (
-                    <tr key={r.id}>
-                      <td data-label="Type"><span className={`wa-badge ${r.type === 'Daily' ? 'green' : 'amber'}`}>{r.type}</span></td>
-                      <td data-label="ID / Date"><strong>{r.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{r.date}</div></td>
-                      <td data-label="Department">{r.dept}</td>
-                      <td data-label="Items" className="td-stack">{r.items}</td>
-                      <td data-label="Status"><span className={`wa-badge ${r.status.includes('Waiting') ? 'amber' : r.status.includes('Rejected') ? 'red' : 'green'}`}>{r.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="history-list">
+              {[
+                ...(historyFilter !== 'Periodic'
+                  ? state.dailyRequests
+                      .filter((d) => d.branchId === branchId)
+                      .map((d) => ({
+                        type: 'Daily',
+                        id: d.id,
+                        date: d.date,
+                        dept: d.department,
+                        actor: d.requestedBy,
+                        itemsList: d.items.map((i) => ({ name: i.name, qty: i.qty, stockLabel: `Stock: ${i.stock}` })),
+                        status: d.status,
+                        timeline: d.timeline || [],
+                      }))
+                  : []),
+                ...(historyFilter !== 'Daily'
+                  ? state.periodicRequests
+                      .filter((p) => p.branchId === branchId)
+                      .map((p) => ({
+                        type: 'Periodic',
+                        id: p.id,
+                        date: p.date,
+                        dept: p.department,
+                        actor: [
+                          p.step1?.approved ? `Mgr: ${p.step1.name}` : null,
+                          p.step2?.approved ? `CC: ${p.step2.name}` : null,
+                          p.step3?.approved ? `Owner: ${p.step3.name}` : null,
+                        ].filter(Boolean).join(' · '),
+                        itemsList: p.items.map((i) => ({ name: i.name, qty: i.qty, stockLabel: `Have: ${i.inventory ?? 0}` })),
+                        status: p.status,
+                        timeline: [],
+                      }))
+                  : []),
+              ].map((r) => {
+                const isOpen = expandedHistoryId === r.id
+                return (
+                  <div key={r.id} className={`history-card ${isOpen ? 'expanded' : ''}`}>
+                    <div
+                      className="history-card-summary"
+                      onClick={() => setExpandedHistoryId((cur) => (cur === r.id ? null : r.id))}
+                    >
+                      <div className="history-card-top">
+                        <div className="history-card-left">
+                          <span className={`wa-badge ${r.type === 'Daily' ? 'green' : 'amber'}`}>{r.type}</span>
+                          <strong style={{ color: '#0e3a2a' }}>{r.id}</strong>
+                          <span style={{ color: '#526359' }}>· {r.dept}</span>
+                        </div>
+                        <div className="history-card-right">
+                          <span className={`wa-badge ${r.status.includes('Waiting') ? 'amber' : r.status.includes('Rejected') ? 'red' : 'green'}`}>
+                            {r.status}
+                          </span>
+                          <span style={{ fontWeight: 700, color: '#0e3a2a', fontSize: 13 }}>{isOpen ? '▾' : '▸'}</span>
+                        </div>
+                      </div>
+                      <div className="history-card-sub">
+                        <span>
+                          📅 {r.date} · {r.itemsList.length} {isUk ? 'поз.' : 'items'}
+                        </span>
+                        <span>{isOpen ? (isUk ? 'Згорнути' : 'Hide details') : (isUk ? 'Деталі' : 'Tap for details')}</span>
+                      </div>
+                    </div>
+
+                    {isOpen && (
+                      <div className="history-card-details">
+                        {r.actor && (
+                          <div style={{ fontSize: 12.5, color: '#526359', marginBottom: 8 }}>
+                            👤 {r.actor}
+                          </div>
+                        )}
+                        {r.itemsList.map((it, idx) => (
+                          <div key={idx} className="history-detail-row">
+                            <span>
+                              <strong>{it.name}</strong>
+                              <span style={{ color: '#526359', marginInlineStart: 8, fontSize: 12 }}>({it.stockLabel})</span>
+                            </span>
+                            <strong>× {it.qty}</strong>
+                          </div>
+                        ))}
+                        {r.timeline.length > 0 && (
+                          <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px solid #eef2ec', fontSize: 12, color: '#526359' }}>
+                            {r.timeline.map((t, i) => (
+                              <div key={i}>• <strong>{t.time}</strong> — {t.text}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

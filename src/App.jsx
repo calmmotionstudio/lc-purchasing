@@ -920,32 +920,72 @@ export default function App() {
                     <tbody>
                       {perRows.map((row, idx) => (
                         <tr key={idx}>
-                          <td>
-                            <input
-                              list="supplies-datalist"
-                              placeholder={isAr ? 'اختر أو اكتب اسم الصنف...' : 'Select or type item (EN / عربي)...'}
-                              value={row.name}
-                              onChange={(e) => {
-                                const val = e.target.value
-                                const match = supplyItems.find(
-                                  (s) => s.name.toLowerCase() === val.trim().toLowerCase() || s.nameAr === val.trim()
-                                )
-                                const lastInv = match ? getLastInventory(match.name) : getLastInventory(val)
-                                setPerRows((p) =>
-                                  p.map((r, i) =>
-                                    i === idx
-                                      ? {
-                                          ...r,
-                                          name: val,
-                                          specs: match ? match.spec : r.specs,
-                                          category: match ? match.subType : r.category,
-                                          inventory: match ? String(lastInv) : r.inventory,
-                                        }
-                                      : r
+                          <td style={{ minWidth: 210 }}>
+                            {row.isCustom ? (
+                              <div style={{ display: 'flex', gap: 4 }}>
+                                <input
+                                  placeholder={isAr ? 'اكتب اسم الصنف...' : 'Type custom item...'}
+                                  value={row.name}
+                                  onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))}
+                                />
+                                <button
+                                  type="button"
+                                  className="wa-btn ghost"
+                                  style={{ padding: '4px 8px', fontSize: 12 }}
+                                  title="Back to list"
+                                  onClick={() => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, isCustom: false } : r)))}
+                                >
+                                  ↩
+                                </button>
+                              </div>
+                            ) : (
+                              <select
+                                value={row.isCustom ? '__custom__' : row.name}
+                                onChange={(e) => {
+                                  const val = e.target.value
+                                  if (val === '__custom__') {
+                                    setPerRows((p) =>
+                                      p.map((r, i) => (i === idx ? { ...r, isCustom: true, name: '', inventory: '0' } : r))
+                                    )
+                                    return
+                                  }
+                                  const match = supplyItems.find((s) => s.name === val)
+                                  const lastInv = match ? getLastInventory(match.name) : 0
+                                  setPerRows((p) =>
+                                    p.map((r, i) =>
+                                      i === idx
+                                        ? {
+                                            ...r,
+                                            name: match.name,
+                                            specs: match.spec,
+                                            category: match.subType,
+                                            inventory: String(lastInv),
+                                          }
+                                        : r
+                                    )
                                   )
-                                )
-                              }}
-                            />
+                                }}
+                              >
+                                <option value="">{isAr ? '— اختر صنف —' : '— Select item —'}</option>
+                                {[
+                                  ['Tableware & Glassware', isAr ? 'أطباق وكاسات وأدوات مائدة (Tableware & Glassware)' : 'Tableware & Glassware'],
+                                  ['Kitchen & Bar Tools', isAr ? 'أدوات المطبخ والبار (Kitchen & Bar Tools)' : 'Kitchen & Bar Tools'],
+                                  ['Small Equipment', isAr ? 'معدات صغيرة (Small Equipment)' : 'Small Equipment'],
+                                  ['Linen & Textiles', isAr ? 'مفروشات وملابس (Linen & Textiles)' : 'Linen & Textiles'],
+                                ].map(([catKey, catLabel]) => (
+                                  <optgroup key={catKey} label={catLabel}>
+                                    {supplyItems
+                                      .filter((s) => s.subType === catKey)
+                                      .map((s) => (
+                                        <option key={s.id} value={s.name}>
+                                          {isAr ? `${s.nameAr} (${s.name})` : `${s.name} · ${s.nameAr}`}
+                                        </option>
+                                      ))}
+                                  </optgroup>
+                                ))}
+                                <option value="__custom__">{isAr ? '✍️ صنف آخر (كتابة يدوية)...' : '✍️ Other / Custom item...'}</option>
+                              </select>
+                            )}
                           </td>
                           <td>
                             <input value={row.specs} onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, specs: e.target.value } : r)))} />
@@ -1030,16 +1070,16 @@ export default function App() {
                   </table>
                 </div>
 
-                <datalist id="supplies-datalist">
-                  {supplyItems.map((s) => (
-                    <option key={s.id} value={isAr ? s.nameAr : s.name}>
-                      {s.name} · {s.nameAr} ({s.subType})
-                    </option>
-                  ))}
-                </datalist>
-
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                  <button className="wa-btn ghost" onClick={() => setPerRows((p) => [...p, { name: '', specs: '', category: 'Tableware & Glassware', inventory: '', qty: '1' }])}>
+                  <button
+                    className="wa-btn ghost"
+                    onClick={() =>
+                      setPerRows((p) => [
+                        ...p,
+                        { name: 'White Napkin for wine', specs: 'Cotton linen service napkin', category: 'Linen & Textiles', inventory: String(getLastInventory('White Napkin for wine')), qty: '1' },
+                      ])
+                    }
+                  >
                     + Add Item
                   </button>
                   <button className="wa-btn" onClick={savePeriodic}>

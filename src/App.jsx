@@ -184,6 +184,7 @@ export default function App() {
     { name: 'Dinner plate 27 cm', specs: 'TW-027 Porcelain', category: 'Tableware & Glassware', inventory: '130', qty: '15' },
     { name: 'Nachos Skillet', specs: 'Cast iron', category: 'Kitchen & Bar Tools', inventory: '8', qty: '10' },
   ])
+  const [openPerComboIdx, setOpenPerComboIdx] = useState(null)
 
   const supplyItems = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
 
@@ -244,7 +245,7 @@ export default function App() {
     notify(isAr ? `تم حفظ طلب الدوري ${newId}` : `Periodic Request ${newId} saved`)
   }
 
-  const approvePeriodicStep = (stepNum) => {
+  const approvePeriodicStep = (stepNum, escalateToOwner = false) => {
     if (!activePer) return
     const inp = stepInputs[stepNum]
     if (!inp.name.trim() || !inp.sig.trim()) {
@@ -262,7 +263,9 @@ export default function App() {
           next.status = 'Waiting Cost Control Manager'
         } else if (stepNum === 2) {
           next.step2 = { approved: true, name: inp.name.trim(), sig: inp.sig.trim(), notes: inp.notes, time }
-          next.status = 'Approved by Cost Control Manager (Sent to Office / Owner)'
+          next.status = escalateToOwner
+            ? 'Waiting Owner Final Approval'
+            : 'Approved by Cost Control Manager (Sent to Cost Control Office)'
         } else if (stepNum === 3) {
           next.step3 = { approved: true, name: inp.name.trim(), sig: inp.sig.trim(), notes: inp.notes, time }
           next.status = 'Fully Approved by Owner'
@@ -270,7 +273,11 @@ export default function App() {
         return next
       }),
     }))
-    notify(isAr ? `✅ تم اعتماد المرحلة ${stepNum}` : `✅ Step ${stepNum} approved`)
+    notify(
+      escalateToOwner
+        ? (isAr ? '✅ تم الاعتماد والإرسال للمالكة' : '✅ Approved & sent to Owner')
+        : (isAr ? `✅ تم اعتماد المرحلة ${stepNum}` : `✅ Step ${stepNum} approved`)
+    )
   }
 
   const rejectPeriodicStep = (stepNum) => {
@@ -906,113 +913,147 @@ export default function App() {
                 </div>
 
                 <div className="wa-table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Category</th>
-                        <th>Item</th>
-                        <th>Specs</th>
-                        <th>Inventory (Have Now)</th>
-                        <th>Need to Order</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {perRows.map((row, idx) => {
-                        const catItems = supplyItems.filter((s) => s.subType === row.category)
-                        return (
-                        <tr key={idx}>
-                          <td>
-                            <select
-                              value={row.category}
-                              onChange={(e) => {
-                                const newCat = e.target.value
-                                const firstInCat = supplyItems.find((s) => s.subType === newCat)
-                                const lastInv = firstInCat ? getLastInventory(firstInCat.name) : 0
-                                setPerRows((p) =>
-                                  p.map((r, i) =>
-                                    i === idx
-                                      ? {
-                                          ...r,
-                                          category: newCat,
-                                          isCustom: !firstInCat,
-                                          name: firstInCat ? firstInCat.name : '',
-                                          specs: firstInCat ? firstInCat.spec : '',
-                                          inventory: firstInCat ? String(lastInv) : '0',
-                                        }
-                                      : r
-                                  )
+                  <div className="per-row-head">
+                    <div>Category</div>
+                    <div>Item</div>
+                    <div>Have Now</div>
+                    <div>Need to Order</div>
+                    <div></div>
+                  </div>
+                  {perRows.map((row, idx) => {
+                    const catItems = supplyItems.filter((s) => s.subType === row.category)
+                    const q = (row.name || '').trim().toLowerCase()
+                    const exactMatch = catItems.some((s) => s.name.toLowerCase() === q)
+                    const filteredCatItems = !q || exactMatch
+                      ? catItems
+                      : catItems.filter((s) => s.name.toLowerCase().includes(q) || s.nameAr.includes(row.name.trim()))
+                    return (
+                      <div key={idx} className="per-row-grid">
+                        <div>
+                          <div className="per-cell-label">Category</div>
+                          <select
+                            value={row.category}
+                            onChange={(e) => {
+                              const newCat = e.target.value
+                              const firstInCat = supplyItems.find((s) => s.subType === newCat)
+                              const lastInv = firstInCat ? getLastInventory(firstInCat.name) : 0
+                              setPerRows((p) =>
+                                p.map((r, i) =>
+                                  i === idx
+                                    ? {
+                                        ...r,
+                                        category: newCat,
+                                        name: firstInCat ? firstInCat.name : '',
+                                        specs: firstInCat ? firstInCat.spec : '',
+                                        inventory: firstInCat ? String(lastInv) : '0',
+                                      }
+                                    : r
                                 )
-                              }}
-                            >
-                              <option value="Tableware & Glassware">{isAr ? 'أطباق وكاسات وأدوات مائدة' : 'Tableware & Glassware'}</option>
-                              <option value="Kitchen & Bar Tools">{isAr ? 'أدوات المطبخ والبار' : 'Kitchen & Bar Tools'}</option>
-                              <option value="Small Equipment">{isAr ? 'معدات صغيرة' : 'Small Equipment'}</option>
-                              <option value="Linen & Textiles">{isAr ? 'مفروشات وملابس' : 'Linen & Textiles'}</option>
-                              <option value="Spare Parts">{isAr ? 'قطع غيار' : 'Spare Parts'}</option>
-                            </select>
-                          </td>
-                          <td style={{ minWidth: 210 }}>
-                            {row.isCustom || catItems.length === 0 ? (
-                              <div style={{ display: 'flex', gap: 4 }}>
-                                <input
-                                  placeholder={isAr ? 'اكتب اسم الصنف...' : 'Type custom item...'}
-                                  value={row.name}
-                                  onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))}
-                                />
-                                {catItems.length > 0 && (
-                                  <button
-                                    type="button"
-                                    className="wa-btn ghost"
-                                    style={{ padding: '4px 8px', fontSize: 12 }}
-                                    title="Back to list"
-                                    onClick={() => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, isCustom: false, name: catItems[0].name, specs: catItems[0].spec, inventory: String(getLastInventory(catItems[0].name)) } : r)))}
-                                  >
-                                    ↩
-                                  </button>
-                                )}
-                              </div>
-                            ) : (
-                              <select
-                                value={row.isCustom ? '__custom__' : row.name}
+                              )
+                              setOpenPerComboIdx(null)
+                            }}
+                          >
+                            <option value="Tableware & Glassware">{isAr ? 'أطباق وكاسات وأدوات مائدة' : 'Tableware & Glassware'}</option>
+                            <option value="Kitchen & Bar Tools">{isAr ? 'أدوات المطبخ والبار' : 'Kitchen & Bar Tools'}</option>
+                            <option value="Small Equipment">{isAr ? 'معدات صغيرة' : 'Small Equipment'}</option>
+                            <option value="Linen & Textiles">{isAr ? 'مفروشات وملابس' : 'Linen & Textiles'}</option>
+                            <option value="Spare Parts">{isAr ? 'قطع غيار' : 'Spare Parts'}</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <div className="per-cell-label">Item (type or choose)</div>
+                          <div className="combo-wrap">
+                            <div className="combo-input-row">
+                              <input
+                                type="text"
+                                placeholder={isAr ? 'اكتب أو اختر الصنف...' : 'Type or pick item...'}
+                                value={row.name}
+                                onFocus={() => setOpenPerComboIdx(idx)}
+                                onBlur={() => setTimeout(() => setOpenPerComboIdx((cur) => (cur === idx ? null : cur)), 160)}
                                 onChange={(e) => {
                                   const val = e.target.value
-                                  if (val === '__custom__') {
-                                    setPerRows((p) =>
-                                      p.map((r, i) => (i === idx ? { ...r, isCustom: true, name: '', inventory: '0' } : r))
-                                    )
-                                    return
-                                  }
-                                  const match = catItems.find((s) => s.name === val)
-                                  const lastInv = match ? getLastInventory(match.name) : 0
+                                  const match = catItems.find((s) => s.name.toLowerCase() === val.trim().toLowerCase())
                                   setPerRows((p) =>
                                     p.map((r, i) =>
                                       i === idx
                                         ? {
                                             ...r,
-                                            name: match.name,
-                                            specs: match.spec,
-                                            inventory: String(lastInv),
+                                            name: val,
+                                            specs: match ? match.spec : '',
+                                            inventory: match ? String(getLastInventory(match.name)) : r.inventory,
                                           }
                                         : r
                                     )
                                   )
+                                  setOpenPerComboIdx(idx)
                                 }}
-                              >
-                                <option value="">{isAr ? '— اختر صنف —' : '— Select item —'}</option>
-                                {catItems.map((s) => (
-                                  <option key={s.id} value={s.name}>
-                                    {isAr ? `${s.nameAr} (${s.name})` : `${s.name} · ${s.nameAr}`}
-                                  </option>
-                                ))}
-                                <option value="__custom__">{isAr ? '✍️ صنف آخر (كتابة يدوية)...' : '✍️ Other / Custom item...'}</option>
-                              </select>
+                              />
+                              {catItems.length > 0 && (
+                                <button
+                                  type="button"
+                                  className="combo-toggle-btn"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => setOpenPerComboIdx((cur) => (cur === idx ? null : idx))}
+                                  aria-label="Toggle items list"
+                                >
+                                  ▾
+                                </button>
+                              )}
+                            </div>
+
+                            {openPerComboIdx === idx && catItems.length > 0 && (
+                              <div className="combo-menu">
+                                {filteredCatItems.length === 0 ? (
+                                  <div className="combo-option" style={{ color: '#526359', cursor: 'default' }}>
+                                    <span>{isAr ? `صنف مخصص: "${row.name}"` : `Custom item: "${row.name}" (will be saved as typed)`}</span>
+                                  </div>
+                                ) : (
+                                  filteredCatItems.map((s) => (
+                                    <div
+                                      key={s.id}
+                                      className="combo-option"
+                                      onMouseDown={(e) => {
+                                        e.preventDefault()
+                                        const lastInv = getLastInventory(s.name)
+                                        setPerRows((p) =>
+                                          p.map((r, i) =>
+                                            i === idx
+                                              ? {
+                                                  ...r,
+                                                  name: s.name,
+                                                  specs: s.spec,
+                                                  inventory: String(lastInv),
+                                                }
+                                              : r
+                                          )
+                                        )
+                                        setOpenPerComboIdx(null)
+                                      }}
+                                    >
+                                      <span>
+                                        <b>{isAr ? s.nameAr : s.name}</b>
+                                        <span style={{ color: '#526359', marginInlineStart: 6, fontSize: 12 }}>
+                                          {isAr ? s.name : s.nameAr}
+                                        </span>
+                                      </span>
+                                      <small>Stock: {getLastInventory(s.name)}</small>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
                             )}
-                          </td>
-                          <td>
-                            <input value={row.specs} onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, specs: e.target.value } : r)))} />
-                          </td>
-                          <td>
+                          </div>
+                          {row.specs && (
+                            <div style={{ fontSize: 11.5, color: '#526359', marginTop: 3 }}>
+                              {row.specs}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="per-steppers-pair">
+                          <div>
+                            <div className="per-cell-label">Inventory (Have Now)</div>
                             <div className="stepper-box">
                               <button
                                 type="button"
@@ -1043,8 +1084,10 @@ export default function App() {
                                 +
                               </button>
                             </div>
-                          </td>
-                          <td>
+                          </div>
+
+                          <div>
+                            <div className="per-cell-label">Need to Order</div>
                             <div className="stepper-box">
                               <button
                                 type="button"
@@ -1075,13 +1118,15 @@ export default function App() {
                                 +
                               </button>
                             </div>
-                          </td>
-                          <td><button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}>✕</button></td>
-                        </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
+                          </div>
+                        </div>
+
+                        <div className="per-remove-cell">
+                          <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
@@ -1115,10 +1160,47 @@ export default function App() {
                   </select>
                 </div>
 
-                <div style={{ background: '#fef3dc', padding: 12, borderRadius: 10, fontWeight: 700, marginTop: 10, color: '#9a4d06' }}>
-                  Status: {activePer.status}
-                  <div style={{ fontSize: 13, fontWeight: 500, marginTop: 4, color: '#222' }}>
-                    {activePer.items.map((i) => `${i.name} (Inventory: ${i.inventory ?? 0} → Need: ${i.qty})`).join(' · ')}
+                <div className="wf-request-box">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <b style={{ fontSize: 15, color: '#0e3a2a' }}>
+                      {activePer.id} · {branchTitle} ({activePer.department})
+                    </b>
+                    <span className={`wa-badge ${activePer.status.includes('Rejected') ? 'red' : activePer.status.includes('Approved') ? 'green' : 'amber'}`}>
+                      {activePer.status}
+                    </span>
+                  </div>
+                  <div className="wf-meta-row">
+                    <span>📅 Date: <b>{activePer.date}</b></span>
+                    {activePer.step1?.approved && (
+                      <span style={{ color: '#146c43' }}>
+                        ✅ From Restaurant Manager: <b>{activePer.step1.name}</b> ({activePer.step1.time})
+                      </span>
+                    )}
+                    {activePer.step2?.approved && (
+                      <span style={{ color: '#146c43' }}>
+                        ✅ Cost Control Manager: <b>{activePer.step2.name}</b> ({activePer.step2.time})
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="wf-items-list">
+                    <div className="wf-item-row head">
+                      <div>Category</div>
+                      <div>Item</div>
+                      <div>Have Now</div>
+                      <div>Need to Order</div>
+                    </div>
+                    {activePer.items.map((item, idx) => (
+                      <div key={idx} className="wf-item-row">
+                        <div style={{ color: '#526359', fontSize: 12 }}>{item.category || 'Non-food'}</div>
+                        <div>
+                          <b>{item.name}</b>
+                          {item.specs && <div style={{ fontSize: 11.5, color: '#526359' }}>{item.specs}</div>}
+                        </div>
+                        <div>Have: <b>{item.inventory ?? 0}</b></div>
+                        <div>Order: <b style={{ color: '#0e3a2a' }}>{item.qty}</b></div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -1128,7 +1210,7 @@ export default function App() {
                   { num: 3, title: '3 - Owner (Lyudmyla)', data: activePer.step3, unlocked: activePer.step2.approved, canAct: roleId === 'owner' },
                 ].map((st) => (
                   <div key={st.num} className={`wa-approval ${st.data.approved ? 'approved' : !st.unlocked ? 'locked' : ''}`}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
                       <b>{st.title}</b>
                       <span className={`wa-badge ${st.data.approved ? 'green' : st.data.rejected ? 'red' : st.unlocked ? 'amber' : 'gray'}`}>
                         {st.data.approved
@@ -1158,7 +1240,10 @@ export default function App() {
                           </div>
                         </div>
                         <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <button className="wa-btn" onClick={() => approvePeriodicStep(st.num)}>✅ Approve</button>
+                          <button className="wa-btn" onClick={() => approvePeriodicStep(st.num, false)}>✅ Approve</button>
+                          {st.num === 2 && (
+                            <button className="wa-btn amber" onClick={() => approvePeriodicStep(2, true)}>📤 Approve & Send to Owner</button>
+                          )}
                           {(st.num === 2 || st.num === 3) && (
                             <button className="wa-btn red" onClick={() => rejectPeriodicStep(st.num)}>❌ Reject</button>
                           )}
@@ -1166,7 +1251,7 @@ export default function App() {
                       </>
                     )}
 
-                    {st.data.approved && st.num === 1 && roleId !== 'owner' && (
+                    {st.data.approved && st.num === 1 && roleId === 'manager' && (
                       <div className="wa-box" style={{ marginTop: 8 }}>
                         <button
                           className="wa-btn whatsapp"
@@ -1182,14 +1267,14 @@ export default function App() {
                       </div>
                     )}
 
-                    {st.data.approved && st.num === 2 && roleId !== 'owner' && (
+                    {st.data.approved && st.num === 2 && (roleId === 'cost_control' || roleId === 'cost_office') && (
                       <div className="wa-box" style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <button
                           className="wa-btn whatsapp"
                           onClick={() =>
                             sendWhatsApp(
                               waPhones.office,
-                              `🍽️ Periodic Request ${activePer.id} (${branchTitle}) Approved by Cost Control Manager\n${activePer.items.map((i) => `- ${i.name} (Need: ${i.qty})`).join('\n')}`
+                              `🍽️ Periodic Request ${activePer.id} (${branchTitle}) Approved by Cost Control Manager\n${activePer.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
                             )
                           }
                         >

@@ -1188,7 +1188,12 @@ export const INITIAL_STATE = {
       owner: 'Mona · Purchasing',
       due: 'Today 18:00',
       nextAction: 'Keep 0.5 kg remaining delivery open & confirm credit note',
-      status: 'Open',
+      status: 'Pending',
+      timeline: [
+        { time: '19 Nov 09:00', text: 'Order sent to supplier' },
+        { time: '19 Nov 14:20', text: '4.5 kg accepted at Boho Café' },
+        { time: '19 Nov 14:25', text: 'Missing 0.5 kg reported automatically' },
+      ],
     },
   ],
   stockChecks: [
@@ -1306,6 +1311,83 @@ export const INITIAL_STATE = {
       branchId: 'boho',
       action: 'PO-2061 rev 1 copied & marked Sent to Approved Supplier via WhatsApp',
       rev: 'v1',
+    },
+  ],
+  dailyRequests: [
+    {
+      id: 'DR-201',
+      branchId: 'boho',
+      date: '2026-11-24',
+      department: 'Kitchen',
+      requestedBy: 'Ahmed (Kitchen)',
+      status: 'Waiting Cost Control Office',
+      items: [
+        { name: 'Tomatoes', stock: '20 kg', qty: 10, notes: 'Fresh Roma' },
+        { name: 'Chicken breast', stock: '8 kg', qty: 8, notes: 'Boneless' },
+      ],
+      timeline: [
+        { time: '09:15', text: 'Daily request created by Ahmed (Kitchen)' },
+      ],
+    },
+    {
+      id: 'DR-200',
+      branchId: 'boho',
+      date: '2026-11-23',
+      department: 'Bar',
+      requestedBy: 'Karim (Bar)',
+      status: 'Approved by Cost Control Office',
+      items: [
+        { name: 'Sparkling water 0.25L', stock: '6 box', qty: 4, notes: 'Urgent' },
+        { name: 'Espresso beans', stock: '4 kg', qty: 5, notes: '' },
+      ],
+      timeline: [
+        { time: '10:00', text: 'Daily request created by Karim (Bar)' },
+        { time: '10:20', text: 'Approved by Cost Control Office' },
+      ],
+    },
+    {
+      id: 'DR-199',
+      branchId: 'cairo',
+      date: '2026-11-24',
+      department: 'Kitchen',
+      requestedBy: 'Cairo Chef',
+      status: 'Waiting Cost Control Office',
+      items: [
+        { name: 'Beef patties', stock: '210 pcs', qty: 90, notes: '180g' },
+      ],
+      timeline: [
+        { time: '08:45', text: 'Daily request created by Cairo Chef' },
+      ],
+    },
+  ],
+  periodicRequests: [
+    {
+      id: 'PER-001',
+      branchId: 'boho',
+      date: '2026-11-24',
+      department: 'Restaurant',
+      status: 'Waiting Owner Final Approval',
+      step1: { approved: true, name: 'Shika', sig: 'Shika', time: '11:10' },
+      step2: { approved: true, name: 'Cost Control Manager', sig: 'CC-Mgr', time: '13:45' },
+      step3: { approved: false, name: '', sig: '', time: '' },
+      items: [
+        { name: 'Dinner plate 27 cm', specs: 'TW-027 Porcelain', category: 'Tableware & Glassware', inventory: 130, qty: 15 },
+        { name: 'Outdoor heater', specs: 'EQ-014 13 kW', category: 'Small Equipment', inventory: 2, qty: 1 },
+      ],
+    },
+    {
+      id: 'PER-002',
+      branchId: 'cairo',
+      date: '2026-11-24',
+      department: 'Kitchen',
+      status: 'Waiting Cost Control Manager',
+      step1: { approved: true, name: 'Cairo Manager', sig: 'M.Ali', time: '10:05' },
+      step2: { approved: false, name: '', sig: '', time: '' },
+      step3: { approved: false, name: '', sig: '', time: '' },
+      items: [
+        { name: 'Nachos Skillet', specs: 'Cast iron', category: 'Kitchen & Bar Tools', inventory: 8, qty: 10 },
+        { name: 'Black Soup Bowl', specs: 'Matte black ceramic', category: 'Tableware & Glassware', inventory: 3, qty: 5 },
+      ],
     },
   ],
 }

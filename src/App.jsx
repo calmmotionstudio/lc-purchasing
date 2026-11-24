@@ -618,7 +618,7 @@ export default function App() {
             {/* KITCHEN / BAR / RESTAURANT MANAGER: Create Daily with +/- steppers & send ONLY to Cost Control Office */}
             {(roleId === 'staff' || roleId === 'manager') && (
               <>
-                <div className="wa-grid">
+                <div className="wa-grid-3">
                   <div className="wa-field">
                     <label>{isAr ? 'التاريخ / Date' : 'Date'}</label>
                     <input type="date" value={dailyDate} onChange={(e) => setDailyDate(e.target.value)} />
@@ -863,7 +863,7 @@ export default function App() {
                       <input placeholder="2010xxxxxxxx" value={waPhones.costMgr} onChange={(e) => setWaPhones((p) => ({ ...p, costMgr: e.target.value }))} />
                     </div>
                   )}
-                  {(roleId === 'cost_control' || roleId === 'cost_office') && (
+                  {roleId === 'cost_control' && (
                     <>
                       <div className="wa-field">
                         <label>Cost Control Office WhatsApp</label>
@@ -874,6 +874,12 @@ export default function App() {
                         <input placeholder="2010xxxxxxxx" value={waPhones.owner} onChange={(e) => setWaPhones((p) => ({ ...p, owner: e.target.value }))} />
                       </div>
                     </>
+                  )}
+                  {roleId === 'cost_office' && (
+                    <div className="wa-field">
+                      <label>Owner / Lyudmyla WhatsApp</label>
+                      <input placeholder="2010xxxxxxxx" value={waPhones.owner} onChange={(e) => setWaPhones((p) => ({ ...p, owner: e.target.value }))} />
+                    </div>
                   )}
                 </div>
                 <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -886,7 +892,7 @@ export default function App() {
             {/* Restaurant Manager & Cost Control Manager: Create Periodic Request (auto-fills last Inventory + +/- steppers, NO PRICES) */}
             {(roleId === 'manager' || roleId === 'cost_control') && (
               <div className="wa-card">
-                <div className="wa-grid" style={{ marginBottom: 12 }}>
+                <div className="wa-grid-3" style={{ marginBottom: 12 }}>
                   <div className="wa-field">
                     <label>Request No.</label>
                     <input value={perReqNo} onChange={(e) => setPerReqNo(e.target.value)} />

@@ -145,6 +145,18 @@ body {
   gap: 12px;
 }
 
+.wa-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 560px) {
+  .wa-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
 .wa-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1.25fr;

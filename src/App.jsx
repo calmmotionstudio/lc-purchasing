@@ -410,8 +410,13 @@ export default function App() {
     <div className="wa-container">
       {/* Deep Forest Green Header */}
       <header className="wa-header">
-        <h1>طلب شراء | Purchase Request</h1>
-        <p>الاعتماد بيروح واتساب · WhatsApp Approval Flow · Poster Stock Linked</p>
+        <div className="header-eyebrow">● 4 RESTAURANTS · EL GOUNA & CAIRO</div>
+        <h1>LNC Operations</h1>
+        <p>
+          {isAr
+            ? 'مركز التشغيل والمشتريات · مخزون بوستر · الاستلام وسجل الطلبات'
+            : 'Purchasing Requests · Approvals · Poster Stock · Receiving & Orders History'}
+        </p>
       </header>
 
       {/* Top Controls Bar */}
@@ -846,12 +851,20 @@ export default function App() {
         {/* ================= TAB 3: PERIODIC (NO PRICES, 4 SUBCATEGORIES, MANUAL INVENTORY -> NEED) ================= */}
         {activeTab === 'periodic' && (
           <div>
-            <h2 style={{ marginTop: 0 }}>
-              🍽️ {isAr ? `مشتريات دورية · ${branchTitle}` : `Periodic Purchases · ${branchTitle}`}
-              <div style={{ fontSize: 13, fontWeight: 500, color: '#526359', marginTop: 4 }}>
-                Tableware & Glassware · Kitchen & Bar Tools · Small Equipment · Linen & Textiles
-              </div>
-            </h2>
+            <div className="section-head-clean">
+              <h2>
+                {roleId === 'owner'
+                  ? `👑 ${isAr ? `اعتمادات المالكة · ${branchTitle}` : `Owner Approvals · ${branchTitle}`}`
+                  : `🍽️ ${isAr ? `مشتريات دورية · ${branchTitle}` : `Periodic Purchases · ${branchTitle}`}`}
+              </h2>
+              <p>
+                {roleId === 'owner'
+                  ? (isAr
+                      ? 'الطلبات التي تنتظر موافقتك النهائية فقط. جميع الطلبات الأخرى في سجل الطلبات.'
+                      : 'Only requests waiting for your final approval. All other operations are in Orders History.')
+                  : 'Tableware & Glassware · Kitchen & Bar Tools · Small Equipment · Linen & Textiles'}
+              </p>
+            </div>
 
             {roleId !== 'owner' && (
               <div className="wa-settings">
@@ -1196,26 +1209,33 @@ export default function App() {
                 },
               ]
 
-              return (
-                <div style={{ marginTop: 18 }}>
-                  <h3 style={{ margin: '0 0 6px' }}>Periodic Approval Queues — {branchTitle}</h3>
-                  <div style={{ fontSize: 13, color: '#526359', marginBottom: 8 }}>
-                    {isAr
-                      ? 'كل طلب يظهر مباشرة داخل خانة الشخص المطلوب اعتماده حالياً'
-                      : 'Each request sits directly inside the section of the person whose approval is pending.'}
-                  </div>
+              const visibleBuckets = roleId === 'owner' ? buckets.filter((b) => b.num === 3) : buckets
 
-                  {buckets.map((bucket) => (
+              return (
+                <div style={{ marginTop: roleId === 'owner' ? 8 : 18 }}>
+                  {visibleBuckets.map((bucket) => (
                     <div key={bucket.num} className={`approval-bucket ${bucket.items.length > 0 ? 'has-pending' : ''}`}>
                       <div className="approval-bucket-head">
                         <div>
-                          <b style={{ fontSize: 15, color: '#0e3a2a' }}>{bucket.title}</b>
-                          <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{bucket.subtitle}</div>
+                          <b style={{ fontSize: 15, color: '#0e3a2a' }}>
+                            {roleId === 'owner' ? (isAr ? 'طلبات بانتظار موافقتك' : 'Pending Your Final Approval') : bucket.title}
+                          </b>
+                          {roleId !== 'owner' && (
+                            <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{bucket.subtitle}</div>
+                          )}
                         </div>
                         <span className={`wa-badge ${bucket.items.length > 0 ? 'amber' : 'gray'}`}>
                           {bucket.items.length > 0 ? `${bucket.items.length} Pending` : 'No pending'}
                         </span>
                       </div>
+
+                      {roleId === 'owner' && bucket.items.length === 0 && (
+                        <div style={{ marginTop: 10, fontSize: 13, color: '#526359' }}>
+                          {isAr
+                            ? `لا توجد طلبات بانتظار موافقتك في ${branchTitle}.`
+                            : `No requests waiting for your approval in ${branchTitle}.`}
+                        </div>
+                      )}
 
                       {bucket.items.map((req) => (
                         <div key={req.id} className="wf-request-box">
@@ -1303,7 +1323,7 @@ export default function App() {
                                 )}
                               </div>
                             </div>
-                          ) : (
+                          ) : roleId !== 'owner' ? (
                             <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                               <button
                                 className="wa-btn whatsapp"
@@ -1317,13 +1337,13 @@ export default function App() {
                                 {bucket.reminderLabel}
                               </button>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       ))}
                     </div>
                   ))}
 
-                  {completedOrRejected.length > 0 && (
+                  {roleId !== 'owner' && completedOrRejected.length > 0 && (
                     <div className="approval-bucket">
                       <div className="approval-bucket-head">
                         <b style={{ fontSize: 15, color: '#0e3a2a' }}>✅ Completed / Closed Requests</b>

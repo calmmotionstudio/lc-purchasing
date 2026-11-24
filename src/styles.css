@@ -22,23 +22,55 @@ body {
 }
 
 .wa-header {
-  background: #0e3a2a;
+  background: linear-gradient(135deg, #09291d 0%, #0e3a2a 55%, #144d38 100%);
   color: #ffffff;
-  padding: 18px 22px 14px;
+  padding: 20px 24px 18px;
   text-align: center;
+  border-bottom: 3px solid #25d366;
+}
+
+.header-eyebrow {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9be8b8;
+  margin-bottom: 6px;
 }
 
 .wa-header h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 25px;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
 .wa-header p {
-  margin: 5px 0 0;
-  opacity: 0.88;
+  margin: 6px 0 0;
+  opacity: 0.86;
   font-size: 13px;
+  font-weight: 500;
+}
+
+.section-head-clean {
+  margin: 0 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e6ece3;
+}
+
+.section-head-clean h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 800;
+  color: #0e3a2a;
+}
+
+.section-head-clean p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #526359;
+  font-weight: 500;
 }
 
 .wa-controls-bar {

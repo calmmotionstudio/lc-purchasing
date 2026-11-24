@@ -245,8 +245,7 @@ export default function App() {
     notify(isAr ? `تم حفظ طلب الدوري ${newId}` : `Periodic Request ${newId} saved`)
   }
 
-  const approvePeriodicStep = (stepNum, escalateToOwner = false) => {
-    if (!activePer) return
+  const approvePeriodicStep = (perId, stepNum, escalateToOwner = false) => {
     const inp = stepInputs[stepNum]
     if (!inp.name.trim() || !inp.sig.trim()) {
       alert(isAr ? 'اكتب الاسم والتوقيع الأول' : 'Please enter Name and Signature first.')
@@ -256,7 +255,7 @@ export default function App() {
     setState((prev) => ({
       ...prev,
       periodicRequests: prev.periodicRequests.map((p) => {
-        if (p.id !== activePer.id) return p
+        if (p.id !== perId) return p
         const next = { ...p }
         if (stepNum === 1) {
           next.step1 = { approved: true, name: inp.name.trim(), sig: inp.sig.trim(), notes: inp.notes, time }
@@ -275,20 +274,19 @@ export default function App() {
     }))
     notify(
       escalateToOwner
-        ? (isAr ? '✅ تم الاعتماد والإرسال للمالكة' : '✅ Approved & sent to Owner')
-        : (isAr ? `✅ تم اعتماد المرحلة ${stepNum}` : `✅ Step ${stepNum} approved`)
+        ? (isAr ? `✅ تم اعتماد ${perId} والإرسال للمالكة` : `✅ ${perId} approved & sent to Owner`)
+        : (isAr ? `✅ تم اعتماد ${perId}` : `✅ ${perId} approved (Step ${stepNum})`)
     )
   }
 
-  const rejectPeriodicStep = (stepNum) => {
-    if (!activePer) return
+  const rejectPeriodicStep = (perId, stepNum) => {
     const inp = stepInputs[stepNum]
     const reason = inp.notes?.trim() || (isAr ? 'مرفوض' : 'Rejected')
     const time = new Date().toTimeString().slice(0, 5)
     setState((prev) => ({
       ...prev,
       periodicRequests: prev.periodicRequests.map((p) => {
-        if (p.id !== activePer.id) return p
+        if (p.id !== perId) return p
         const next = { ...p }
         next.status = stepNum === 3 ? `Rejected by Owner (${reason})` : `Rejected by Cost Control Manager (${reason})`
         if (stepNum === 2) {
@@ -300,7 +298,7 @@ export default function App() {
         return next
       }),
     }))
-    notify(isAr ? `❌ تم رفض الطلب ${activePer.id}` : `❌ ${activePer.id} rejected`)
+    notify(isAr ? `❌ تم رفض الطلب ${perId}` : `❌ ${perId} rejected`)
   }
 
   // ============ RECEIVING -> AUTO-CREATES PENDING SHORTAGES ============
@@ -930,7 +928,16 @@ export default function App() {
                     return (
                       <div key={idx} className="per-row-grid">
                         <div>
-                          <div className="per-cell-label">Category</div>
+                          <div className="per-cell-label">
+                            <span>Category</span>
+                            <button
+                              type="button"
+                              className="wa-btn ghost per-remove-mobile-btn"
+                              onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}
+                            >
+                              ✕ Remove
+                            </button>
+                          </div>
                           <select
                             value={row.category}
                             onChange={(e) => {
@@ -1121,7 +1128,7 @@ export default function App() {
                           </div>
                         </div>
 
-                        <div className="per-remove-cell">
+                        <div className="per-remove-desktop-cell">
                           <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
                         </div>
                       </div>
@@ -1129,7 +1136,7 @@ export default function App() {
                   })}
                 </div>
 
-                <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                <div className="per-actions-bar">
                   <button
                     className="wa-btn ghost"
                     onClick={() =>
@@ -1148,155 +1155,194 @@ export default function App() {
               </div>
             )}
 
-            {/* Approval Workflow */}
-            {activePer && (
-              <div style={{ marginTop: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-                  <h3 style={{ margin: 0 }}>Periodic Approval Workflow — {activePer.id}</h3>
-                  <select className="wa-pill-select" value={activePer.id} onChange={(e) => setSelectedPerId(e.target.value)}>
-                    {branchPeriodic.map((p) => (
-                      <option key={p.id} value={p.id}>{p.id} · {p.status}</option>
-                    ))}
-                  </select>
-                </div>
+            {/* Approval Workflow — Grouped by Person Whose Approval We Are Waiting For */}
+            {branchPeriodic.length > 0 && (() => {
+              const waitingStep1 = branchPeriodic.filter((p) => !p.step1?.approved && !p.status.includes('Rejected'))
+              const waitingStep2 = branchPeriodic.filter((p) => p.step1?.approved && !p.step2?.approved && !p.step2?.rejected && !p.status.includes('Rejected'))
+              const waitingStep3 = branchPeriodic.filter((p) => p.step2?.approved && !p.step3?.approved && !p.step3?.rejected && p.status.includes('Owner') && !p.status.includes('Cost Control Office'))
+              const completedOrRejected = branchPeriodic.filter(
+                (p) => !waitingStep1.includes(p) && !waitingStep2.includes(p) && !waitingStep3.includes(p)
+              )
 
-                <div className="wf-request-box">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                    <b style={{ fontSize: 15, color: '#0e3a2a' }}>
-                      {activePer.id} · {branchTitle} ({activePer.department})
-                    </b>
-                    <span className={`wa-badge ${activePer.status.includes('Rejected') ? 'red' : activePer.status.includes('Approved') ? 'green' : 'amber'}`}>
-                      {activePer.status}
-                    </span>
-                  </div>
-                  <div className="wf-meta-row">
-                    <span>📅 Date: <b>{activePer.date}</b></span>
-                    {activePer.step1?.approved && (
-                      <span style={{ color: '#146c43' }}>
-                        ✅ From Restaurant Manager: <b>{activePer.step1.name}</b> ({activePer.step1.time})
-                      </span>
-                    )}
-                    {activePer.step2?.approved && (
-                      <span style={{ color: '#146c43' }}>
-                        ✅ Cost Control Manager: <b>{activePer.step2.name}</b> ({activePer.step2.time})
-                      </span>
-                    )}
+              const buckets = [
+                {
+                  num: 1,
+                  title: '1 - Restaurant Manager',
+                  subtitle: isAr ? 'في انتظار اعتماد مدير المطعم' : 'Waiting for Restaurant Manager approval',
+                  items: waitingStep1,
+                  canAct: roleId === 'manager',
+                  reminderPhone: waPhones.office,
+                  reminderLabel: '📱 Send Reminder to Manager',
+                },
+                {
+                  num: 2,
+                  title: '2 - Cost Control Manager',
+                  subtitle: isAr ? 'تم اعتمادها من مدير المطعم · في انتظار Cost Control Manager' : 'Approved by Manager · Waiting for Cost Control Manager',
+                  items: waitingStep2,
+                  canAct: roleId === 'cost_control',
+                  reminderPhone: waPhones.costMgr,
+                  reminderLabel: '📱 Send Reminder to Cost Control Manager',
+                },
+                {
+                  num: 3,
+                  title: '3 - Owner (Lyudmyla)',
+                  subtitle: isAr ? 'في انتظار الاعتماد النهائي من المالكة' : 'Waiting for Owner final approval',
+                  items: waitingStep3,
+                  canAct: roleId === 'owner',
+                  reminderPhone: waPhones.owner,
+                  reminderLabel: '📱 Send Reminder to Owner',
+                },
+              ]
+
+              return (
+                <div style={{ marginTop: 18 }}>
+                  <h3 style={{ margin: '0 0 6px' }}>Periodic Approval Queues — {branchTitle}</h3>
+                  <div style={{ fontSize: 13, color: '#526359', marginBottom: 8 }}>
+                    {isAr
+                      ? 'كل طلب يظهر مباشرة داخل خانة الشخص المطلوب اعتماده حالياً'
+                      : 'Each request sits directly inside the section of the person whose approval is pending.'}
                   </div>
 
-                  <div className="wf-items-list">
-                    <div className="wf-item-row head">
-                      <div>Category</div>
-                      <div>Item</div>
-                      <div>Have Now</div>
-                      <div>Need to Order</div>
-                    </div>
-                    {activePer.items.map((item, idx) => (
-                      <div key={idx} className="wf-item-row">
-                        <div style={{ color: '#526359', fontSize: 12 }}>{item.category || 'Non-food'}</div>
+                  {buckets.map((bucket) => (
+                    <div key={bucket.num} className={`approval-bucket ${bucket.items.length > 0 ? 'has-pending' : ''}`}>
+                      <div className="approval-bucket-head">
                         <div>
-                          <b>{item.name}</b>
-                          {item.specs && <div style={{ fontSize: 11.5, color: '#526359' }}>{item.specs}</div>}
+                          <b style={{ fontSize: 15, color: '#0e3a2a' }}>{bucket.title}</b>
+                          <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{bucket.subtitle}</div>
                         </div>
-                        <div>Have: <b>{item.inventory ?? 0}</b></div>
-                        <div>Order: <b style={{ color: '#0e3a2a' }}>{item.qty}</b></div>
+                        <span className={`wa-badge ${bucket.items.length > 0 ? 'amber' : 'gray'}`}>
+                          {bucket.items.length > 0 ? `${bucket.items.length} Pending` : 'No pending'}
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {[
-                  { num: 1, title: '1 - Restaurant Manager', data: activePer.step1, unlocked: true, canAct: roleId === 'manager' },
-                  { num: 2, title: '2 - Cost Control Manager', data: activePer.step2, unlocked: activePer.step1.approved, canAct: roleId === 'cost_control' },
-                  { num: 3, title: '3 - Owner (Lyudmyla)', data: activePer.step3, unlocked: activePer.step2.approved, canAct: roleId === 'owner' },
-                ].map((st) => (
-                  <div key={st.num} className={`wa-approval ${st.data.approved ? 'approved' : !st.unlocked ? 'locked' : ''}`}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-                      <b>{st.title}</b>
-                      <span className={`wa-badge ${st.data.approved ? 'green' : st.data.rejected ? 'red' : st.unlocked ? 'amber' : 'gray'}`}>
-                        {st.data.approved
-                          ? `✅ Approved - ${st.data.name} (${st.data.time})`
-                          : st.data.rejected
-                          ? `❌ Rejected - ${st.data.notes}`
-                          : st.unlocked
-                          ? 'Pending'
-                          : '🔒 Locked'}
-                      </span>
+                      {bucket.items.map((req) => (
+                        <div key={req.id} className="wf-request-box">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                            <b style={{ fontSize: 15, color: '#0e3a2a' }}>
+                              {req.id} · {branchTitle} ({req.department})
+                            </b>
+                            <span className="wa-badge amber">Pending · {req.date}</span>
+                          </div>
+
+                          <div className="wf-meta-row">
+                            {req.step1?.approved && (
+                              <span style={{ color: '#146c43' }}>
+                                ✅ Approved by Restaurant Manager: <b>{req.step1.name}</b> ({req.step1.time})
+                              </span>
+                            )}
+                            {req.step2?.approved && (
+                              <span style={{ color: '#146c43' }}>
+                                ✅ Approved by Cost Control Manager: <b>{req.step2.name}</b> ({req.step2.time})
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="wf-items-list">
+                            <div className="wf-item-row head">
+                              <div>Category</div>
+                              <div>Item</div>
+                              <div>Have Now</div>
+                              <div>Need to Order</div>
+                            </div>
+                            {req.items.map((item, idx) => (
+                              <div key={idx} className="wf-item-row">
+                                <div style={{ color: '#526359', fontSize: 12 }}>{item.category || 'Non-food'}</div>
+                                <div>
+                                  <b>{item.name}</b>
+                                  {item.specs && <div style={{ fontSize: 11.5, color: '#526359' }}>{item.specs}</div>}
+                                </div>
+                                <div>Have: <b>{item.inventory ?? 0}</b></div>
+                                <div>Order: <b style={{ color: '#0e3a2a' }}>{item.qty}</b></div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {bucket.canAct ? (
+                            <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #eef2ec' }}>
+                              <div className="wa-grid">
+                                <div className="wa-field">
+                                  <label>Name</label>
+                                  <input
+                                    placeholder="Your name"
+                                    value={stepInputs[bucket.num].name}
+                                    onChange={(e) => setStepInputs((p) => ({ ...p, [bucket.num]: { ...p[bucket.num], name: e.target.value } }))}
+                                  />
+                                </div>
+                                <div className="wa-field">
+                                  <label>Signature</label>
+                                  <input
+                                    placeholder="Type name as signature"
+                                    value={stepInputs[bucket.num].sig}
+                                    onChange={(e) => setStepInputs((p) => ({ ...p, [bucket.num]: { ...p[bucket.num], sig: e.target.value } }))}
+                                  />
+                                </div>
+                                <div className="wa-field">
+                                  <label>Notes</label>
+                                  <input
+                                    placeholder="Optional (or reject reason)"
+                                    value={stepInputs[bucket.num].notes}
+                                    onChange={(e) => setStepInputs((p) => ({ ...p, [bucket.num]: { ...p[bucket.num], notes: e.target.value } }))}
+                                  />
+                                </div>
+                              </div>
+                              <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <button className="wa-btn" onClick={() => approvePeriodicStep(req.id, bucket.num, false)}>
+                                  ✅ Approve
+                                </button>
+                                {bucket.num === 2 && (
+                                  <button className="wa-btn amber" onClick={() => approvePeriodicStep(req.id, 2, true)}>
+                                    📤 Approve & Send to Owner
+                                  </button>
+                                )}
+                                {(bucket.num === 2 || bucket.num === 3) && (
+                                  <button className="wa-btn red" onClick={() => rejectPeriodicStep(req.id, bucket.num)}>
+                                    ❌ Reject
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <button
+                                className="wa-btn whatsapp"
+                                onClick={() =>
+                                  sendWhatsApp(
+                                    bucket.reminderPhone,
+                                    `⏰ Reminder: Periodic Request ${req.id} (${branchTitle} - ${req.department}) is waiting for your approval.\n${req.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
+                                  )
+                                }
+                              >
+                                {bucket.reminderLabel}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
+                  ))}
 
-                    {!st.data.approved && !st.data.rejected && st.unlocked && st.canAct && (
-                      <>
-                        <div className="wa-grid">
-                          <div className="wa-field">
-                            <label>Name</label>
-                            <input placeholder="Your name" value={stepInputs[st.num].name} onChange={(e) => setStepInputs((p) => ({ ...p, [st.num]: { ...p[st.num], name: e.target.value } }))} />
+                  {completedOrRejected.length > 0 && (
+                    <div className="approval-bucket">
+                      <div className="approval-bucket-head">
+                        <b style={{ fontSize: 15, color: '#0e3a2a' }}>✅ Completed / Closed Requests</b>
+                        <span className="wa-badge green">{completedOrRejected.length}</span>
+                      </div>
+                      {completedOrRejected.map((req) => (
+                        <div key={req.id} className="wf-request-box" style={{ background: req.status.includes('Rejected') ? '#fff8f8' : '#f7fbf8' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                            <b>{req.id} · {req.department} ({req.date})</b>
+                            <span className={`wa-badge ${req.status.includes('Rejected') ? 'red' : 'green'}`}>{req.status}</span>
                           </div>
-                          <div className="wa-field">
-                            <label>Signature</label>
-                            <input placeholder="Type name as signature" value={stepInputs[st.num].sig} onChange={(e) => setStepInputs((p) => ({ ...p, [st.num]: { ...p[st.num], sig: e.target.value } }))} />
-                          </div>
-                          <div className="wa-field">
-                            <label>Notes</label>
-                            <input placeholder="Optional" value={stepInputs[st.num].notes} onChange={(e) => setStepInputs((p) => ({ ...p, [st.num]: { ...p[st.num], notes: e.target.value } }))} />
+                          <div style={{ fontSize: 12.5, color: '#2b3a31', marginTop: 6 }}>
+                            {req.items.map((i) => `${i.name} (Have: ${i.inventory ?? 0} → Order: ${i.qty})`).join(' · ')}
                           </div>
                         </div>
-                        <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                          <button className="wa-btn" onClick={() => approvePeriodicStep(st.num, false)}>✅ Approve</button>
-                          {st.num === 2 && (
-                            <button className="wa-btn amber" onClick={() => approvePeriodicStep(2, true)}>📤 Approve & Send to Owner</button>
-                          )}
-                          {(st.num === 2 || st.num === 3) && (
-                            <button className="wa-btn red" onClick={() => rejectPeriodicStep(st.num)}>❌ Reject</button>
-                          )}
-                        </div>
-                      </>
-                    )}
-
-                    {st.data.approved && st.num === 1 && roleId === 'manager' && (
-                      <div className="wa-box" style={{ marginTop: 8 }}>
-                        <button
-                          className="wa-btn whatsapp"
-                          onClick={() =>
-                            sendWhatsApp(
-                              waPhones.costMgr,
-                              `🍽️ Periodic Request ${activePer.id} (${branchTitle})\nApproved by Manager ${st.data.name}\n${activePer.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
-                            )
-                          }
-                        >
-                          📱 Send to Cost Control Manager
-                        </button>
-                      </div>
-                    )}
-
-                    {st.data.approved && st.num === 2 && (roleId === 'cost_control' || roleId === 'cost_office') && (
-                      <div className="wa-box" style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <button
-                          className="wa-btn whatsapp"
-                          onClick={() =>
-                            sendWhatsApp(
-                              waPhones.office,
-                              `🍽️ Periodic Request ${activePer.id} (${branchTitle}) Approved by Cost Control Manager\n${activePer.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
-                            )
-                          }
-                        >
-                          📱 Send to Cost Control Office
-                        </button>
-                        <button
-                          className="wa-btn ghost"
-                          onClick={() =>
-                            sendWhatsApp(
-                              waPhones.owner,
-                              `🍽️ Periodic Request ${activePer.id} (${branchTitle}) for Owner Approval\n${activePer.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
-                            )
-                          }
-                        >
-                          📱 Send to Owner (If Needed)
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
           </div>
         )}
 

@@ -634,6 +634,45 @@ td select {
   border-bottom: none;
 }
 
+.per-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.per-remove-mobile-btn {
+  display: none;
+}
+
+.per-remove-desktop-cell {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.approval-bucket {
+  border: 2px solid #dfe6dc;
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 14px;
+  background: #ffffff;
+}
+
+.approval-bucket.has-pending {
+  border-color: #f5c36a;
+  background: #fffdf8;
+}
+
+.approval-bucket-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 @media (max-width: 920px) {
   .per-row-head {
     display: none;
@@ -646,24 +685,39 @@ td select {
     margin-bottom: 10px;
     background: #fcfdfb;
     padding: 12px;
-    position: relative;
   }
   .per-cell-label {
-    display: block;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .per-remove-mobile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 9px !important;
+    font-size: 12px !important;
+  }
+  .per-remove-desktop-cell {
+    display: none;
   }
   .per-steppers-pair {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
   }
-  .per-remove-cell {
-    position: absolute;
-    top: 10px;
-    inset-inline-end: 10px;
-  }
   .stepper-box {
     width: 100%;
     justify-content: space-between;
+  }
+  .stepper-btn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+  }
+  .stepper-val {
+    width: 38px !important;
+    min-width: 32px;
   }
   .wa-table-wrap {
     border: none;
@@ -676,5 +730,11 @@ td select {
     grid-template-columns: 1fr auto;
     gap: 4px 10px;
     padding: 10px 12px;
+  }
+  .per-actions-bar {
+    flex-direction: row;
+  }
+  .per-actions-bar .wa-btn {
+    flex: 1 1 auto;
   }
 }

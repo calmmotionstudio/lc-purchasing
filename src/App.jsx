@@ -558,13 +558,6 @@ export default function App() {
                               >
                                 📱 Cost Control Manager
                               </button>
-                              <button
-                                className="wa-btn ghost"
-                                style={{ padding: '6px 10px', fontSize: 12 }}
-                                onClick={() => sendWhatsApp(waPhones.owner, `🥬 Daily ${d.id} (${branchTitle}) [Rare]:\n${d.items.map((i) => `- ${i.name}: ${i.qty}`).join('\n')}`)}
-                              >
-                                📱 Owner (Rare)
-                              </button>
                             </div>
                           </td>
                         </tr>

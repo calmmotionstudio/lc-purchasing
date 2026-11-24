@@ -258,7 +258,7 @@ body {
 
 .wa-table-wrap {
   width: 100%;
-  overflow-x: auto;
+  overflow: visible;
   margin-top: 12px;
   border-radius: 12px;
   border: 1px solid #dfe6dc;
@@ -607,22 +607,30 @@ td select {
 /* Responsive vertical cards for request tables on tablet & mobile (no horizontal scroll) */
 .per-row-grid {
   display: grid;
-  grid-template-columns: 34px 1.15fr 1.5fr 145px 145px 40px;
-  gap: 10px;
+  grid-template-columns: 32px minmax(0, 1.05fr) minmax(0, 1.45fr) 126px 126px 38px;
+  gap: 8px;
   align-items: start;
   padding: 12px;
   border-bottom: 1.5px solid #dfe6dc;
 }
 
+.per-row-grid > div,
+.daily-row-grid > div,
+.per-steppers-pair > div {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .per-row-head {
   display: grid;
-  grid-template-columns: 34px 1.15fr 1.5fr 145px 145px 40px;
-  gap: 10px;
+  grid-template-columns: 32px minmax(0, 1.05fr) minmax(0, 1.45fr) 126px 126px 38px;
+  gap: 8px;
   background: #0e3a2a;
   color: #ffffff;
   padding: 10px 12px;
   font-size: 13px;
   font-weight: 700;
+  border-radius: 11px 11px 0 0;
 }
 
 .item-num-desktop {
@@ -796,7 +804,7 @@ td select {
   gap: 8px;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1040px) {
   .per-row-head {
     display: none;
   }
@@ -837,23 +845,25 @@ td select {
   }
   .per-steppers-pair {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 8px;
   }
   .stepper-box {
     width: 100%;
+    min-width: 0;
+    max-width: 100%;
     justify-content: space-between;
     gap: 2px;
   }
   .stepper-btn {
-    width: 30px;
+    width: 28px;
     height: 32px;
     flex-shrink: 0;
   }
   .stepper-val {
     flex: 1;
     width: auto !important;
-    min-width: 42px;
+    min-width: 28px;
     padding: 0 2px !important;
     font-size: 14px;
   }
@@ -925,92 +935,7 @@ td select {
     align-items: stretch;
     text-align: start;
   }
-  .history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.history-card {
-  border: 1.5px solid #8ea898;
-  border-radius: 12px;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(14, 58, 42, 0.05);
-  overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.history-card.expanded {
-  border-color: #0e3a2a;
-  box-shadow: 0 4px 14px rgba(14, 58, 42, 0.1);
-}
-
-.history-card-summary {
-  padding: 11px 14px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  background: #fcfdfb;
-}
-
-.history-card-summary:hover {
-  background: #f4f8f5;
-}
-
-.history-card-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.history-card-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 13.5px;
-}
-
-.history-card-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.history-card-sub {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  color: #526359;
-}
-
-.history-card-details {
-  padding: 12px 14px;
-  border-top: 1px solid #dfe6dc;
-  background: #ffffff;
-}
-
-.history-detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 0;
-  border-bottom: 1px solid #eef2ec;
-  font-size: 13px;
-}
-
-.history-detail-row:last-child {
-  border-bottom: none;
-}
-
-.daily-row-head {
+  .daily-row-head {
     display: none !important;
   }
   .daily-row-grid {
@@ -1112,19 +1037,20 @@ td select {
 
 .daily-row-head {
   display: grid;
-  grid-template-columns: 1.6fr 120px 145px 1fr 40px;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1.6fr) 115px 126px minmax(0, 1fr) 38px;
+  gap: 8px;
   background: #0e3a2a;
   color: #ffffff;
   padding: 10px 12px;
   font-size: 13px;
   font-weight: 700;
+  border-radius: 11px 11px 0 0;
 }
 
 .daily-row-grid {
   display: grid;
-  grid-template-columns: 1.6fr 120px 145px 1fr 40px;
-  gap: 10px;
+  grid-template-columns: minmax(0, 1.6fr) 115px 126px minmax(0, 1fr) 38px;
+  gap: 8px;
   align-items: center;
   padding: 10px 12px;
   border-bottom: 1px solid #eef2ec;

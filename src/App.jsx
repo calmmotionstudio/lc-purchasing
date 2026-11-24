@@ -68,11 +68,11 @@ export default function App() {
     setTimeout(() => setToast(null), 3200)
   }
 
-  // Poster-linked stock lookup for Daily Requests
+  // Poster-linked stock lookup for Daily Requests (Food / Daily items ONLY — excludes Periodic Non-food)
   const stockOptions = useMemo(() => {
     const posterItems = state.posterSnapshot?.branches?.[branchId]?.items || []
     return [
-      ...CURATED_CATALOG.map((c) => ({
+      ...CURATED_CATALOG.filter((c) => c.category === 'Food').map((c) => ({
         name: c.name,
         nameAr: c.nameAr,
         stock: c.posterStock[branchId] ?? 0,

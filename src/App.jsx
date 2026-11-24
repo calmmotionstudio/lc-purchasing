@@ -176,6 +176,23 @@ export default function App() {
     notify(`✅ ${dailyId} approved by Cost Control Office`)
   }
 
+  const rejectDailyByOffice = (dailyId) => {
+    const time = new Date().toTimeString().slice(0, 5)
+    setState((prev) => ({
+      ...prev,
+      dailyRequests: prev.dailyRequests.map((d) =>
+        d.id !== dailyId
+          ? d
+          : {
+              ...d,
+              status: 'Rejected by Cost Control Office',
+              timeline: [...(d.timeline || []), { time, text: 'Rejected by Cost Control Office' }],
+            }
+      ),
+    }))
+    notify(`❌ ${dailyId} rejected by Cost Control Office`)
+  }
+
   // ============ PERIODIC STATE (NO PRICES, 4 SUBCATEGORIES, MANUAL INVENTORY -> NEED TO ORDER) ============
   const [perReqNo, setPerReqNo] = useState(`PER-00${state.periodicRequests.length + 1}`)
   const [perDate, setPerDate] = useState('2026-11-24')
@@ -491,8 +508,8 @@ export default function App() {
           <div>
             <h2 style={{ marginTop: 0 }}>🥬 {isAr ? `طلب يومي · ${branchTitle}` : `Daily Purchase Request · ${branchTitle}`}</h2>
 
-            {/* WhatsApp numbers box — ONLY for roles that send Daily WhatsApp (NOT Owner, NOT Cost Control Manager) */}
-            {roleId !== 'owner' && roleId !== 'cost_control' && (
+            {/* WhatsApp numbers box — ONLY for Kitchen/Bar/Manager who send Daily WhatsApp to Cost Control Office */}
+            {(roleId === 'staff' || roleId === 'manager') && (
               <div className="wa-settings">
                 <h3>📱 {isAr ? 'أرقام الواتساب (الطلب اليومي)' : 'Daily WhatsApp Numbers'}</h3>
                 <div className="wa-grid">
@@ -500,18 +517,6 @@ export default function App() {
                     <label>Cost Control Office WhatsApp</label>
                     <input placeholder="2010xxxxxxxx" value={waPhones.office} onChange={(e) => setWaPhones((p) => ({ ...p, office: e.target.value }))} />
                   </div>
-                  {(roleId === 'cost_office' || roleId === 'cost_control') && (
-                    <>
-                      <div className="wa-field">
-                        <label>Cost Control Manager WhatsApp</label>
-                        <input placeholder="2010xxxxxxxx" value={waPhones.costMgr} onChange={(e) => setWaPhones((p) => ({ ...p, costMgr: e.target.value }))} />
-                      </div>
-                      <div className="wa-field">
-                        <label>Owner WhatsApp (Rare Cases)</label>
-                        <input placeholder="2010xxxxxxxx" value={waPhones.owner} onChange={(e) => setWaPhones((p) => ({ ...p, owner: e.target.value }))} />
-                      </div>
-                    </>
-                  )}
                 </div>
                 <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button className="wa-btn whatsapp" onClick={saveWaPhones}>💾 {isAr ? 'حفظ الأرقام' : 'Save Numbers'}</button>
@@ -520,11 +525,11 @@ export default function App() {
               </div>
             )}
 
-            {/* COST CONTROL OFFICE: Approve Daily OR send to Cost Control Manager / Owner (rare) */}
+            {/* COST CONTROL OFFICE: Approve or Reject Daily Requests (No WhatsApp forwarding) */}
             {roleId === 'cost_office' && (
               <div className="wa-card">
-                <h3 style={{ marginTop: 0 }}>👁️ Cost Control Office — Review & Approve Daily Requests</h3>
-                <div className="wa-table-wrap" style={{ marginTop: 8 }}>
+                <h3 style={{ marginTop: 0 }}>👁️ Cost Control Office — Approve or Reject Daily Requests</h3>
+                <div className="wa-table-wrap responsive-cards-table" style={{ marginTop: 8 }}>
                   <table>
                     <thead>
                       <tr>
@@ -538,25 +543,27 @@ export default function App() {
                     <tbody>
                       {branchDaily.map((d) => (
                         <tr key={d.id}>
-                          <td><strong>{d.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{d.date}</div></td>
-                          <td>{d.department}<div style={{ fontSize: 12, color: '#666' }}>{d.requestedBy}</div></td>
-                          <td>
+                          <td data-label="ID / Date"><strong>{d.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{d.date}</div></td>
+                          <td data-label="From">{d.department}<div style={{ fontSize: 12, color: '#666' }}>{d.requestedBy}</div></td>
+                          <td data-label="Items" className="td-stack">
                             {d.items.map((i, idx) => (
-                              <div key={idx}><strong>{i.name}</strong>: {i.qty} · <span className="wa-badge green">Stock: {i.stock}</span></div>
+                              <div key={idx} style={{ marginBottom: 4 }}>
+                                <strong>{i.name}</strong>: {i.qty} · <span className="wa-badge green">Stock: {i.stock}</span>
+                              </div>
                             ))}
                           </td>
-                          <td><span className={`wa-badge ${d.status.includes('Approved') ? 'green' : 'amber'}`}>{d.status}</span></td>
-                          <td>
-                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                              <button className="wa-btn" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => approveDailyByOffice(d.id)}>
+                          <td data-label="Status">
+                            <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'}`}>
+                              {d.status}
+                            </span>
+                          </td>
+                          <td data-label="Action" className="td-stack">
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <button className="wa-btn" style={{ padding: '7px 12px', fontSize: 12.5, flex: '1 1 auto' }} onClick={() => approveDailyByOffice(d.id)}>
                                 ✅ Approve
                               </button>
-                              <button
-                                className="wa-btn whatsapp"
-                                style={{ padding: '6px 10px', fontSize: 12 }}
-                                onClick={() => sendWhatsApp(waPhones.costMgr, `🥬 Daily ${d.id} (${branchTitle} - ${d.department}):\n${d.items.map((i) => `- ${i.name}: ${i.qty}`).join('\n')}`)}
-                              >
-                                📱 Cost Control Manager
+                              <button className="wa-btn red" style={{ padding: '7px 12px', fontSize: 12.5, flex: '1 1 auto' }} onClick={() => rejectDailyByOffice(d.id)}>
+                                ❌ Reject
                               </button>
                             </div>
                           </td>
@@ -575,7 +582,7 @@ export default function App() {
                 <p style={{ fontSize: 13, color: '#526359', marginTop: 0 }}>
                   Shown for information only (Cost Control Manager approves Periodic Purchases only).
                 </p>
-                <div className="wa-table-wrap" style={{ marginTop: 8 }}>
+                <div className="wa-table-wrap responsive-cards-table" style={{ marginTop: 8 }}>
                   <table>
                     <thead>
                       <tr>
@@ -583,37 +590,22 @@ export default function App() {
                         <th>From</th>
                         <th>Items & Poster Stock</th>
                         <th>Status</th>
-                        <th>Forward (WhatsApp)</th>
                       </tr>
                     </thead>
                     <tbody>
                       {branchDaily.map((d) => (
                         <tr key={d.id}>
-                          <td><strong>{d.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{d.date}</div></td>
-                          <td>{d.department}<div style={{ fontSize: 12, color: '#666' }}>{d.requestedBy}</div></td>
-                          <td>
+                          <td data-label="ID / Date"><strong>{d.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{d.date}</div></td>
+                          <td data-label="From">{d.department}<div style={{ fontSize: 12, color: '#666' }}>{d.requestedBy}</div></td>
+                          <td data-label="Items" className="td-stack">
                             {d.items.map((i, idx) => (
                               <div key={idx}><strong>{i.name}</strong>: {i.qty} · <span className="wa-badge green">Stock: {i.stock}</span></div>
                             ))}
                           </td>
-                          <td><span className={`wa-badge ${d.status.includes('Approved') ? 'green' : 'amber'}`}>{d.status}</span></td>
-                          <td>
-                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                              <button
-                                className="wa-btn whatsapp"
-                                style={{ padding: '6px 10px', fontSize: 12 }}
-                                onClick={() => sendWhatsApp(waPhones.office, `🥬 Daily ${d.id} (${branchTitle}):\n${d.items.map((i) => `- ${i.name}: ${i.qty}`).join('\n')}`)}
-                              >
-                                📱 Cost Control Office
-                              </button>
-                              <button
-                                className="wa-btn ghost"
-                                style={{ padding: '6px 10px', fontSize: 12 }}
-                                onClick={() => sendWhatsApp(waPhones.owner, `🥬 Daily Info ${d.id} (${branchTitle}):\n${d.items.map((i) => `- ${i.name}: ${i.qty}`).join('\n')}`)}
-                              >
-                                📱 Owner
-                              </button>
-                            </div>
+                          <td data-label="Status">
+                            <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'}`}>
+                              {d.status}
+                            </span>
                           </td>
                         </tr>
                       ))}
@@ -645,78 +637,89 @@ export default function App() {
                 </div>
 
                 <div className="wa-table-wrap">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th>{isAr ? 'اسم الصنف / Item' : 'Item Name'}</th>
-                        <th>{isAr ? 'الموجود في بوستر / Poster Stock' : 'In Stock (Poster)'}</th>
-                        <th>{isAr ? 'الكمية المطلوبة / Order Qty' : 'Order Qty'}</th>
-                        <th>{isAr ? 'ملاحظات / Notes' : 'Notes'}</th>
-                        <th></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dailyRows.map((row, idx) => (
-                        <tr key={idx}>
-                          <td>{idx + 1}</td>
-                          <td>
+                  <div className="daily-row-head">
+                    <div>{isAr ? 'اسم الصنف / Item' : 'Item Name'}</div>
+                    <div>{isAr ? 'بوستر / Stock' : 'In Stock'}</div>
+                    <div>{isAr ? 'الكمية / Order Qty' : 'Order Qty'}</div>
+                    <div>{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
+                    <div></div>
+                  </div>
+                  {dailyRows.map((row, idx) => (
+                    <div key={idx} className="daily-row-grid">
+                      <div>
+                        <div className="per-cell-label">
+                          <span>{isAr ? 'اسم الصنف / Item' : `Item #${idx + 1}`}</span>
+                          <button
+                            type="button"
+                            className="wa-btn ghost per-remove-mobile-btn"
+                            onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}
+                          >
+                            ✕ Remove
+                          </button>
+                        </div>
+                        <input
+                          list="poster-stock-datalist"
+                          placeholder="e.g. Tomatoes"
+                          value={row.name}
+                          onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))}
+                        />
+                      </div>
+
+                      <div className="per-steppers-pair">
+                        <div>
+                          <div className="per-cell-label">{isAr ? 'الموجود / Stock' : 'In Stock (Poster)'}</div>
+                          <span className="wa-badge green">{findStock(row.name)}</span>
+                        </div>
+
+                        <div>
+                          <div className="per-cell-label">{isAr ? 'الكمية المطلوبة / Order Qty' : 'Order Qty'}</div>
+                          <div className="stepper-box">
+                            <button
+                              type="button"
+                              className="stepper-btn"
+                              onClick={() =>
+                                setDailyRows((p) =>
+                                  p.map((r, i) => (i === idx ? { ...r, qty: String(Math.max(0, Number(r.qty || 0) - 1)) } : r))
+                                )
+                              }
+                            >
+                              −
+                            </button>
                             <input
-                              list="poster-stock-datalist"
-                              placeholder="e.g. Tomatoes"
-                              value={row.name}
-                              onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))}
+                              type="number"
+                              className="stepper-val"
+                              value={row.qty}
+                              onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, qty: e.target.value } : r)))}
                             />
-                          </td>
-                          <td>
-                            <span className="wa-badge green">{findStock(row.name)}</span>
-                          </td>
-                          <td>
-                            <div className="stepper-box">
-                              <button
-                                type="button"
-                                className="stepper-btn"
-                                onClick={() =>
-                                  setDailyRows((p) =>
-                                    p.map((r, i) => (i === idx ? { ...r, qty: String(Math.max(0, Number(r.qty || 0) - 1)) } : r))
-                                  )
-                                }
-                              >
-                                −
-                              </button>
-                              <input
-                                type="number"
-                                className="stepper-val"
-                                value={row.qty}
-                                onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, qty: e.target.value } : r)))}
-                              />
-                              <button
-                                type="button"
-                                className="stepper-btn plus"
-                                onClick={() =>
-                                  setDailyRows((p) =>
-                                    p.map((r, i) => (i === idx ? { ...r, qty: String(Number(r.qty || 0) + 1) } : r))
-                                  )
-                                }
-                              >
-                                +
-                              </button>
-                            </div>
-                          </td>
-                          <td>
-                            <input
-                              placeholder="Optional"
-                              value={row.notes}
-                              onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, notes: e.target.value } : r)))}
-                            />
-                          </td>
-                          <td>
-                            <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                            <button
+                              type="button"
+                              className="stepper-btn plus"
+                              onClick={() =>
+                                setDailyRows((p) =>
+                                  p.map((r, i) => (i === idx ? { ...r, qty: String(Number(r.qty || 0) + 1) } : r))
+                                )
+                              }
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="per-cell-label">{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
+                        <input
+                          placeholder="Optional"
+                          value={row.notes}
+                          onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, notes: e.target.value } : r)))}
+                        />
+                      </div>
+
+                      <div className="per-remove-desktop-cell">
+                        <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <datalist id="poster-stock-datalist">
@@ -727,7 +730,7 @@ export default function App() {
                   ))}
                 </datalist>
 
-                <div style={{ marginTop: 12, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <div className="per-actions-bar">
                   <button className="wa-btn ghost" onClick={() => setDailyRows((p) => [...p, { name: '', qty: '1', notes: '' }])}>
                     + {isAr ? 'إضافة صنف' : 'Add Item'}
                   </button>
@@ -1454,7 +1457,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="wa-table-wrap">
+            <div className="wa-table-wrap responsive-cards-table">
               <table>
                 <thead>
                   <tr>
@@ -1493,11 +1496,11 @@ export default function App() {
                       : []),
                   ].map((r) => (
                     <tr key={r.id}>
-                      <td><span className={`wa-badge ${r.type === 'Daily' ? 'green' : 'amber'}`}>{r.type}</span></td>
-                      <td><strong>{r.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{r.date}</div></td>
-                      <td>{r.dept}</td>
-                      <td>{r.items}</td>
-                      <td><span className={`wa-badge ${r.status.includes('Waiting') ? 'amber' : r.status.includes('Rejected') ? 'red' : 'green'}`}>{r.status}</span></td>
+                      <td data-label="Type"><span className={`wa-badge ${r.type === 'Daily' ? 'green' : 'amber'}`}>{r.type}</span></td>
+                      <td data-label="ID / Date"><strong>{r.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{r.date}</div></td>
+                      <td data-label="Department">{r.dept}</td>
+                      <td data-label="Items" className="td-stack">{r.items}</td>
+                      <td data-label="Status"><span className={`wa-badge ${r.status.includes('Waiting') ? 'amber' : r.status.includes('Rejected') ? 'red' : 'green'}`}>{r.status}</span></td>
                     </tr>
                   ))}
                 </tbody>
@@ -1516,7 +1519,7 @@ export default function App() {
                 : 'Factual view of items that actually arrived in a smaller quantity than ordered (auto-populated from Receiving).'}
             </p>
 
-            <div className="wa-table-wrap">
+            <div className="wa-table-wrap responsive-cards-table">
               <table>
                 <thead>
                   <tr>
@@ -1535,12 +1538,12 @@ export default function App() {
                     const displayStatus = s.status === 'Open' ? 'Pending' : s.status
                     return (
                       <tr key={s.id}>
-                        <td><strong>{s.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{s.refDoc}</div></td>
-                        <td><strong>{s.itemName}</strong></td>
-                        <td>{s.expectedQty} {s.unit}</td>
-                        <td>{s.actualQty} {s.unit}</td>
-                        <td><span className="wa-badge red">−{missing} {s.unit}</span></td>
-                        <td>
+                        <td data-label="ID / Order"><strong>{s.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{s.refDoc}</div></td>
+                        <td data-label="Item"><strong>{s.itemName}</strong></td>
+                        <td data-label="Ordered">{s.expectedQty} {s.unit}</td>
+                        <td data-label="Arrived">{s.actualQty} {s.unit}</td>
+                        <td data-label="Missing"><span className="wa-badge red">−{missing} {s.unit}</span></td>
+                        <td data-label="Reason / Timeline" className="td-stack">
                           <div>{s.nextAction}</div>
                           {s.timeline && s.timeline.length > 0 && (
                             <div style={{ fontSize: 11.5, color: '#526359', marginTop: 4 }}>
@@ -1548,7 +1551,7 @@ export default function App() {
                             </div>
                           )}
                         </td>
-                        <td><span className={`wa-badge ${displayStatus === 'Closed' ? 'green' : 'amber'}`}>{displayStatus}</span></td>
+                        <td data-label="Status"><span className={`wa-badge ${displayStatus === 'Closed' ? 'green' : 'amber'}`}>{displayStatus}</span></td>
                       </tr>
                     )
                   })}

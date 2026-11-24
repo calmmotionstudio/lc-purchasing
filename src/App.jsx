@@ -277,7 +277,7 @@ export default function App() {
 
   const approvePeriodicStep = (perId, stepNum, escalateToOwner = false) => {
     const inp = stepInputs[stepNum]
-    if (!inp.name.trim() || !inp.sig.trim()) {
+    if (stepNum !== 3 && (!inp.name.trim() || !inp.sig.trim())) {
       alert(isAr ? 'اكتب الاسم والتوقيع الأول' : 'Please enter Name and Signature first.')
       return
     }
@@ -296,7 +296,7 @@ export default function App() {
             ? 'Waiting Owner Final Approval'
             : 'Approved by Cost Control Manager (Sent to Cost Control Office)'
         } else if (stepNum === 3) {
-          next.step3 = { approved: true, name: inp.name.trim(), sig: inp.sig.trim(), notes: inp.notes, time }
+          next.step3 = { approved: true, name: 'Lyudmyla (Owner)', sig: 'Approved', notes: inp.notes, time }
           next.status = 'Fully Approved by Owner'
         }
         return next
@@ -305,13 +305,17 @@ export default function App() {
     notify(
       escalateToOwner
         ? (isAr ? `✅ تم اعتماد ${perId} والإرسال للمالكة` : `✅ ${perId} approved & sent to Owner`)
-        : (isAr ? `✅ تم اعتماد ${perId}` : `✅ ${perId} approved (Step ${stepNum})`)
+        : isUk
+        ? `✅ ${perId} погоджено`
+        : isAr
+        ? `✅ تم اعتماد ${perId}`
+        : `✅ ${perId} approved`
     )
   }
 
   const rejectPeriodicStep = (perId, stepNum) => {
     const inp = stepInputs[stepNum]
-    const reason = inp.notes?.trim() || (isAr ? 'مرفوض' : 'Rejected')
+    const reason = inp.notes?.trim() || (isUk ? 'Відхилено' : isAr ? 'مرفوض' : 'Rejected')
     const time = new Date().toTimeString().slice(0, 5)
     setState((prev) => ({
       ...prev,
@@ -323,12 +327,12 @@ export default function App() {
           next.step2 = { approved: false, rejected: true, name: inp.name.trim() || 'Cost Control Manager', notes: reason, time }
         }
         if (stepNum === 3) {
-          next.step3 = { approved: false, rejected: true, name: inp.name.trim() || 'Owner', notes: reason, time }
+          next.step3 = { approved: false, rejected: true, name: 'Lyudmyla (Owner)', notes: reason, time }
         }
         return next
       }),
     }))
-    notify(isAr ? `❌ تم رفض الطلب ${perId}` : `❌ ${perId} rejected`)
+    notify(isUk ? `❌ ${perId} відхилено` : isAr ? `❌ تم رفض الطلب ${perId}` : `❌ ${perId} rejected`)
   }
 
   // ============ RECEIVING -> AUTO-CREATES PENDING SHORTAGES ============
@@ -399,6 +403,20 @@ export default function App() {
   // ============ MY ORDERS (STAFF) & HISTORY ============
   const [historyFilter, setHistoryFilter] = useState('All')
   const [expandedHistoryId, setExpandedHistoryId] = useState(null)
+  const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
+  const [expandedShortageId, setExpandedShortageId] = useState(null)
+
+  const compactStatus = (st) => {
+    if (!st) return '—'
+    if (st.includes('Cost Control Office') && st.includes('Waiting')) return isUk ? '⏳ Офіс CC' : '⏳ CC Office'
+    if (st.includes('Cost Control Manager') && st.includes('Waiting')) return isUk ? '⏳ Менеджер CC' : '⏳ CC Mgr'
+    if (st.includes('Owner') && st.includes('Waiting')) return isUk ? '⏳ Власник' : '⏳ Owner'
+    if (st.includes('Fully Approved')) return isUk ? '✅ Погоджено' : '✅ Owner OK'
+    if (st.includes('Approved by Cost Control Manager')) return isUk ? '✅ Погоджено CC' : '✅ CC Approved'
+    if (st.includes('Approved by Cost Control Office')) return isUk ? '✅ Погоджено' : '✅ Approved'
+    if (st.includes('Rejected')) return isUk ? '❌ Відхилено' : '❌ Rejected'
+    return st
+  }
   const branchDaily = state.dailyRequests.filter((d) => d.branchId === branchId)
   const [selectedOrderId, setSelectedOrderId] = useState(branchDaily[0]?.id || branchPOs[0]?.id)
   const [orderNoteText, setOrderNoteText] = useState('')
@@ -1307,7 +1325,91 @@ export default function App() {
                         </div>
                       )}
 
-                      {bucket.items.map((req) => (
+                      {bucket.items.map((req) => {
+                        if (roleId === 'owner') {
+                          const isOwnerOpen = expandedOwnerReqId === req.id
+                          const previewItems = req.items.slice(0, 2).map((i) => `${i.name} (×${i.qty})`).join(', ') + (req.items.length > 2 ? ` +${req.items.length - 2}` : '')
+                          return (
+                            <div key={req.id} className={`history-card ${isOwnerOpen ? 'expanded' : ''}`} style={{ marginTop: 10 }}>
+                              <div
+                                className="history-card-summary"
+                                onClick={() => setExpandedOwnerReqId((cur) => (cur === req.id ? null : req.id))}
+                              >
+                                <div className="history-card-top">
+                                  <div className="history-card-left">
+                                    <strong style={{ color: '#0e3a2a' }}>{req.id}</strong>
+                                    <span className="dept-pill" style={{ fontSize: 11.5, padding: '2px 8px' }}>{req.department}</span>
+                                    <span style={{ fontSize: 12, color: '#526359' }}>📅 {req.date}</span>
+                                  </div>
+                                  <div className="history-card-right">
+                                    <span className="wa-badge amber compact">{isUk ? '⏳ На погодження' : '⏳ Final Approval'}</span>
+                                    <span style={{ fontWeight: 700, color: '#0e3a2a', fontSize: 13 }}>{isOwnerOpen ? '▾' : '▸'}</span>
+                                  </div>
+                                </div>
+                                <div className="history-preview-line">
+                                  {req.items.length} {isUk ? 'поз.' : 'items'}: {previewItems}
+                                </div>
+                                <div className="history-card-sub" style={{ marginTop: 2 }}>
+                                  <span>{req.step2?.name ? `✓ ${req.step2.name}` : ''}</span>
+                                  <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                      className="wa-btn"
+                                      style={{ padding: '5px 11px', fontSize: 12 }}
+                                      onClick={() => approvePeriodicStep(req.id, 3, false)}
+                                    >
+                                      ✅ {isUk ? 'Погодити' : 'Approve'}
+                                    </button>
+                                    <button
+                                      className="wa-btn red"
+                                      style={{ padding: '5px 11px', fontSize: 12 }}
+                                      onClick={() => rejectPeriodicStep(req.id, 3)}
+                                    >
+                                      ❌ {isUk ? 'Відхилити' : 'Reject'}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {isOwnerOpen && (
+                                <div className="history-card-details">
+                                  <div className="wf-meta-row" style={{ marginTop: 0, marginBottom: 8 }}>
+                                    {req.step1?.approved && (
+                                      <span style={{ color: '#146c43' }}>
+                                        ✅ {isUk ? 'Подано:' : 'Submitted:'} <b>{req.step1.name}</b> ({req.step1.time})
+                                      </span>
+                                    )}
+                                    {req.step2?.approved && (
+                                      <span style={{ color: '#146c43' }}>
+                                        ✅ Cost Control: <b>{req.step2.name}</b> ({req.step2.time})
+                                      </span>
+                                    )}
+                                  </div>
+                                  {req.items.map((item, idx) => (
+                                    <div key={idx} className="history-detail-row">
+                                      <span>
+                                        <strong>{item.name}</strong>
+                                        <span style={{ color: '#526359', marginInlineStart: 6, fontSize: 12 }}>
+                                          ({isUk ? 'Є:' : 'Have:'} {item.inventory ?? 0})
+                                        </span>
+                                      </span>
+                                      <strong style={{ color: '#0e3a2a' }}>× {item.qty}</strong>
+                                    </div>
+                                  ))}
+                                  <div style={{ marginTop: 10 }}>
+                                    <input
+                                      style={{ width: '100%', padding: '7px 10px', border: '1.5px solid #cfd9cb', borderRadius: 8, fontSize: 13 }}
+                                      placeholder={isUk ? "Коментар або причина відмови (необов'язково)..." : 'Optional note or reject reason...'}
+                                      value={stepInputs[3].notes}
+                                      onChange={(e) => setStepInputs((p) => ({ ...p, 3: { ...p[3], notes: e.target.value } }))}
+                                    />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        }
+
+                        return (
                         <div key={req.id} className="wf-request-box">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                             <b style={{ fontSize: 15, color: '#0e3a2a' }}>
@@ -1409,7 +1511,8 @@ export default function App() {
                             </div>
                           ) : null}
                         </div>
-                      ))}
+                      )
+                      })}
                     </div>
                   ))}
 
@@ -1591,6 +1694,7 @@ export default function App() {
                   : []),
               ].map((r) => {
                 const isOpen = expandedHistoryId === r.id
+                const previewText = r.itemsList.slice(0, 2).map((it) => `${it.name} (×${it.qty})`).join(', ') + (r.itemsList.length > 2 ? ` +${r.itemsList.length - 2}` : '')
                 return (
                   <div key={r.id} className={`history-card ${isOpen ? 'expanded' : ''}`}>
                     <div
@@ -1599,22 +1703,25 @@ export default function App() {
                     >
                       <div className="history-card-top">
                         <div className="history-card-left">
-                          <span className={`wa-badge ${r.type === 'Daily' ? 'green' : 'amber'}`}>{r.type}</span>
+                          <span className={`wa-badge compact ${r.type === 'Daily' ? 'green' : 'amber'}`}>{r.type}</span>
                           <strong style={{ color: '#0e3a2a' }}>{r.id}</strong>
-                          <span style={{ color: '#526359' }}>· {r.dept}</span>
+                          <span style={{ color: '#526359', fontSize: 12.5 }}>· {r.dept}</span>
                         </div>
                         <div className="history-card-right">
-                          <span className={`wa-badge ${r.status.includes('Waiting') ? 'amber' : r.status.includes('Rejected') ? 'red' : 'green'}`}>
-                            {r.status}
+                          <span className={`wa-badge compact ${r.status.includes('Waiting') ? 'amber' : r.status.includes('Rejected') ? 'red' : 'green'}`}>
+                            {compactStatus(r.status)}
                           </span>
                           <span style={{ fontWeight: 700, color: '#0e3a2a', fontSize: 13 }}>{isOpen ? '▾' : '▸'}</span>
                         </div>
+                      </div>
+                      <div className="history-preview-line">
+                        {previewText}
                       </div>
                       <div className="history-card-sub">
                         <span>
                           📅 {r.date} · {r.itemsList.length} {isUk ? 'поз.' : 'items'}
                         </span>
-                        <span>{isOpen ? (isUk ? 'Згорнути' : 'Hide details') : (isUk ? 'Деталі' : 'Tap for details')}</span>
+                        <span>{isOpen ? (isUk ? 'Згорнути' : 'Hide') : (isUk ? 'Деталі' : 'Details')}</span>
                       </div>
                     </div>
 
@@ -1664,44 +1771,53 @@ export default function App() {
                 : 'Factual view of items that actually arrived in a smaller quantity than ordered (auto-populated from Receiving).'}
             </p>
 
-            <div className="wa-table-wrap responsive-cards-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>{isUk ? 'ID / Замовлення' : 'ID / Order'}</th>
-                    <th>{isUk ? 'Позиція' : 'Item'}</th>
-                    <th>{isUk ? 'Замовлено' : 'Ordered'}</th>
-                    <th>{isUk ? 'Прибуло' : 'Arrived'}</th>
-                    <th>{isUk ? 'Нестача' : 'Missing'}</th>
-                    <th>{isUk ? 'Причина / Історія' : 'Reason / Timeline'}</th>
-                    <th>{isUk ? 'Статус' : 'Status'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {branchShortages.map((s) => {
-                    const missing = Math.max(0, Number((s.expectedQty - s.actualQty).toFixed(3)))
-                    const displayStatus = s.status === 'Open' ? 'Pending' : s.status
-                    return (
-                      <tr key={s.id}>
-                        <td data-label="ID / Order"><strong>{s.id}</strong><div style={{ fontSize: 12, color: '#666' }}>{s.refDoc}</div></td>
-                        <td data-label="Item"><strong>{s.itemName}</strong></td>
-                        <td data-label="Ordered">{s.expectedQty} {s.unit}</td>
-                        <td data-label="Arrived">{s.actualQty} {s.unit}</td>
-                        <td data-label="Missing"><span className="wa-badge red">−{missing} {s.unit}</span></td>
-                        <td data-label="Reason / Timeline" className="td-stack">
-                          <div>{s.nextAction}</div>
-                          {s.timeline && s.timeline.length > 0 && (
-                            <div style={{ fontSize: 11.5, color: '#526359', marginTop: 4 }}>
-                              {s.timeline[s.timeline.length - 1].time} — {s.timeline[s.timeline.length - 1].text}
-                            </div>
-                          )}
-                        </td>
-                        <td data-label="Status"><span className={`wa-badge ${displayStatus === 'Closed' ? 'green' : 'amber'}`}>{displayStatus}</span></td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+            <div className="history-list">
+              {branchShortages.map((s) => {
+                const missing = Math.max(0, Number((s.expectedQty - s.actualQty).toFixed(3)))
+                const displayStatus = s.status === 'Open' ? 'Pending' : s.status
+                const isShOpen = expandedShortageId === s.id
+                return (
+                  <div key={s.id} className={`history-card ${isShOpen ? 'expanded' : ''}`}>
+                    <div
+                      className="history-card-summary"
+                      onClick={() => setExpandedShortageId((cur) => (cur === s.id ? null : s.id))}
+                    >
+                      <div className="history-card-top">
+                        <div className="history-card-left">
+                          <strong style={{ color: '#0e3a2a' }}>{s.id}</strong>
+                          <strong style={{ color: '#15221b' }}>· {s.itemName}</strong>
+                        </div>
+                        <div className="history-card-right">
+                          <span className="wa-badge red compact">−{missing} {s.unit}</span>
+                          <span className={`wa-badge compact ${displayStatus === 'Closed' ? 'green' : 'amber'}`}>{displayStatus}</span>
+                          <span style={{ fontWeight: 700, color: '#0e3a2a', fontSize: 13 }}>{isShOpen ? '▾' : '▸'}</span>
+                        </div>
+                      </div>
+                      <div className="history-card-sub">
+                        <span>
+                          {s.refDoc} · {isUk ? 'Замовлено:' : 'Ordered:'} {s.expectedQty} {s.unit} → {isUk ? 'Прибуло:' : 'Arrived:'} {s.actualQty} {s.unit}
+                        </span>
+                        <span>{isShOpen ? (isUk ? 'Згорнути' : 'Hide') : (isUk ? 'Деталі' : 'Details')}</span>
+                      </div>
+                    </div>
+
+                    {isShOpen && (
+                      <div className="history-card-details">
+                        <div style={{ fontSize: 13, marginBottom: 6 }}>
+                          <strong>{isUk ? 'Дія / Причина:' : 'Action / Reason:'}</strong> {s.nextAction}
+                        </div>
+                        {s.timeline && s.timeline.length > 0 && (
+                          <div style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid #eef2ec', fontSize: 12, color: '#526359' }}>
+                            {s.timeline.map((t, i) => (
+                              <div key={i}>• <strong>{t.time}</strong> — {t.text}</div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

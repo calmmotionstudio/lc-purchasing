@@ -6,7 +6,6 @@ const STORAGE_KEY = 'lc_unified_purchasing_v5'
 const ROLES = [
   { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', tabs: ['daily', 'my_orders'] },
   { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', tabs: ['periodic', 'daily', 'receiving', 'shortages'] },
-  { id: 'receiving', labelEn: 'Receiving', labelAr: 'الاستلام', tabs: ['receiving', 'shortages'] },
   { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
   { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
   { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', tabs: ['periodic', 'history', 'shortages'] },
@@ -187,6 +186,20 @@ export default function App() {
   ])
 
   const supplyItems = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
+
+  const getLastInventory = (itemName) => {
+    const q = (itemName || '').trim().toLowerCase()
+    if (!q) return 0
+    // 1. Check most recent saved periodic request for this branch
+    for (const pr of state.periodicRequests) {
+      if (pr.branchId !== branchId) continue
+      const found = pr.items.find((i) => i.name.toLowerCase() === q)
+      if (found && found.inventory !== undefined) return Number(found.inventory)
+    }
+    // 2. Fallback to initial catalog / Cairo & Boho sheet counts
+    const cat = supplyItems.find((s) => s.name.toLowerCase() === q || s.nameAr === itemName.trim())
+    return cat ? (cat.posterStock[branchId] ?? 0) : 0
+  }
 
   const branchPeriodic = state.periodicRequests.filter((p) => p.branchId === branchId)
   const [selectedPerId, setSelectedPerId] = useState(branchPeriodic[0]?.id || state.periodicRequests[0]?.id)
@@ -473,8 +486,8 @@ export default function App() {
           <div>
             <h2 style={{ marginTop: 0 }}>🥬 {isAr ? `طلب يومي · ${branchTitle}` : `Daily Purchase Request · ${branchTitle}`}</h2>
 
-            {/* WhatsApp Numbers Box (Hidden for Owner) */}
-            {roleId !== 'owner' && (
+            {/* WhatsApp numbers box — ONLY for roles that send Daily WhatsApp (NOT Owner, NOT Cost Control Manager) */}
+            {roleId !== 'owner' && roleId !== 'cost_control' && (
               <div className="wa-settings">
                 <h3>📱 {isAr ? 'أرقام الواتساب (الطلب اليومي)' : 'Daily WhatsApp Numbers'}</h3>
                 <div className="wa-grid">
@@ -869,8 +882,8 @@ export default function App() {
               </div>
             )}
 
-            {/* Restaurant Manager ONLY: Create Periodic Request (4 subcategories + manual Inventory -> Need to Order, NO PRICES) */}
-            {roleId === 'manager' && (
+            {/* Restaurant Manager & Cost Control Manager: Create Periodic Request (auto-fills last Inventory + +/- steppers, NO PRICES) */}
+            {(roleId === 'manager' || roleId === 'cost_control') && (
               <div className="wa-card">
                 <div className="wa-grid" style={{ marginBottom: 12 }}>
                   <div className="wa-field">
@@ -910,13 +923,14 @@ export default function App() {
                           <td>
                             <input
                               list="supplies-datalist"
-                              placeholder={isAr ? 'اكتب اسم الصنف...' : 'Type item (EN or Arabic)...'}
+                              placeholder={isAr ? 'اختر أو اكتب اسم الصنف...' : 'Select or type item (EN / عربي)...'}
                               value={row.name}
                               onChange={(e) => {
                                 const val = e.target.value
                                 const match = supplyItems.find(
                                   (s) => s.name.toLowerCase() === val.trim().toLowerCase() || s.nameAr === val.trim()
                                 )
+                                const lastInv = match ? getLastInventory(match.name) : getLastInventory(val)
                                 setPerRows((p) =>
                                   p.map((r, i) =>
                                     i === idx
@@ -925,6 +939,7 @@ export default function App() {
                                           name: val,
                                           specs: match ? match.spec : r.specs,
                                           category: match ? match.subType : r.category,
+                                          inventory: match ? String(lastInv) : r.inventory,
                                         }
                                       : r
                                   )
@@ -937,28 +952,76 @@ export default function App() {
                           </td>
                           <td>
                             <select value={row.category} onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, category: e.target.value } : r)))}>
-                              <option>Tableware & Glassware</option>
-                              <option>Kitchen & Bar Tools</option>
-                              <option>Small Equipment</option>
-                              <option>Linen & Textiles</option>
-                              <option>Spare Parts</option>
+                              <option value="Tableware & Glassware">{isAr ? 'أطباق وكاسات وأدوات مائدة' : 'Tableware & Glassware'}</option>
+                              <option value="Kitchen & Bar Tools">{isAr ? 'أدوات المطبخ والبار' : 'Kitchen & Bar Tools'}</option>
+                              <option value="Small Equipment">{isAr ? 'معدات صغيرة' : 'Small Equipment'}</option>
+                              <option value="Linen & Textiles">{isAr ? 'مفروشات وملابس' : 'Linen & Textiles'}</option>
+                              <option value="Spare Parts">{isAr ? 'قطع غيار' : 'Spare Parts'}</option>
                             </select>
                           </td>
                           <td>
-                            <input
-                              type="number"
-                              placeholder="Have now"
-                              value={row.inventory}
-                              onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, inventory: e.target.value } : r)))}
-                            />
+                            <div className="stepper-box">
+                              <button
+                                type="button"
+                                className="stepper-btn"
+                                onClick={() =>
+                                  setPerRows((p) =>
+                                    p.map((r, i) => (i === idx ? { ...r, inventory: String(Math.max(0, Number(r.inventory || 0) - 1)) } : r))
+                                  )
+                                }
+                              >
+                                −
+                              </button>
+                              <input
+                                type="number"
+                                className="stepper-val"
+                                value={row.inventory}
+                                onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, inventory: e.target.value } : r)))}
+                              />
+                              <button
+                                type="button"
+                                className="stepper-btn plus"
+                                onClick={() =>
+                                  setPerRows((p) =>
+                                    p.map((r, i) => (i === idx ? { ...r, inventory: String(Number(r.inventory || 0) + 1) } : r))
+                                  )
+                                }
+                              >
+                                +
+                              </button>
+                            </div>
                           </td>
                           <td>
-                            <input
-                              type="number"
-                              placeholder="Need"
-                              value={row.qty}
-                              onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, qty: e.target.value } : r)))}
-                            />
+                            <div className="stepper-box">
+                              <button
+                                type="button"
+                                className="stepper-btn"
+                                onClick={() =>
+                                  setPerRows((p) =>
+                                    p.map((r, i) => (i === idx ? { ...r, qty: String(Math.max(0, Number(r.qty || 0) - 1)) } : r))
+                                  )
+                                }
+                              >
+                                −
+                              </button>
+                              <input
+                                type="number"
+                                className="stepper-val"
+                                value={row.qty}
+                                onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, qty: e.target.value } : r)))}
+                              />
+                              <button
+                                type="button"
+                                className="stepper-btn plus"
+                                onClick={() =>
+                                  setPerRows((p) =>
+                                    p.map((r, i) => (i === idx ? { ...r, qty: String(Number(r.qty || 0) + 1) } : r))
+                                  )
+                                }
+                              >
+                                +
+                              </button>
+                            </div>
                           </td>
                           <td><button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setPerRows((p) => p.filter((_, i) => i !== idx))}>✕</button></td>
                         </tr>

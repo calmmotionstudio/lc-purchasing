@@ -124,20 +124,10 @@ export default function App() {
   const [dailyDate, setDailyDate] = useState('2026-11-24')
   const [dailyDept, setDailyDept] = useState('Kitchen')
   const [dailyRequester, setDailyRequester] = useState('Kitchen / Bar Lead')
-  const [dailyCatFilter, setDailyCatFilter] = useState('Food')
-  const [dailySearch, setDailySearch] = useState('')
   const [dailyRows, setDailyRows] = useState([
     { name: 'Tomatoes', qty: '10', notes: 'Fresh' },
     { name: 'Chicken breast', qty: '8', notes: 'Boneless' },
   ])
-
-  const dailyCatalogItems = CURATED_CATALOG.filter((c) => c.category !== 'Non-food')
-    .filter((c) => dailyCatFilter === 'All' || c.category === dailyCatFilter)
-    .filter((c) => {
-      if (!dailySearch.trim()) return true
-      const q = dailySearch.toLowerCase()
-      return c.name.toLowerCase().includes(q) || c.nameAr.includes(dailySearch)
-    })
 
   const submitDaily = () => {
     const items = dailyRows
@@ -191,21 +181,12 @@ export default function App() {
   const [perReqNo, setPerReqNo] = useState(`PER-00${state.periodicRequests.length + 1}`)
   const [perDate, setPerDate] = useState('2026-11-24')
   const [perDept, setPerDept] = useState('Restaurant')
-  const [perSubCat, setPerSubCat] = useState('Tableware & Glassware')
-  const [perSearch, setPerSearch] = useState('')
   const [perRows, setPerRows] = useState([
     { name: 'Dinner plate 27 cm', specs: 'TW-027 Porcelain', category: 'Tableware & Glassware', inventory: '130', qty: '15' },
     { name: 'Nachos Skillet', specs: 'Cast iron', category: 'Kitchen & Bar Tools', inventory: '8', qty: '10' },
   ])
 
   const supplyItems = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
-  const filteredSupplyItems = supplyItems
-    .filter((c) => perSubCat === 'All' || c.subType === perSubCat)
-    .filter((c) => {
-      if (!perSearch.trim()) return true
-      const q = perSearch.toLowerCase()
-      return c.name.toLowerCase().includes(q) || c.nameAr.includes(perSearch) || c.spec.toLowerCase().includes(q)
-    })
 
   const branchPeriodic = state.periodicRequests.filter((p) => p.branchId === branchId)
   const [selectedPerId, setSelectedPerId] = useState(branchPeriodic[0]?.id || state.periodicRequests[0]?.id)
@@ -652,59 +633,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Categorized Bilingual Daily Picker (Food / Drinks / Cleaning) */}
-                <div className="wa-card" style={{ marginTop: 14, background: '#f8faf7' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                    <strong style={{ fontSize: 13.5 }}>
-                      {isAr ? 'اختر من التصنيفات (أكل · مشروبات · منظفات):' : 'Quick-pick by Category (EN / عربي):'}
-                    </strong>
-                    <input
-                      className="wa-field"
-                      style={{ padding: '6px 10px', border: '1.5px solid #cfd9cb', borderRadius: 8, minWidth: 220 }}
-                      placeholder={isAr ? 'ابحث بالعربي أو بالإنجليزي...' : 'Search item (EN or Arabic)...'}
-                      value={dailySearch}
-                      onChange={(e) => setDailySearch(e.target.value)}
-                    />
-                  </div>
-                  <div className="chip-row" style={{ marginBottom: 8 }}>
-                    {[
-                      ['Food', isAr ? 'أكل (Food)' : 'Food · أكل'],
-                      ['Drinks', isAr ? 'مشروبات (Drinks)' : 'Drinks · مشروبات'],
-                      ['Cleaning', isAr ? 'منظفات (Cleaning)' : 'Cleaning · منظفات'],
-                      ['All', isAr ? 'الكل' : 'All'],
-                    ].map(([cat, label]) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        className={`chip-btn ${dailyCatFilter === cat ? 'active' : ''}`}
-                        onClick={() => setDailyCatFilter(cat)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {dailyCatalogItems.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className="wa-btn ghost"
-                        style={{ padding: '6px 10px', fontSize: 12.5, background: '#fff', border: '1px solid #cfd9cb' }}
-                        onClick={() => {
-                          const displayName = isAr ? item.nameAr : item.name
-                          setDailyRows((p) => [...p, { name: displayName, qty: '1', notes: '' }])
-                          notify(`+ ${displayName} (Stock: ${item.posterStock[branchId] ?? 0} ${item.unit})`)
-                        }}
-                      >
-                        + {item.emoji} {isAr ? `${item.nameAr} (${item.name})` : `${item.name} · ${item.nameAr}`}
-                        <span className="wa-badge green" style={{ marginInlineStart: 4 }}>
-                          {item.posterStock[branchId] ?? 0} {item.unit}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 <div className="wa-table-wrap">
                   <table>
                     <thead>
@@ -964,116 +892,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Kitchen & Bar Supplies — Full 4-Subcategory Bilingual Picker (all 18+ items) */}
-                <div style={{ marginBottom: 14, background: '#f8faf7', padding: 12, borderRadius: 12, border: '1px solid #dfe6dc' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                    <strong style={{ fontSize: 14, color: '#0e3a2a' }}>
-                      🍽️ {isAr ? 'أدوات المطبخ والبار (Kitchen & Bar Supplies):' : 'Kitchen & Bar Supplies (4 Subcategories · EN / عربي):'}
-                    </strong>
-                    <input
-                      style={{ padding: '6px 10px', border: '1.5px solid #cfd9cb', borderRadius: 8, minWidth: 220 }}
-                      placeholder={isAr ? 'ابحث بالعربي أو بالإنجليزي...' : 'Search supplies (EN or Arabic)...'}
-                      value={perSearch}
-                      onChange={(e) => setPerSearch(e.target.value)}
-                    />
-                  </div>
-                  <div className="chip-row" style={{ marginBottom: 10 }}>
-                    {[
-                      ['Tableware & Glassware', isAr ? 'أطباق وكاسات وأدوات مائدة' : 'Tableware & Glassware'],
-                      ['Kitchen & Bar Tools', isAr ? 'أدوات المطبخ والبار' : 'Kitchen & Bar Tools'],
-                      ['Small Equipment', isAr ? 'معدات صغيرة' : 'Small Equipment'],
-                      ['Linen & Textiles', isAr ? 'مفروشات وملابس' : 'Linen & Textiles'],
-                      ['All', isAr ? 'عرض الكل' : 'All Supplies'],
-                    ].map(([sc, label]) => (
-                      <button
-                        key={sc}
-                        type="button"
-                        className={`chip-btn ${perSubCat === sc ? 'active' : ''}`}
-                        onClick={() => setPerSubCat(sc)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {filteredSupplyItems.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className="wa-btn ghost"
-                        style={{ padding: '6px 10px', fontSize: 12.5, background: '#fff', border: '1px solid #cfd9cb' }}
-                        onClick={() =>
-                          setPerRows((p) => [
-                            ...p,
-                            {
-                              name: isAr ? item.nameAr : item.name,
-                              specs: item.spec,
-                              category: item.subType,
-                              inventory: String(item.posterStock[branchId] ?? 0),
-                              qty: '1',
-                            },
-                          ])
-                        }
-                      >
-                        + {item.emoji} {isAr ? `${item.nameAr} (${item.name})` : `${item.name} · ${item.nameAr}`}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Categorized Bilingual Daily Picker (Food / Drinks / Cleaning) */}
-                <div className="wa-card" style={{ marginTop: 14, background: '#f8faf7' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                    <strong style={{ fontSize: 13.5 }}>
-                      {isAr ? 'اختر من التصنيفات (أكل · مشروبات · منظفات):' : 'Quick-pick by Category (EN / عربي):'}
-                    </strong>
-                    <input
-                      className="wa-field"
-                      style={{ padding: '6px 10px', border: '1.5px solid #cfd9cb', borderRadius: 8, minWidth: 220 }}
-                      placeholder={isAr ? 'ابحث بالعربي أو بالإنجليزي...' : 'Search item (EN or Arabic)...'}
-                      value={dailySearch}
-                      onChange={(e) => setDailySearch(e.target.value)}
-                    />
-                  </div>
-                  <div className="chip-row" style={{ marginBottom: 8 }}>
-                    {[
-                      ['Food', isAr ? 'أكل (Food)' : 'Food · أكل'],
-                      ['Drinks', isAr ? 'مشروبات (Drinks)' : 'Drinks · مشروبات'],
-                      ['Cleaning', isAr ? 'منظفات (Cleaning)' : 'Cleaning · منظفات'],
-                      ['All', isAr ? 'الكل' : 'All'],
-                    ].map(([cat, label]) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        className={`chip-btn ${dailyCatFilter === cat ? 'active' : ''}`}
-                        onClick={() => setDailyCatFilter(cat)}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {dailyCatalogItems.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className="wa-btn ghost"
-                        style={{ padding: '6px 10px', fontSize: 12.5, background: '#fff', border: '1px solid #cfd9cb' }}
-                        onClick={() => {
-                          const displayName = isAr ? item.nameAr : item.name
-                          setDailyRows((p) => [...p, { name: displayName, qty: '1', notes: '' }])
-                          notify(`+ ${displayName} (Stock: ${item.posterStock[branchId] ?? 0} ${item.unit})`)
-                        }}
-                      >
-                        + {item.emoji} {isAr ? `${item.nameAr} (${item.name})` : `${item.name} · ${item.nameAr}`}
-                        <span className="wa-badge green" style={{ marginInlineStart: 4 }}>
-                          {item.posterStock[branchId] ?? 0} {item.unit}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 <div className="wa-table-wrap">
                   <table>
                     <thead>
@@ -1091,9 +909,27 @@ export default function App() {
                         <tr key={idx}>
                           <td>
                             <input
-                              placeholder="e.g. Dinner plate"
+                              list="supplies-datalist"
+                              placeholder={isAr ? 'اكتب اسم الصنف...' : 'Type item (EN or Arabic)...'}
                               value={row.name}
-                              onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))}
+                              onChange={(e) => {
+                                const val = e.target.value
+                                const match = supplyItems.find(
+                                  (s) => s.name.toLowerCase() === val.trim().toLowerCase() || s.nameAr === val.trim()
+                                )
+                                setPerRows((p) =>
+                                  p.map((r, i) =>
+                                    i === idx
+                                      ? {
+                                          ...r,
+                                          name: val,
+                                          specs: match ? match.spec : r.specs,
+                                          category: match ? match.subType : r.category,
+                                        }
+                                      : r
+                                  )
+                                )
+                              }}
                             />
                           </td>
                           <td>
@@ -1130,6 +966,14 @@ export default function App() {
                     </tbody>
                   </table>
                 </div>
+
+                <datalist id="supplies-datalist">
+                  {supplyItems.map((s) => (
+                    <option key={s.id} value={isAr ? s.nameAr : s.name}>
+                      {s.name} · {s.nameAr} ({s.subType})
+                    </option>
+                  ))}
+                </datalist>
 
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
                   <button className="wa-btn ghost" onClick={() => setPerRows((p) => [...p, { name: '', specs: '', category: 'Tableware & Glassware', inventory: '', qty: '1' }])}>

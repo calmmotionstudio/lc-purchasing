@@ -1173,36 +1173,37 @@ export default function App() {
 
                         <div className="per-steppers-pair">
                           <div>
-                            <div className="per-cell-label">Inventory (Have Now)</div>
-                            <div className="stepper-box">
-                              <button
-                                type="button"
-                                className="stepper-btn"
-                                onClick={() =>
-                                  setPerRows((p) =>
-                                    p.map((r, i) => (i === idx ? { ...r, inventory: String(Math.max(0, Number(r.inventory || 0) - 1)) } : r))
-                                  )
-                                }
-                              >
-                                −
-                              </button>
-                              <input
-                                type="number"
-                                className="stepper-val"
-                                value={row.inventory}
-                                onChange={(e) => setPerRows((p) => p.map((r, i) => (i === idx ? { ...r, inventory: e.target.value } : r)))}
-                              />
-                              <button
-                                type="button"
-                                className="stepper-btn plus"
-                                onClick={() =>
-                                  setPerRows((p) =>
-                                    p.map((r, i) => (i === idx ? { ...r, inventory: String(Number(r.inventory || 0) + 1) } : r))
-                                  )
-                                }
-                              >
-                                +
-                              </button>
+                            <div className="per-cell-label">{isAr ? 'الموجود حالياً' : 'Inventory (Have Now)'}</div>
+                            <div className="inv-badge-wrap">
+                              <span className="inv-count-pill">{row.inventory || 0}</span>
+                              {roleId === 'manager' && (
+                                <div className="inv-arrow-stack">
+                                  <button
+                                    type="button"
+                                    className="inv-arrow-btn"
+                                    title="Increase inventory"
+                                    onClick={() =>
+                                      setPerRows((p) =>
+                                        p.map((r, i) => (i === idx ? { ...r, inventory: String(Number(r.inventory || 0) + 1) } : r))
+                                      )
+                                    }
+                                  >
+                                    ▲
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="inv-arrow-btn"
+                                    title="Decrease inventory"
+                                    onClick={() =>
+                                      setPerRows((p) =>
+                                        p.map((r, i) => (i === idx ? { ...r, inventory: String(Math.max(0, Number(r.inventory || 0) - 1)) } : r))
+                                      )
+                                    }
+                                  >
+                                    ▼
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
 

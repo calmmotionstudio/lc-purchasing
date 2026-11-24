@@ -1052,6 +1052,52 @@ td select {
   border-bottom: none;
 }
 
+.inv-badge-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inv-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e6f4ec;
+  color: #146c43;
+  font-weight: 800;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.inv-arrow-stack {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inv-arrow-btn {
+  width: 24px;
+  height: 16px;
+  border: 1px solid #c8d3c3;
+  background: #f4f7f3;
+  color: #0e3a2a;
+  border-radius: 4px;
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.inv-arrow-btn:hover {
+  background: #e6f4ec;
+}
+
 .daily-row-head {
   display: grid;
   grid-template-columns: minmax(0, 1.6fr) 115px 126px minmax(0, 1fr) 38px;

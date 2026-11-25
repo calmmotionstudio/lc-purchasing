@@ -1128,3 +1128,138 @@ td select {
   font-size: 13.5px;
   background: #fff;
 }
+
+/* Owner approval card action buttons (full-width split Approve / Reject + Contact CC Manager) */
+.owner-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.owner-card-actions .wa-btn {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13.5px;
+}
+
+.owner-contact-btn {
+  grid-column: 1 / -1;
+  background: #eef5f0 !important;
+  color: #0e3a2a !important;
+  border: 1.5px solid #9ab0a2 !important;
+}
+
+/* Owner Inventory Explorer */
+.inv-branch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.inv-branch-card {
+  border: 1.5px solid #c8d3c3;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: start;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.inv-branch-card.active {
+  border-color: #0e3a2a;
+  background: #f0f7f2;
+  box-shadow: 0 3px 10px rgba(14, 58, 42, 0.1);
+}
+
+.inv-cat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.inv-cat-btn {
+  border: 1.5px solid #c8d3c3;
+  background: #ffffff;
+  color: #15221b;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inv-cat-btn.active {
+  background: #0e3a2a;
+  color: #ffffff;
+  border-color: #0e3a2a;
+}
+
+.inv-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+
+.inv-item-card {
+  border: 1.5px solid #8ea898;
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 6px rgba(14, 58, 42, 0.05);
+}
+
+.inv-item-media {
+  width: 100%;
+  height: 155px;
+  background: #f4f7f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-bottom: 1px solid #e6ece3;
+}
+
+.inv-item-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.inv-item-body {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (max-width: 650px) {
+  .inv-items-grid {
+    grid-template-columns: 1fr;
+  }
+  .inv-item-card {
+    flex-direction: row;
+    align-items: center;
+  }
+  .inv-item-media {
+    width: 88px;
+    height: 88px;
+    flex-shrink: 0;
+    border-bottom: none;
+    border-inline-end: 1px solid #e6ece3;
+  }
+  .inv-item-body {
+    flex: 1;
+    min-width: 0;
+  }
+}

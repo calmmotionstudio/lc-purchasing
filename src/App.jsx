@@ -8,8 +8,53 @@ const ROLES = [
   { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', tabs: ['periodic', 'daily', 'receiving', 'shortages'] },
   { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
   { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
-  { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', tabs: ['periodic', 'history', 'shortages'] },
+  { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', tabs: ['periodic', 'inventory', 'history', 'shortages'] },
 ]
+
+const ITEM_IMAGES = {
+  'CAT-IRG': './items/irish-coffee-glass.jpg',
+  'CAT-LTG': './items/latte-glass.jpg',
+  'CAT-ESP-U': './items/espresso-underline.jpg',
+  'CAT-ESP-C': './items/espresso-cup.jpg',
+  'CAT-CAP-C': './items/cappuccino-cup.jpg',
+  'CAT-AMR-C': './items/americano-cup.jpg',
+  'CAT-SUG-J': './items/jar-for-sugar.jpg',
+  'CAT-MLK-J': './items/milk-jar.jpg',
+  'CAT-CAP-U': './items/cappuccino-underline.jpg',
+  'CAT-AMR-U': './items/americano-underline.jpg',
+  'CAT-MSR': './items/measure.jpg',
+  'CAT-TEAP': './items/tea-pot.jpg',
+  'CAT-MICC': './items/metal-ice-cream-cup.jpg',
+  'CAT-SCHW-OF': './items/schweppes-old-fashion.jpg',
+  'CAT-HB-300': './items/hi-ball-300ml.jpg',
+  'CAT-COKE-G': './items/coca-cola-glass.jpg',
+  'CAT-SPK-G': './items/sparkling-wine-glass.jpg',
+  'CAT-CKG': './items/cocktail-glass.jpg',
+  'CAT-OF-G': './items/old-fashion-glass.jpg',
+  'CAT-HB-400': './items/hi-ball-400ml.jpg',
+  'CAT-SHK': './items/bar-shaker.jpg',
+  'CAT-WNG': './items/wine-glass.jpg',
+  'CAT-BEER-L': './items/beer-glass-large.jpg',
+  'CAT-BEER-S': './items/beer-glass-small.jpg',
+  'CAT-FLDR-C': './items/folder-car.jpg',
+  'CAT-WCB': './items/wooden-cutlery-box.jpg',
+  'CAT-ASHT': './items/ashtray.jpg',
+  'CAT-BBP-L': './items/bb-plate-large.jpg',
+  'CAT-BBP-S': './items/bb-plate-small.jpg',
+  'CAT-SAN-B': './items/sanitizer-bottle-black.jpg',
+  'CAT-SAN-G': './items/sanitizer-bottle-grey.jpg',
+  'CAT-BCJ': './items/black-cutlery-jar.jpg',
+  'CAT-FORK': './items/fork.jpg',
+  'CAT-KNIFE': './items/knife.jpg',
+  'CAT-HURR-G': './items/hurricane-glass.jpg',
+  'CAT-DAIQ-G': './items/daiquiri-glass.jpg',
+  'CAT-BLND': './items/blender.jpg',
+  'CAT-DRIER': './items/drier-machine.jpg',
+  'CAT-GRND': './items/coffee-grinder.jpg',
+  'CAT-LATT-S': './items/latte-spoon.jpg',
+  'CAT-TEA-S': './items/tea-spoon.jpg',
+  'CAT-SOUP-S': './items/soup-spoon.jpg',
+}
 
 function loadState() {
   try {
@@ -405,6 +450,7 @@ export default function App() {
   const [expandedHistoryId, setExpandedHistoryId] = useState(null)
   const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
   const [expandedShortageId, setExpandedShortageId] = useState(null)
+  const [invCategory, setInvCategory] = useState('Tableware & Glassware')
 
   const compactStatus = (st) => {
     if (!st) return '—'
@@ -511,37 +557,54 @@ export default function App() {
         {role.tabs.includes('daily') && (
           <button className={activeTab === 'daily' ? 'active' : ''} onClick={() => setActiveTab('daily')}>
             🥬 {isAr ? 'طلب يومي | Daily' : 'Daily Request'}
-            <small>{isAr ? 'خضار - فاكهة - ستوك يومي' : 'Kitchen · Bar · Cost Control Office'}</small>
+            <small>{isAr ? 'خضار وفاكهة ولحوم يومية مع رصيد بوستر' : 'Daily food orders checked with Poster stock'}</small>
           </button>
         )}
         {role.tabs.includes('my_orders') && (
           <button className={activeTab === 'my_orders' ? 'active' : ''} onClick={() => setActiveTab('my_orders')}>
             📋 {isAr ? 'طلباتي' : 'My Orders'}
-            <small>{isAr ? 'حالة الطلبات والتحديثات' : 'Status & Timeline'}</small>
+            <small>{isAr ? 'متابعة حالة الطلبات والتحديثات' : 'Track submitted requests & timeline'}</small>
           </button>
         )}
         {role.tabs.includes('periodic') && (
           <button className={activeTab === 'periodic' ? 'active' : ''} onClick={() => setActiveTab('periodic')}>
             🍽️ {isAr ? 'مشتريات دورية | Periodic' : isUk ? 'Періодичні закупівлі' : 'Periodic Purchases'}
-            <small>{isAr ? 'أدوات المطبخ والبار والمعدات' : isUk ? 'Погодження власника' : 'Manager → Cost Control Manager → Owner'}</small>
+            <small>
+              {isAr
+                ? 'أدوات المطبخ والبار والمعدات مع الجرد'
+                : isUk
+                ? 'Фінальне погодження запитів від Cost Control'
+                : roleId === 'owner'
+                ? 'Final Approve / Reject for Cost Control requests'
+                : 'Tableware, bar tools & equipment requests'}
+            </small>
+          </button>
+        )}
+        {role.tabs.includes('inventory') && (
+          <button className={activeTab === 'inventory' ? 'active' : ''} onClick={() => setActiveTab('inventory')}>
+            📦 {isUk ? 'Інвентар' : 'Inventory'}
+            <small>{isUk ? 'Залишки та фото по 4 ресторанах' : 'Stock & photos across 4 restaurants'}</small>
           </button>
         )}
         {role.tabs.includes('receiving') && (
           <button className={activeTab === 'receiving' ? 'active' : ''} onClick={() => setActiveTab('receiving')}>
             🚚 {isAr ? 'الاستلام' : 'Receiving'}
-            <small>{isAr ? 'تأكيد الكمية اللي وصلت' : 'Confirm arrival (auto-flags shortages)'}</small>
+            <small>{isAr ? 'تأكيد الكمية المستلمة وتسجيل النواقص' : 'Confirm delivery & auto-flag shortages'}</small>
           </button>
         )}
         {role.tabs.includes('history') && (
           <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
             📋 {isAr ? 'سجل اليومي والدوري' : isUk ? 'Історія замовлень' : 'Orders History'}
-            <small>{isAr ? `كل طلبات ${branchTitle}` : isUk ? `Щоденні та періодичні · ${branchTitle}` : `Daily & Periodic · ${branchTitle}`}</small>
+            <small>{isAr ? `سجل كامل لطلبات ${branchTitle}` : isUk ? `Усі щоденні та періодичні · ${branchTitle}` : `Full log of Daily & Periodic · ${branchTitle}`}</small>
           </button>
         )}
         {role.tabs.includes('shortages') && (
           <button className={activeTab === 'shortages' ? 'active' : ''} onClick={() => setActiveTab('shortages')}>
             ⚠️ {isAr ? 'وصل أقل من المطلوب' : isUk ? 'Нестачі' : 'Shortages'}
-            <small>{branchShortages.filter((s) => s.status === 'Pending' || s.status === 'Open').length} {isUk ? 'очікує' : 'pending'}</small>
+            <small>
+              {branchShortages.filter((s) => s.status === 'Pending' || s.status === 'Open').length}{' '}
+              {isUk ? 'очікує · Нестачі доставки' : 'pending · Short deliveries log'}
+            </small>
           </button>
         )}
       </div>
@@ -950,9 +1013,11 @@ export default function App() {
               <p>
                 {roleId === 'owner'
                   ? (isUk
-                      ? 'Лише запити, що очікують на ваше фінальне рішення. Уся інша історія — в Історії замовлень.'
-                      : 'Only requests waiting for your final approval. All other operations are in Orders History.')
-                  : 'Tableware & Glassware · Kitchen & Bar Tools · Small Equipment · Linen & Textiles'}
+                      ? 'Тут ви отримуєте періодичні запити на закупівлю від Cost Control Manager для фінального рішення — погодити (Approve) або відхилити (Reject). Натисніть на картку, щоб переглянути деталі, або зв’яжіться з Cost Control Manager напряму.'
+                      : 'Here you receive Periodic Purchase Requests escalated by the Cost Control Manager for your final Approve or Reject decision. Tap any card to inspect full item details & stock, or contact the Cost Control Manager directly.')
+                  : isAr
+                  ? 'طلبات دورية للأطباق والزجاجيات وأدوات المطبخ والبار والمعدات مع مقارنة الرصيد الحالي.'
+                  : 'Scheduled requests for Tableware & Glassware, Kitchen & Bar Tools, Small Equipment & Textiles with current inventory counts.'}
               </p>
             </div>
 
@@ -1352,22 +1417,32 @@ export default function App() {
                                 </div>
                                 <div className="history-card-sub" style={{ marginTop: 2 }}>
                                   <span>{req.step2?.name ? `✓ ${req.step2.name}` : ''}</span>
-                                  <div style={{ display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
-                                    <button
-                                      className="wa-btn"
-                                      style={{ padding: '5px 11px', fontSize: 12 }}
-                                      onClick={() => approvePeriodicStep(req.id, 3, false)}
-                                    >
-                                      ✅ {isUk ? 'Погодити' : 'Approve'}
-                                    </button>
-                                    <button
-                                      className="wa-btn red"
-                                      style={{ padding: '5px 11px', fontSize: 12 }}
-                                      onClick={() => rejectPeriodicStep(req.id, 3)}
-                                    >
-                                      ❌ {isUk ? 'Відхилити' : 'Reject'}
-                                    </button>
-                                  </div>
+                                  <span>{isOwnerOpen ? (isUk ? 'Згорнути' : 'Hide') : (isUk ? 'Натисніть для деталей' : 'Tap for details')}</span>
+                                </div>
+                                <div className="owner-card-actions" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    className="wa-btn"
+                                    onClick={() => approvePeriodicStep(req.id, 3, false)}
+                                  >
+                                    ✅ {isUk ? 'Погодити' : 'Approve'}
+                                  </button>
+                                  <button
+                                    className="wa-btn red"
+                                    onClick={() => rejectPeriodicStep(req.id, 3)}
+                                  >
+                                    ❌ {isUk ? 'Відхилити' : 'Reject'}
+                                  </button>
+                                  <button
+                                    className="wa-btn owner-contact-btn"
+                                    onClick={() =>
+                                      sendWhatsApp(
+                                        waPhones.costMgr,
+                                        `Hi Cost Control Manager, regarding Periodic Request ${req.id} (${branchTitle} - ${req.department}):\n${req.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
+                                      )
+                                    }
+                                  >
+                                    📞 {isUk ? 'Зв’язатися з Cost Control Manager' : 'Contact Cost Control Manager'}
+                                  </button>
                                 </div>
                               </div>
 
@@ -1541,6 +1616,105 @@ export default function App() {
             })()}
           </div>
         )}
+
+        {/* ================= TAB 7: OWNER INVENTORY EXPLORER ================= */}
+        {activeTab === 'inventory' && (() => {
+          const invCategories = [
+            { id: 'Tableware & Glassware', label: isUk ? 'Посуд та скло' : 'Tableware & Glassware', icon: '🍽️' },
+            { id: 'Kitchen & Bar Tools', label: isUk ? 'Інвентар кухні та бару' : 'Kitchen & Bar Tools', icon: '🔪' },
+            { id: 'Small Equipment', label: isUk ? 'Мале обладнання' : 'Small Equipment', icon: '⚙️' },
+            { id: 'Linen & Textiles', label: isUk ? 'Текстиль' : 'Linen & Textiles', icon: '🧺' },
+            { id: 'Consumables', label: isUk ? 'Витратні матеріали' : 'Consumables', icon: '🧤' },
+            { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Stock)', icon: '🥬' },
+          ]
+
+          const catCatalogItems = invCategory === 'Food'
+            ? CURATED_CATALOG.filter((c) => c.category === 'Food')
+            : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === invCategory)
+
+          return (
+            <div>
+              <div className="section-head-clean">
+                <h2>📦 {isUk ? `Інвентар та залишки · ${branchTitle}` : `Restaurant Inventory · ${branchTitle}`}</h2>
+                <p>
+                  {isUk
+                    ? 'Оберіть ресторан і категорію, щоб побачити фактичну кількість посуду, обладнання, інвентарю та продуктів із фото.'
+                    : 'Select any restaurant and category below to view current stock counts for tableware, bar/kitchen tools, equipment, and food.'}
+                </p>
+              </div>
+
+              <div className="inv-branch-grid">
+                {BRANCHES.map((b) => {
+                  const totalUnits = CURATED_CATALOG.reduce((sum, c) => sum + Number(c.posterStock?.[b.id] ?? 0), 0)
+                  const isActive = branchId === b.id
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      className={`inv-branch-card ${isActive ? 'active' : ''}`}
+                      onClick={() => setBranchId(b.id)}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                        <strong style={{ color: '#0e3a2a', fontSize: 14.5 }}>{b.name}</strong>
+                        {isActive && <span className="wa-badge green compact">✓</span>}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#526359', marginTop: 4 }}>
+                        📍 {b.city} · {totalUnits} {isUk ? 'од. на обліку' : 'units tracked'}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="inv-cat-row">
+                {invCategories.map((cat) => {
+                  const count = cat.id === 'Food'
+                    ? CURATED_CATALOG.filter((c) => c.category === 'Food').length
+                    : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === cat.id).length
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      className={`inv-cat-btn ${invCategory === cat.id ? 'active' : ''}`}
+                      onClick={() => setInvCategory(cat.id)}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{cat.label}</span>
+                      <span style={{ opacity: 0.75, fontSize: 11.5 }}>({count})</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              <div className="inv-items-grid">
+                {catCatalogItems.map((item) => {
+                  const imgSrc = ITEM_IMAGES[item.id]
+                  const qty = item.posterStock?.[branchId] ?? 0
+                  return (
+                    <div key={item.id} className="inv-item-card">
+                      <div className="inv-item-media">
+                        {imgSrc ? (
+                          <img src={imgSrc} alt={item.name} loading="lazy" />
+                        ) : (
+                          <span style={{ fontSize: 42 }}>{item.emoji || '📦'}</span>
+                        )}
+                      </div>
+                      <div className="inv-item-body">
+                        <div style={{ minWidth: 0 }}>
+                          <strong style={{ fontSize: 14, color: '#0e3a2a', display: 'block' }}>{item.name}</strong>
+                          <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{item.spec}</div>
+                        </div>
+                        <span className={`wa-badge compact ${qty > 0 ? 'green' : 'gray'}`}>
+                          {qty} {item.unit}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* ================= TAB 4: RECEIVING (1-TAP OK OR AUTO-CREATE PENDING SHORTAGE) ================= */}
         {activeTab === 'receiving' && (

@@ -8,7 +8,7 @@ const ROLES = [
   { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', tabs: ['periodic', 'daily', 'receiving', 'shortages'] },
   { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
   { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
-  { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', tabs: ['periodic', 'inventory', 'history', 'shortages'] },
+  { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', tabs: ['periodic', 'history', 'shortages', 'inventory'] },
 ]
 
 const ITEM_IMAGES = {
@@ -580,12 +580,6 @@ export default function App() {
             </small>
           </button>
         )}
-        {role.tabs.includes('inventory') && (
-          <button className={activeTab === 'inventory' ? 'active' : ''} onClick={() => setActiveTab('inventory')}>
-            📦 {isUk ? 'Інвентар' : 'Inventory'}
-            <small>{isUk ? 'Залишки та фото по 4 ресторанах' : 'Stock & photos across 4 restaurants'}</small>
-          </button>
-        )}
         {role.tabs.includes('receiving') && (
           <button className={activeTab === 'receiving' ? 'active' : ''} onClick={() => setActiveTab('receiving')}>
             🚚 {isAr ? 'الاستلام' : 'Receiving'}
@@ -605,6 +599,12 @@ export default function App() {
               {branchShortages.filter((s) => s.status === 'Pending' || s.status === 'Open').length}{' '}
               {isUk ? 'очікує · Нестачі доставки' : 'pending · Short deliveries log'}
             </small>
+          </button>
+        )}
+        {role.tabs.includes('inventory') && (
+          <button className={activeTab === 'inventory' ? 'active' : ''} onClick={() => setActiveTab('inventory')}>
+            📦 {isUk ? 'Інвентар' : 'Inventory'}
+            <small>{isUk ? 'Залишки та фото по 4 ресторанах' : 'Stock & photos across 4 restaurants'}</small>
           </button>
         )}
       </div>

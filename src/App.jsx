@@ -1699,7 +1699,7 @@ export default function App() {
               ) : (
                 <div className="inv-items-grid">
                   {catCatalogItems.map((item) => {
-                    const imgSrc = ITEM_IMAGES[item.id]
+                    const imgSrc = branchId === 'cairo' ? ITEM_IMAGES[item.id] : null
                     const qty = branchItemQty(item)
                     return (
                       <div key={item.id} className="inv-item-card">

@@ -1628,9 +1628,12 @@ export default function App() {
             { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Stock)', icon: '🥬' },
           ]
 
-          const catCatalogItems = invCategory === 'Food'
+          const branchItemQty = (item, bId = branchId) => Number(item.posterStock?.[bId] ?? 0)
+
+          const catCatalogItems = (invCategory === 'Food'
             ? CURATED_CATALOG.filter((c) => c.category === 'Food')
             : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === invCategory)
+          ).filter((c) => branchItemQty(c) > 0)
 
           return (
             <div>
@@ -1668,9 +1671,10 @@ export default function App() {
 
               <div className="inv-cat-row">
                 {invCategories.map((cat) => {
-                  const count = cat.id === 'Food'
-                    ? CURATED_CATALOG.filter((c) => c.category === 'Food').length
-                    : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === cat.id).length
+                  const count = (cat.id === 'Food'
+                    ? CURATED_CATALOG.filter((c) => c.category === 'Food')
+                    : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === cat.id)
+                  ).filter((c) => branchItemQty(c) > 0).length
                   return (
                     <button
                       key={cat.id}
@@ -1686,32 +1690,40 @@ export default function App() {
                 })}
               </div>
 
-              <div className="inv-items-grid">
-                {catCatalogItems.map((item) => {
-                  const imgSrc = ITEM_IMAGES[item.id]
-                  const qty = item.posterStock?.[branchId] ?? 0
-                  return (
-                    <div key={item.id} className="inv-item-card">
-                      <div className="inv-item-media">
-                        {imgSrc ? (
-                          <img src={imgSrc} alt={item.name} loading="lazy" />
-                        ) : (
-                          <span style={{ fontSize: 42 }}>{item.emoji || '📦'}</span>
-                        )}
-                      </div>
-                      <div className="inv-item-body">
-                        <div style={{ minWidth: 0 }}>
-                          <strong style={{ fontSize: 14, color: '#0e3a2a', display: 'block' }}>{item.name}</strong>
-                          <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{item.spec}</div>
+              {catCatalogItems.length === 0 ? (
+                <div className="wa-card" style={{ color: '#526359', fontSize: 13.5 }}>
+                  {isUk
+                    ? `У категорії «${invCategories.find((c) => c.id === invCategory)?.label}» для ${branchTitle} зараз немає позицій на обліку.`
+                    : `No items recorded in "${invCategory}" for ${branchTitle}.`}
+                </div>
+              ) : (
+                <div className="inv-items-grid">
+                  {catCatalogItems.map((item) => {
+                    const imgSrc = ITEM_IMAGES[item.id]
+                    const qty = branchItemQty(item)
+                    return (
+                      <div key={item.id} className="inv-item-card">
+                        <div className="inv-item-media">
+                          {imgSrc ? (
+                            <img src={imgSrc} alt={item.name} loading="lazy" />
+                          ) : (
+                            <span style={{ fontSize: 42 }}>{item.emoji || '📦'}</span>
+                          )}
                         </div>
-                        <span className={`wa-badge compact ${qty > 0 ? 'green' : 'gray'}`}>
-                          {qty} {item.unit}
-                        </span>
+                        <div className="inv-item-body">
+                          <div style={{ minWidth: 0 }}>
+                            <strong style={{ fontSize: 14, color: '#0e3a2a', display: 'block' }}>{item.name}</strong>
+                            <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{item.spec}</div>
+                          </div>
+                          <span className="wa-badge compact green">
+                            {qty} {item.unit}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )
         })()}

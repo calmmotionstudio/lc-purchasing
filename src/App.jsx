@@ -8,7 +8,7 @@ const ROLES = [
   { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', icon: '🍳', pin: '1111', desc: 'Daily product requests & order status', tabs: ['daily', 'my_orders'] },
   { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', icon: '🧑‍💼', pin: '2222', desc: 'Periodic requests, receiving, shortages & inventory updates', tabs: ['periodic', 'daily', 'receiving', 'shortages', 'inventory'] },
   { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', icon: '🗂️', pin: '3333', desc: 'Approve/Reject Daily, view Periodic & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages'] },
-  { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', icon: '📊', pin: '4444', desc: 'Approve/Escalate Periodic & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages'] },
+  { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', icon: '📊', pin: '4444', desc: 'Approve/Escalate Periodic, edit Inventory & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages', 'inventory'] },
   { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', icon: '👑', pin: null, desc: 'Final approvals, full history, inventory & view any role without PIN', tabs: ['periodic', 'history', 'shortages', 'inventory'] },
 ]
 
@@ -2060,6 +2060,7 @@ export default function App() {
 
           const branchItemQty = (item, bId = branchId) => getBranchStock(item, bId)
           const sq = invSearch.trim().toLowerCase()
+          const canEditInv = roleId === 'manager' || roleId === 'cost_control'
 
           const catCatalogItems = (sq
             ? CURATED_CATALOG
@@ -2067,8 +2068,8 @@ export default function App() {
             ? CURATED_CATALOG.filter((c) => c.category === 'Food')
             : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === invCategory)
           ).filter((c) => {
-            if (branchItemQty(c) <= 0 && roleId !== 'manager') return false
-            if (roleId === 'manager' && branchItemQty(c) <= 0 && !sq) return false
+            if (branchItemQty(c) <= 0 && !canEditInv) return false
+            if (canEditInv && branchItemQty(c) <= 0 && !sq) return false
             if (!sq) return true
             return (
               c.name.toLowerCase().includes(sq) ||
@@ -2086,7 +2087,7 @@ export default function App() {
               <div className="section-head-clean">
                 <h2>📦 {isUk ? `Інвентар та залишки · ${branchTitle}` : `Restaurant Inventory · ${branchTitle}`}</h2>
                 <p>
-                  {roleId === 'manager'
+                  {canEditInv
                     ? 'Update actual stock counts or record broken, damaged, or lost items with a mandatory reason. Changes sync immediately to Periodic requests and Owner view.'
                     : isUk
                     ? 'Оберіть ресторан і категорію, щоб побачити фактичну кількість посуду, обладнання, інвентарю та продуктів із фото.'
@@ -2094,7 +2095,7 @@ export default function App() {
                 </p>
               </div>
 
-              {roleId === 'owner' && (
+              {(roleId === 'owner' || roleId === 'cost_control') && (
                 <div className="inv-branch-grid">
                   {BRANCHES.map((b) => {
                     const totalUnits = CURATED_CATALOG.reduce((sum, c) => sum + branchItemQty(c, b.id), 0)
@@ -2186,7 +2187,7 @@ export default function App() {
                           </div>
                         </div>
 
-                        {roleId === 'manager' && !isEditing && (
+                        {canEditInv && !isEditing && (
                           <div style={{ padding: '0 12px 10px' }}>
                             <button
                               type="button"
@@ -2203,7 +2204,7 @@ export default function App() {
                           </div>
                         )}
 
-                        {roleId === 'manager' && isEditing && (
+                        {canEditInv && isEditing && (
                           <div style={{ padding: '10px 12px', borderTop: '1px solid #dfe6dc', background: '#f8faf7' }}>
                             <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>New Actual Count ({item.unit}):</div>
                             <div className="stepper-box" style={{ width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>

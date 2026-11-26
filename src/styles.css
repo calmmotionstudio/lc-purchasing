@@ -1263,3 +1263,62 @@ td select {
     min-width: 0;
   }
 }
+
+/* Role Entry / PIN Lock Screen */
+.auth-screen {
+  max-width: 780px;
+  margin: 24px auto;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #dfe6dc;
+  box-shadow: 0 12px 34px rgba(14, 58, 42, 0.1);
+  overflow: hidden;
+}
+
+.auth-body {
+  padding: 20px;
+}
+
+.auth-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.auth-role-card {
+  border: 2px solid #cfd9cb;
+  border-radius: 14px;
+  padding: 16px;
+  background: #fcfdfb;
+  cursor: pointer;
+  text-align: start;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+
+.auth-role-card:hover {
+  border-color: #0e3a2a;
+  background: #f0f7f2;
+  transform: translateY(-1px);
+}
+
+.auth-role-card.owner-card {
+  border-color: #25d366;
+  background: #f2fbf5;
+}
+
+.auth-pin-box {
+  margin-top: 16px;
+  padding: 16px;
+  border: 2px solid #0e3a2a;
+  border-radius: 14px;
+  background: #f8faf7;
+}
+
+.supplier-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f0f7f2;
+  border: 1.5px solid #9ab0a2;
+}

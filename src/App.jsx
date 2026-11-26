@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { INITIAL_STATE, BRANCHES, CURATED_CATALOG } from './data/seedData'
 
-const STORAGE_KEY = 'lc_unified_purchasing_v5'
+const STORAGE_KEY = 'lc_unified_purchasing_v6'
+const AUTH_STORAGE_KEY = 'lc_auth_role_v1'
 
 const ROLES = [
-  { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', tabs: ['daily', 'my_orders'] },
-  { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', tabs: ['periodic', 'daily', 'receiving', 'shortages'] },
-  { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
-  { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', tabs: ['daily', 'periodic', 'history', 'shortages'] },
-  { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', tabs: ['periodic', 'history', 'shortages', 'inventory'] },
+  { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', icon: '🍳', pin: '1111', desc: 'Daily product requests & order status', tabs: ['daily', 'my_orders'] },
+  { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', icon: '🧑‍💼', pin: '2222', desc: 'Periodic requests, receiving, shortages & inventory updates', tabs: ['periodic', 'daily', 'receiving', 'shortages', 'inventory'] },
+  { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', icon: '🗂️', pin: '3333', desc: 'Approve/Reject Daily, view Periodic & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages'] },
+  { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', icon: '📊', pin: '4444', desc: 'Approve/Escalate Periodic & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages'] },
+  { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', icon: '👑', pin: null, desc: 'Final approvals, full history, inventory & view any role without PIN', tabs: ['periodic', 'history', 'shortages', 'inventory'] },
 ]
 
 const ITEM_IMAGES = {
@@ -56,26 +57,101 @@ const ITEM_IMAGES = {
   'CAT-SOUP-S': './items/soup-spoon.jpg',
 }
 
+function buildInitialInventoryCounts() {
+  const counts = {}
+  for (const b of BRANCHES) {
+    counts[b.id] = {}
+    for (const item of CURATED_CATALOG) {
+      counts[b.id][item.id] = Number(item.posterStock?.[b.id] ?? 0)
+    }
+  }
+  return counts
+}
+
 function loadState() {
+  const defaultCounts = buildInitialInventoryCounts()
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      return { ...INITIAL_STATE, ...parsed, posterSnapshot: INITIAL_STATE.posterSnapshot }
+      return {
+        ...INITIAL_STATE,
+        ...parsed,
+        posterSnapshot: INITIAL_STATE.posterSnapshot,
+        inventoryCounts: parsed.inventoryCounts || defaultCounts,
+        inventoryLog: parsed.inventoryLog || [],
+      }
     }
   } catch (e) {
     // ignore
   }
-  return INITIAL_STATE
+  return { ...INITIAL_STATE, inventoryCounts: defaultCounts, inventoryLog: [] }
 }
 
 export default function App() {
+  const isDemoMode = typeof window !== 'undefined' && window.location.search.includes('demo=1')
+  const [authRoleId, setAuthRoleId] = useState(() => {
+    if (isDemoMode) return 'owner'
+    try {
+      return localStorage.getItem(AUTH_STORAGE_KEY) || null
+    } catch (e) {
+      return null
+    }
+  })
+  const [pendingPinRole, setPendingPinRole] = useState(null)
+  const [pinInput, setPinInput] = useState('')
+  const [pinError, setPinError] = useState('')
+
   const [state, setState] = useState(loadState)
   const [branchId, setBranchId] = useState('boho')
-  const [roleId, setRoleId] = useState('owner')
+  const [roleId, setRoleId] = useState(() => authRoleId || 'owner')
   const [lang, setLang] = useState('en')
   const [activeTab, setActiveTab] = useState('periodic')
   const [toast, setToast] = useState(null)
+
+  useEffect(() => {
+    if (authRoleId && authRoleId !== 'owner') {
+      setRoleId(authRoleId)
+    }
+  }, [authRoleId])
+
+  const loginAsRole = (r) => {
+    if (!r.pin) {
+      localStorage.setItem(AUTH_STORAGE_KEY, r.id)
+      setAuthRoleId(r.id)
+      setRoleId(r.id)
+      setPendingPinRole(null)
+      setPinInput('')
+      setPinError('')
+      return
+    }
+    setPendingPinRole(r)
+    setPinInput('')
+    setPinError('')
+  }
+
+  const submitPinLogin = (e) => {
+    e.preventDefault()
+    if (!pendingPinRole) return
+    if (pinInput.trim() === pendingPinRole.pin) {
+      localStorage.setItem(AUTH_STORAGE_KEY, pendingPinRole.id)
+      setAuthRoleId(pendingPinRole.id)
+      setRoleId(pendingPinRole.id)
+      setPendingPinRole(null)
+      setPinInput('')
+      setPinError('')
+    } else {
+      setPinError('Incorrect PIN. Please try again.')
+    }
+  }
+
+  const lockRoleScreen = () => {
+    localStorage.removeItem(AUTH_STORAGE_KEY)
+    setAuthRoleId(null)
+    setPendingPinRole(null)
+    setPinInput('')
+    setPinError('')
+  }
 
   const role = ROLES.find((r) => r.id === roleId) || ROLES[0]
   const branch = BRANCHES.find((b) => b.id === branchId) || BRANCHES[0]
@@ -144,20 +220,23 @@ export default function App() {
     office: localStorage.getItem('lc_wa_office') || '',
     costMgr: localStorage.getItem('lc_wa_costmgr') || '',
     owner: localStorage.getItem('lc_wa_owner') || '',
+    supplier: localStorage.getItem('lc_wa_supplier') || '',
   }))
 
   const saveWaPhones = () => {
     localStorage.setItem('lc_wa_office', waPhones.office)
     localStorage.setItem('lc_wa_costmgr', waPhones.costMgr)
     localStorage.setItem('lc_wa_owner', waPhones.owner)
+    localStorage.setItem('lc_wa_supplier', waPhones.supplier)
     notify(isAr ? '✅ تم حفظ أرقام الواتساب' : '✅ WhatsApp numbers saved')
   }
 
   const clearWaPhones = () => {
-    setWaPhones({ office: '', costMgr: '', owner: '' })
+    setWaPhones({ office: '', costMgr: '', owner: '', supplier: '' })
     localStorage.removeItem('lc_wa_office')
     localStorage.removeItem('lc_wa_costmgr')
     localStorage.removeItem('lc_wa_owner')
+    localStorage.removeItem('lc_wa_supplier')
     notify(isAr ? '🗑️ تم مسح الأرقام' : '🗑️ Numbers cleared')
   }
 
@@ -168,6 +247,56 @@ export default function App() {
       return
     }
     window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`, '_blank')
+  }
+
+  const printOrderPdf = ({ id, type, branchName, department, date, items, status }) => {
+    const win = window.open('', '_blank', 'width=860,height=920')
+    if (!win) {
+      alert('Please allow pop-ups in your browser to generate the PDF.')
+      return
+    }
+    const rowsHtml = items
+      .map(
+        (it, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${it.name}</strong>${it.specs ? `<div style="font-size:11px;color:#555">${it.specs}</div>` : ''}</td>
+          <td style="text-align:right"><strong>${it.qty}</strong></td>
+        </tr>`
+      )
+      .join('')
+    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${id} - L&C Operations</title>
+      <style>
+        body { font-family: Inter, Arial, sans-serif; padding: 28px; color: #15221b; }
+        .head { display:flex; justify-content:space-between; align-items:flex-start; border-bottom: 3px solid #0e3a2a; padding-bottom: 12px; margin-bottom: 18px; }
+        .brand { font-size: 20px; font-weight: 800; color: #0e3a2a; }
+        .meta { font-size: 13px; line-height: 1.5; margin-bottom: 16px; background: #f4f7f3; padding: 12px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+        th { background: #0e3a2a; color: #fff; padding: 9px 10px; text-align: left; font-size: 13px; }
+        td { padding: 9px 10px; border-bottom: 1px solid #dfe6dc; font-size: 13.5px; }
+        .foot { margin-top: 24px; font-size: 12px; color: #526359; }
+      </style></head><body>
+      <div class="head">
+        <div><div class="brand">L&amp;C Operations — Purchase Order (${type})</div><div style="font-size:12px;color:#526359">${branchName}</div></div>
+        <div style="text-align:right"><strong>${id}</strong><div style="font-size:12px">Date: ${date}</div></div>
+      </div>
+      <div class="meta">
+        <div><strong>Restaurant:</strong> ${branchName}</div>
+        <div><strong>Department:</strong> ${department}</div>
+        <div><strong>Approval Status:</strong> ${status}</div>
+      </div>
+      <table><thead><tr><th style="width:40px">#</th><th>Item</th><th style="width:110px;text-align:right">Order Qty</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+      <div class="foot">Generated from L&amp;C Operations · Ready to send to Supplier</div>
+      <script>window.onload = () => { window.print(); }</script></body></html>`)
+    win.document.close()
+  }
+
+  const sendSupplierWhatsApp = ({ id, branchName, department, date, items }) => {
+    const lines = items.map((i) => `- ${i.name}: ${i.qty}`).join('\n')
+    sendWhatsApp(
+      waPhones.supplier,
+      `📦 Purchase Order ${id}\nRestaurant: ${branchName} (${department})\nDate: ${date}\n\nItems to supply:\n${lines}`
+    )
   }
 
   // ============ DAILY STATE ============
@@ -257,18 +386,25 @@ export default function App() {
 
   const supplyItems = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
 
+  const getBranchStock = (item, bId = branchId) => {
+    if (!item) return 0
+    const stored = state.inventoryCounts?.[bId]?.[item.id]
+    return stored !== undefined ? Number(stored) : Number(item.posterStock?.[bId] ?? 0)
+  }
+
   const getLastInventory = (itemName) => {
     const q = (itemName || '').trim().toLowerCase()
     if (!q) return 0
-    // 1. Check most recent saved periodic request for this branch
+    // 1. Live branch inventory (updated by Restaurant Manager adjustments or Periodic requests)
+    const cat = supplyItems.find((s) => s.name.toLowerCase() === q || s.nameAr === itemName.trim())
+    if (cat) return getBranchStock(cat, branchId)
+    // 2. Fallback to most recent saved periodic request for this branch
     for (const pr of state.periodicRequests) {
       if (pr.branchId !== branchId) continue
       const found = pr.items.find((i) => i.name.toLowerCase() === q)
       if (found && found.inventory !== undefined) return Number(found.inventory)
     }
-    // 2. Fallback to initial catalog / Cairo & Boho sheet counts
-    const cat = supplyItems.find((s) => s.name.toLowerCase() === q || s.nameAr === itemName.trim())
-    return cat ? (cat.posterStock[branchId] ?? 0) : 0
+    return 0
   }
 
   const branchPeriodic = state.periodicRequests.filter((p) => p.branchId === branchId)
@@ -294,28 +430,40 @@ export default function App() {
     if (items.length === 0) return
     const newId = perReqNo.trim() || `PER-00${state.periodicRequests.length + 1}`
     const time = new Date().toTimeString().slice(0, 5)
-    setState((prev) => ({
-      ...prev,
-      periodicRequests: [
-        {
-          id: newId,
-          branchId,
-          date: perDate,
-          department: perDept,
-          status: 'Waiting Cost Control Manager',
-          step1: {
-            approved: true,
-            name: roleId === 'cost_control' ? 'Cost Control Manager' : 'Restaurant Manager',
-            sig: 'Submitted',
-            time,
-          },
-          step2: { approved: false, name: '', sig: '', time: '' },
-          step3: { approved: false, name: '', sig: '', time: '' },
-          items,
+    setState((prev) => {
+      // Sync updated Have Now counts into live branch inventoryCounts
+      const nextBranchCounts = { ...(prev.inventoryCounts?.[branchId] || {}) }
+      for (const r of items) {
+        const cat = CURATED_CATALOG.find((c) => c.name.toLowerCase() === r.name.toLowerCase())
+        if (cat) nextBranchCounts[cat.id] = r.inventory
+      }
+      return {
+        ...prev,
+        inventoryCounts: {
+          ...(prev.inventoryCounts || {}),
+          [branchId]: nextBranchCounts,
         },
-        ...prev.periodicRequests,
-      ],
-    }))
+        periodicRequests: [
+          {
+            id: newId,
+            branchId,
+            date: perDate,
+            department: perDept,
+            status: 'Waiting Cost Control Manager',
+            step1: {
+              approved: true,
+              name: roleId === 'cost_control' ? 'Cost Control Manager' : 'Restaurant Manager',
+              sig: 'Submitted',
+              time,
+            },
+            step2: { approved: false, name: '', sig: '', time: '' },
+            step3: { approved: false, name: '', sig: '', time: '' },
+            items,
+          },
+          ...prev.periodicRequests,
+        ],
+      }
+    })
     setSelectedPerId(newId)
     notify(isAr ? `تم حفظ طلب الدوري ${newId}` : `Periodic Request ${newId} saved`)
   }
@@ -451,6 +599,50 @@ export default function App() {
   const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
   const [expandedShortageId, setExpandedShortageId] = useState(null)
   const [invCategory, setInvCategory] = useState('Tableware & Glassware')
+  const [invSearch, setInvSearch] = useState('')
+  const [editingInvId, setEditingInvId] = useState(null)
+  const [invEditQty, setInvEditQty] = useState('')
+  const [invEditReason, setInvEditReason] = useState('')
+
+  const saveInventoryAdjustment = (item) => {
+    const newQty = Math.max(0, Number(invEditQty || 0))
+    const reason = invEditReason.trim()
+    if (!reason) {
+      alert(isAr ? 'اكتب سبب التعديل الأول' : 'Please enter a reason (e.g. Broken, Damaged, Recount).')
+      return
+    }
+    const prevQty = getBranchStock(item)
+    const time = new Date().toTimeString().slice(0, 5)
+    const date = new Date().toISOString().slice(0, 10)
+    setState((prev) => ({
+      ...prev,
+      inventoryCounts: {
+        ...(prev.inventoryCounts || {}),
+        [branchId]: {
+          ...(prev.inventoryCounts?.[branchId] || {}),
+          [item.id]: newQty,
+        },
+      },
+      inventoryLog: [
+        {
+          id: `INV-${Date.now()}`,
+          branchId,
+          date,
+          time,
+          itemName: item.name,
+          unit: item.unit,
+          prevQty,
+          newQty,
+          reason,
+          by: role.labelEn,
+        },
+        ...(prev.inventoryLog || []),
+      ],
+    }))
+    setEditingInvId(null)
+    setInvEditReason('')
+    notify(`✅ ${item.name}: ${prevQty} → ${newQty} (${reason})`)
+  }
 
   const compactStatus = (st) => {
     if (!st) return '—'
@@ -484,6 +676,75 @@ export default function App() {
     notify('Note added to timeline')
   }
 
+  if (!authRoleId) {
+    return (
+      <div className="auth-screen">
+        <header className="wa-header">
+          <div className="header-eyebrow">● 4 RESTAURANTS · EL GOUNA & CAIRO</div>
+          <h1>L&amp;C Operations</h1>
+          <p>Select your role to enter · Device stays signed in</p>
+        </header>
+        <div className="auth-body">
+          <div style={{ fontSize: 14, color: '#2b3a31', fontWeight: 600 }}>
+            Tap your role card below. Owner enters directly without a password; team roles require a 4-digit PIN once per device.
+          </div>
+
+          <div className="auth-grid">
+            {ROLES.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                className={`auth-role-card ${r.id === 'owner' ? 'owner-card' : ''}`}
+                onClick={() => loginAsRole(r)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 22 }}>{r.icon}</span>
+                  <span className={`wa-badge compact ${r.pin ? 'gray' : 'green'}`}>
+                    {r.pin ? '🔒 PIN' : '🔓 No PIN'}
+                  </span>
+                </div>
+                <strong style={{ fontSize: 15, color: '#0e3a2a', display: 'block' }}>{r.labelEn}</strong>
+                <div style={{ fontSize: 12, color: '#526359', marginTop: 4 }}>{r.desc}</div>
+              </button>
+            ))}
+          </div>
+
+          {pendingPinRole && (
+            <form className="auth-pin-box" onSubmit={submitPinLogin}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <strong style={{ color: '#0e3a2a' }}>
+                  {pendingPinRole.icon} Enter 4-digit PIN for {pendingPinRole.labelEn}
+                </strong>
+                <button type="button" className="wa-btn ghost" style={{ padding: '4px 10px', fontSize: 12 }} onClick={() => setPendingPinRole(null)}>
+                  Cancel
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={6}
+                  autoFocus
+                  placeholder="PIN (e.g. 1111)"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  style={{ flex: '1 1 160px', padding: '10px 12px', border: '1.5px solid #0e3a2a', borderRadius: 10, fontSize: 16 }}
+                />
+                <button type="submit" className="wa-btn">
+                  🔓 Enter System
+                </button>
+              </div>
+              {pinError && <div style={{ color: '#b42318', fontSize: 12.5, fontWeight: 700, marginTop: 6 }}>{pinError}</div>}
+              <div style={{ fontSize: 11.5, color: '#526359', marginTop: 8 }}>
+                Demo PINs — Kitchen/Bar: <b>1111</b> · Manager: <b>2222</b> · Cost Office: <b>3333</b> · Cost Manager: <b>4444</b>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="wa-container">
       {/* Deep Forest Green Header */}
@@ -513,16 +774,30 @@ export default function App() {
             </select>
           </div>
 
-          <div className="wa-pill-select">
-            <span>👤 {isAr ? 'الدور:' : isUk ? 'Роль:' : 'Role:'}</span>
-            <select value={roleId} onChange={(e) => setRoleId(e.target.value)}>
-              {ROLES.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {isAr ? r.labelAr : r.labelEn}
-                </option>
-              ))}
-            </select>
-          </div>
+          {authRoleId === 'owner' ? (
+            <div className="wa-pill-select">
+              <span>👑 {isUk ? 'Роль:' : 'View Role:'}</span>
+              <select value={roleId} onChange={(e) => setRoleId(e.target.value)}>
+                {ROLES.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {isAr ? r.labelAr : r.labelEn}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="wa-pill-select">
+              <span>{role.icon} {isAr ? role.labelAr : role.labelEn}</span>
+              <button
+                type="button"
+                className="wa-btn ghost"
+                style={{ padding: '2px 8px', fontSize: 11.5, borderRadius: 6 }}
+                onClick={lockRoleScreen}
+              >
+                🔒 Switch
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="wa-control-group">
@@ -675,6 +950,54 @@ export default function App() {
                         ❌ {isAr ? 'رفض' : 'Reject'}
                       </button>
                     </div>
+
+                    {d.status === 'Approved by Cost Control Office' && (
+                      <div className="supplier-box">
+                        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#0e3a2a', marginBottom: 6 }}>
+                          📤 {isAr ? 'إرسال الطلب المعتمد للمورد:' : 'Approved — Send to Supplier:'}
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                          <input
+                            placeholder="Supplier WhatsApp (2010...)"
+                            value={waPhones.supplier}
+                            onChange={(e) => setWaPhones((p) => ({ ...p, supplier: e.target.value }))}
+                            style={{ flex: '1 1 160px', padding: '7px 10px', border: '1px solid #9ab0a2', borderRadius: 8, fontSize: 13 }}
+                          />
+                          <button
+                            className="wa-btn ghost"
+                            style={{ padding: '7px 12px', fontSize: 12.5 }}
+                            onClick={() =>
+                              printOrderPdf({
+                                id: d.id,
+                                type: 'Daily',
+                                branchName: branchTitle,
+                                department: d.department,
+                                date: d.date,
+                                items: d.items,
+                                status: d.status,
+                              })
+                            }
+                          >
+                            📄 PDF
+                          </button>
+                          <button
+                            className="wa-btn whatsapp"
+                            style={{ padding: '7px 12px', fontSize: 12.5 }}
+                            onClick={() =>
+                              sendSupplierWhatsApp({
+                                id: d.id,
+                                branchName: branchTitle,
+                                department: d.department,
+                                date: d.date,
+                                items: d.items,
+                              })
+                            }
+                          >
+                            📱 WhatsApp Supplier
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -715,6 +1038,53 @@ export default function App() {
                         </div>
                       ))}
                     </div>
+                    {d.status === 'Approved by Cost Control Office' && (
+                      <div className="supplier-box">
+                        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#0e3a2a', marginBottom: 6 }}>
+                          📤 {isAr ? 'إرسال الطلب المعتمد للمورد:' : 'Approved — Send to Supplier:'}
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                          <input
+                            placeholder="Supplier WhatsApp (2010...)"
+                            value={waPhones.supplier}
+                            onChange={(e) => setWaPhones((p) => ({ ...p, supplier: e.target.value }))}
+                            style={{ flex: '1 1 160px', padding: '7px 10px', border: '1px solid #9ab0a2', borderRadius: 8, fontSize: 13 }}
+                          />
+                          <button
+                            className="wa-btn ghost"
+                            style={{ padding: '7px 12px', fontSize: 12.5 }}
+                            onClick={() =>
+                              printOrderPdf({
+                                id: d.id,
+                                type: 'Daily',
+                                branchName: branchTitle,
+                                department: d.department,
+                                date: d.date,
+                                items: d.items,
+                                status: d.status,
+                              })
+                            }
+                          >
+                            📄 PDF
+                          </button>
+                          <button
+                            className="wa-btn whatsapp"
+                            style={{ padding: '7px 12px', fontSize: 12.5 }}
+                            onClick={() =>
+                              sendSupplierWhatsApp({
+                                id: d.id,
+                                branchName: branchTitle,
+                                department: d.department,
+                                date: d.date,
+                                items: d.items,
+                              })
+                            }
+                          >
+                            📱 WhatsApp Supplier
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1598,7 +1968,9 @@ export default function App() {
                         <b style={{ fontSize: 15, color: '#0e3a2a' }}>✅ Completed / Closed Requests</b>
                         <span className="wa-badge green">{completedOrRejected.length}</span>
                       </div>
-                      {completedOrRejected.map((req) => (
+                      {completedOrRejected.map((req) => {
+                        const isFullyApproved = !req.status.includes('Rejected') && (req.status.includes('Approved by Cost Control Manager') || req.status === 'Fully Approved by Owner')
+                        return (
                         <div key={req.id} className="wf-request-box" style={{ background: req.status.includes('Rejected') ? '#fff8f8' : '#f7fbf8' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                             <b>{req.id} · {req.department} ({req.date})</b>
@@ -1607,8 +1979,56 @@ export default function App() {
                           <div style={{ fontSize: 12.5, color: '#2b3a31', marginTop: 6 }}>
                             {req.items.map((i) => `${i.name} (Have: ${i.inventory ?? 0} → Order: ${i.qty})`).join(' · ')}
                           </div>
+                          {isFullyApproved && (roleId === 'cost_office' || roleId === 'cost_control') && (
+                            <div className="supplier-box">
+                              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#0e3a2a', marginBottom: 6 }}>
+                                📤 {isAr ? 'إرسال الطلب المعتمد للمورد:' : 'Fully Approved — Send to Supplier:'}
+                              </div>
+                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                                <input
+                                  placeholder="Supplier WhatsApp (2010...)"
+                                  value={waPhones.supplier}
+                                  onChange={(e) => setWaPhones((p) => ({ ...p, supplier: e.target.value }))}
+                                  style={{ flex: '1 1 160px', padding: '7px 10px', border: '1px solid #9ab0a2', borderRadius: 8, fontSize: 13 }}
+                                />
+                                <button
+                                  className="wa-btn ghost"
+                                  style={{ padding: '7px 12px', fontSize: 12.5 }}
+                                  onClick={() =>
+                                    printOrderPdf({
+                                      id: req.id,
+                                      type: 'Periodic',
+                                      branchName: branchTitle,
+                                      department: req.department,
+                                      date: req.date,
+                                      items: req.items,
+                                      status: req.status,
+                                    })
+                                  }
+                                >
+                                  📄 PDF
+                                </button>
+                                <button
+                                  className="wa-btn whatsapp"
+                                  style={{ padding: '7px 12px', fontSize: 12.5 }}
+                                  onClick={() =>
+                                    sendSupplierWhatsApp({
+                                      id: req.id,
+                                      branchName: branchTitle,
+                                      department: req.department,
+                                      date: req.date,
+                                      items: req.items,
+                                    })
+                                  }
+                                >
+                                  📱 WhatsApp Supplier
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -1617,7 +2037,7 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= TAB 7: OWNER INVENTORY EXPLORER ================= */}
+        {/* ================= TAB 7: INVENTORY EXPLORER (OWNER VIEW + MANAGER LIVE UPDATE & BREAKAGE) ================= */}
         {activeTab === 'inventory' && (() => {
           const invCategories = [
             { id: 'Tableware & Glassware', label: isUk ? 'Посуд та скло' : 'Tableware & Glassware', icon: '🍽️' },
@@ -1628,46 +2048,69 @@ export default function App() {
             { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Stock)', icon: '🥬' },
           ]
 
-          const branchItemQty = (item, bId = branchId) => Number(item.posterStock?.[bId] ?? 0)
+          const branchItemQty = (item, bId = branchId) => getBranchStock(item, bId)
+          const sq = invSearch.trim().toLowerCase()
 
           const catCatalogItems = (invCategory === 'Food'
             ? CURATED_CATALOG.filter((c) => c.category === 'Food')
             : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === invCategory)
-          ).filter((c) => branchItemQty(c) > 0)
+          ).filter((c) => {
+            if (branchItemQty(c) <= 0 && roleId !== 'manager') return false
+            if (roleId === 'manager' && branchItemQty(c) <= 0 && !sq) return false
+            if (!sq) return true
+            return c.name.toLowerCase().includes(sq) || c.nameAr.includes(invSearch.trim())
+          })
+
+          const branchLog = (state.inventoryLog || []).filter((l) => l.branchId === branchId)
 
           return (
             <div>
               <div className="section-head-clean">
                 <h2>📦 {isUk ? `Інвентар та залишки · ${branchTitle}` : `Restaurant Inventory · ${branchTitle}`}</h2>
                 <p>
-                  {isUk
+                  {roleId === 'manager'
+                    ? 'Update actual stock counts or record broken, damaged, or lost items with a mandatory reason. Changes sync immediately to Periodic requests and Owner view.'
+                    : isUk
                     ? 'Оберіть ресторан і категорію, щоб побачити фактичну кількість посуду, обладнання, інвентарю та продуктів із фото.'
                     : 'Select any restaurant and category below to view current stock counts for tableware, bar/kitchen tools, equipment, and food.'}
                 </p>
               </div>
 
-              <div className="inv-branch-grid">
-                {BRANCHES.map((b) => {
-                  const totalUnits = CURATED_CATALOG.reduce((sum, c) => sum + Number(c.posterStock?.[b.id] ?? 0), 0)
-                  const isActive = branchId === b.id
-                  return (
-                    <button
-                      key={b.id}
-                      type="button"
-                      className={`inv-branch-card ${isActive ? 'active' : ''}`}
-                      onClick={() => setBranchId(b.id)}
-                    >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
-                        <strong style={{ color: '#0e3a2a', fontSize: 14.5 }}>{b.name}</strong>
-                        {isActive && <span className="wa-badge green compact">✓</span>}
-                      </div>
-                      <div style={{ fontSize: 12, color: '#526359', marginTop: 4 }}>
-                        📍 {b.city} · {totalUnits} {isUk ? 'од. на обліку' : 'units tracked'}
-                      </div>
-                    </button>
-                  )
-                })}
-              </div>
+              {roleId === 'owner' && (
+                <div className="inv-branch-grid">
+                  {BRANCHES.map((b) => {
+                    const totalUnits = CURATED_CATALOG.reduce((sum, c) => sum + branchItemQty(c, b.id), 0)
+                    const isActive = branchId === b.id
+                    return (
+                      <button
+                        key={b.id}
+                        type="button"
+                        className={`inv-branch-card ${isActive ? 'active' : ''}`}
+                        onClick={() => setBranchId(b.id)}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                          <strong style={{ color: '#0e3a2a', fontSize: 14.5 }}>{b.name}</strong>
+                          {isActive && <span className="wa-badge green compact">✓</span>}
+                        </div>
+                        <div style={{ fontSize: 12, color: '#526359', marginTop: 4 }}>
+                          📍 {b.city} · {totalUnits} {isUk ? 'од. на обліку' : 'units tracked'}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {roleId === 'manager' && (
+                <div style={{ marginBottom: 12 }}>
+                  <input
+                    placeholder="🔍 Search item to update count or report breakage..."
+                    value={invSearch}
+                    onChange={(e) => setInvSearch(e.target.value)}
+                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #8ea898', borderRadius: 10, fontSize: 14 }}
+                  />
+                </div>
+              )}
 
               <div className="inv-cat-row">
                 {invCategories.map((cat) => {
@@ -1701,27 +2144,102 @@ export default function App() {
                   {catCatalogItems.map((item) => {
                     const imgSrc = branchId === 'cairo' ? ITEM_IMAGES[item.id] : null
                     const qty = branchItemQty(item)
+                    const isEditing = editingInvId === item.id
                     return (
-                      <div key={item.id} className="inv-item-card">
-                        <div className="inv-item-media">
-                          {imgSrc ? (
-                            <img src={imgSrc} alt={item.name} loading="lazy" />
-                          ) : (
-                            <span style={{ fontSize: 42 }}>{item.emoji || '📦'}</span>
-                          )}
-                        </div>
-                        <div className="inv-item-body">
-                          <div style={{ minWidth: 0 }}>
-                            <strong style={{ fontSize: 14, color: '#0e3a2a', display: 'block' }}>{item.name}</strong>
-                            <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{item.spec}</div>
+                      <div key={item.id} className="inv-item-card" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+                        <div style={{ display: 'flex', flexDirection: 'inherit' }}>
+                          <div className="inv-item-media" style={{ width: '100%', height: 145 }}>
+                            {imgSrc ? (
+                              <img src={imgSrc} alt={item.name} loading="lazy" />
+                            ) : (
+                              <span style={{ fontSize: 42 }}>{item.emoji || '📦'}</span>
+                            )}
                           </div>
-                          <span className="wa-badge compact green">
-                            {qty} {item.unit}
-                          </span>
+                          <div className="inv-item-body">
+                            <div style={{ minWidth: 0 }}>
+                              <strong style={{ fontSize: 14, color: '#0e3a2a', display: 'block' }}>{item.name}</strong>
+                              <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{item.spec}</div>
+                            </div>
+                            <span className="wa-badge compact green">
+                              {qty} {item.unit}
+                            </span>
+                          </div>
                         </div>
+
+                        {roleId === 'manager' && !isEditing && (
+                          <div style={{ padding: '0 12px 10px' }}>
+                            <button
+                              type="button"
+                              className="wa-btn ghost"
+                              style={{ width: '100%', padding: '6px 10px', fontSize: 12.5 }}
+                              onClick={() => {
+                                setEditingInvId(item.id)
+                                setInvEditQty(String(qty))
+                                setInvEditReason('')
+                              }}
+                            >
+                              ✏️ Update / Report Breakage
+                            </button>
+                          </div>
+                        )}
+
+                        {roleId === 'manager' && isEditing && (
+                          <div style={{ padding: '10px 12px', borderTop: '1px solid #dfe6dc', background: '#f8faf7' }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>New Actual Count ({item.unit}):</div>
+                            <div className="stepper-box" style={{ width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>
+                              <button type="button" className="stepper-btn" onClick={() => setInvEditQty((v) => String(Math.max(0, Number(v || 0) - 1)))}>−</button>
+                              <input type="number" className="stepper-val" value={invEditQty} onChange={(e) => setInvEditQty(e.target.value)} />
+                              <button type="button" className="stepper-btn plus" onClick={() => setInvEditQty((v) => String(Number(v || 0) + 1))}>+</button>
+                            </div>
+                            <div className="chip-row" style={{ marginBottom: 6 }}>
+                              {['Broken', 'Damaged', 'Lost', 'Recount'].map((rs) => (
+                                <button
+                                  key={rs}
+                                  type="button"
+                                  className={`chip-btn ${invEditReason === rs ? 'active' : ''}`}
+                                  style={{ padding: '4px 8px', fontSize: 11.5 }}
+                                  onClick={() => setInvEditReason(rs)}
+                                >
+                                  {rs}
+                                </button>
+                              ))}
+                            </div>
+                            <input
+                              placeholder="Reason (required)..."
+                              value={invEditReason}
+                              onChange={(e) => setInvEditReason(e.target.value)}
+                              style={{ width: '100%', padding: '7px 9px', border: '1px solid #cfd9cb', borderRadius: 8, fontSize: 12.5, marginBottom: 8 }}
+                            />
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <button type="button" className="wa-btn" style={{ flex: 1, padding: '6px 10px', fontSize: 12 }} onClick={() => saveInventoryAdjustment(item)}>
+                                ✅ Save
+                              </button>
+                              <button type="button" className="wa-btn ghost" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => setEditingInvId(null)}>
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )
                   })}
+                </div>
+              )}
+
+              {branchLog.length > 0 && (
+                <div className="wa-card" style={{ marginTop: 16 }}>
+                  <h3 style={{ marginTop: 0, fontSize: 15 }}>
+                    📝 {isUk ? `Журнал змін та бою · ${branchTitle}` : `Inventory Adjustments & Breakage Log · ${branchTitle}`}
+                  </h3>
+                  {branchLog.map((l) => (
+                    <div key={l.id} className="history-detail-row">
+                      <span>
+                        <strong>{l.itemName}</strong>: {l.prevQty} → <strong>{l.newQty} {l.unit}</strong>
+                        <span className="wa-badge amber compact" style={{ marginInlineStart: 8 }}>{l.reason}</span>
+                      </span>
+                      <span style={{ fontSize: 12, color: '#526359' }}>{l.date} {l.time}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

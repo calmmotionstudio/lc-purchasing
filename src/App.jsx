@@ -1970,12 +1970,22 @@ export default function App() {
                       </div>
                       {completedOrRejected.map((req) => {
                         const isFullyApproved = !req.status.includes('Rejected') && (req.status.includes('Approved by Cost Control Manager') || req.status === 'Fully Approved by Owner')
+                        const approverParts = [
+                          req.step1?.approved ? `Submitted: ${req.step1.name}` : null,
+                          req.step2?.approved ? `Approved by Cost Control Manager: ${req.step2.name} (${req.step2.time})` : req.step2?.rejected ? `Rejected by Cost Control Manager: ${req.step2.name}` : null,
+                          req.step3?.approved ? `Approved by Owner: ${req.step3.name} (${req.step3.time})` : req.step3?.rejected ? `Rejected by Owner: ${req.step3.name}` : null,
+                        ].filter(Boolean)
                         return (
                         <div key={req.id} className="wf-request-box" style={{ background: req.status.includes('Rejected') ? '#fff8f8' : '#f7fbf8' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                             <b>{req.id} · {req.department} ({req.date})</b>
                             <span className={`wa-badge ${req.status.includes('Rejected') ? 'red' : 'green'}`}>{req.status}</span>
                           </div>
+                          {approverParts.length > 0 && (
+                            <div style={{ fontSize: 12, color: '#146c43', fontWeight: 600, marginTop: 6 }}>
+                              {approverParts.join(' · ')}
+                            </div>
+                          )}
                           <div style={{ fontSize: 12.5, color: '#2b3a31', marginTop: 6 }}>
                             {req.items.map((i) => `${i.name} (Have: ${i.inventory ?? 0} → Order: ${i.qty})`).join(' · ')}
                           </div>
@@ -2051,14 +2061,22 @@ export default function App() {
           const branchItemQty = (item, bId = branchId) => getBranchStock(item, bId)
           const sq = invSearch.trim().toLowerCase()
 
-          const catCatalogItems = (invCategory === 'Food'
+          const catCatalogItems = (sq
+            ? CURATED_CATALOG
+            : invCategory === 'Food'
             ? CURATED_CATALOG.filter((c) => c.category === 'Food')
             : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === invCategory)
           ).filter((c) => {
             if (branchItemQty(c) <= 0 && roleId !== 'manager') return false
             if (roleId === 'manager' && branchItemQty(c) <= 0 && !sq) return false
             if (!sq) return true
-            return c.name.toLowerCase().includes(sq) || c.nameAr.includes(invSearch.trim())
+            return (
+              c.name.toLowerCase().includes(sq) ||
+              c.nameAr.includes(invSearch.trim()) ||
+              (c.spec || '').toLowerCase().includes(sq) ||
+              (c.subType || '').toLowerCase().includes(sq) ||
+              c.category.toLowerCase().includes(sq)
+            )
           })
 
           const branchLog = (state.inventoryLog || []).filter((l) => l.branchId === branchId)
@@ -2101,16 +2119,18 @@ export default function App() {
                 </div>
               )}
 
-              {roleId === 'manager' && (
-                <div style={{ marginBottom: 12 }}>
-                  <input
-                    placeholder="🔍 Search item to update count or report breakage..."
-                    value={invSearch}
-                    onChange={(e) => setInvSearch(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #8ea898', borderRadius: 10, fontSize: 14 }}
-                  />
-                </div>
-              )}
+              <div style={{ marginBottom: 12 }}>
+                <input
+                  placeholder={
+                    isUk
+                      ? '🔍 Пошук по назві або категорії (наприклад: Glass, Wine, Kitchen)...'
+                      : '🔍 Search item or category across this restaurant...'
+                  }
+                  value={invSearch}
+                  onChange={(e) => setInvSearch(e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #8ea898', borderRadius: 10, fontSize: 14 }}
+                />
+              </div>
 
               <div className="inv-cat-row">
                 {invCategories.map((cat) => {
@@ -2373,7 +2393,12 @@ export default function App() {
                         id: d.id,
                         date: d.date,
                         dept: d.department,
-                        actor: d.requestedBy,
+                        actor: `${isUk ? 'Запит від:' : 'Requested by:'} ${d.requestedBy}`,
+                        approvedBy: d.status.includes('Approved')
+                          ? (isUk ? 'Погоджено: Cost Control Office' : 'Approved by: Cost Control Office')
+                          : d.status.includes('Rejected')
+                          ? (isUk ? 'Відхилено: Cost Control Office' : 'Rejected by: Cost Control Office')
+                          : '',
                         itemsList: d.items.map((i) => ({ name: i.name, qty: i.qty, stockLabel: `Stock: ${i.stock}` })),
                         status: d.status,
                         timeline: d.timeline || [],
@@ -2388,10 +2413,19 @@ export default function App() {
                         date: p.date,
                         dept: p.department,
                         actor: [
-                          p.step1?.approved ? `Mgr: ${p.step1.name}` : null,
-                          p.step2?.approved ? `CC: ${p.step2.name}` : null,
+                          p.step1?.approved ? `${isUk ? 'Подано:' : 'Requested:'} ${p.step1.name}` : null,
+                          p.step2?.approved ? `CC Mgr: ${p.step2.name}` : null,
                           p.step3?.approved ? `Owner: ${p.step3.name}` : null,
                         ].filter(Boolean).join(' · '),
+                        approvedBy: p.step3?.approved
+                          ? (isUk ? `Погоджено: Owner (${p.step3.name})` : `Approved by: Owner (${p.step3.name})`)
+                          : p.step2?.approved
+                          ? (isUk ? `Погоджено: Cost Control Manager (${p.step2.name})` : `Approved by: Cost Control Manager (${p.step2.name})`)
+                          : p.step3?.rejected
+                          ? (isUk ? `Відхилено: Owner (${p.step3.name})` : `Rejected by: Owner (${p.step3.name})`)
+                          : p.step2?.rejected
+                          ? (isUk ? `Відхилено: Cost Control Manager (${p.step2.name})` : `Rejected by: Cost Control Manager (${p.step2.name})`)
+                          : '',
                         itemsList: p.items.map((i) => ({ name: i.name, qty: i.qty, stockLabel: `Have: ${i.inventory ?? 0}` })),
                         status: p.status,
                         timeline: [],
@@ -2422,6 +2456,11 @@ export default function App() {
                       <div className="history-preview-line">
                         {previewText}
                       </div>
+                      {r.approvedBy && (
+                        <div style={{ fontSize: 12, fontWeight: 700, color: r.status.includes('Rejected') ? '#b42318' : '#146c43' }}>
+                          {r.approvedBy}
+                        </div>
+                      )}
                       <div className="history-card-sub">
                         <span>
                           📅 {r.date} · {r.itemsList.length} {isUk ? 'поз.' : 'items'}

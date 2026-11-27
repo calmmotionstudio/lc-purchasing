@@ -4,6 +4,31 @@ import { INITIAL_STATE, BRANCHES, CURATED_CATALOG } from './data/seedData'
 const STORAGE_KEY = 'lc_unified_purchasing_v6'
 const AUTH_STORAGE_KEY = 'lc_auth_role_v1'
 
+const FIXED_COST_CONTROL_OFFICERS = [
+  { id: 'cc_office_1', label: 'Cost Control Office · Main (El Gouna / Cairo)', phone: '201000000001' },
+  { id: 'cc_office_2', label: 'Cost Control Office · Night Shift', phone: '201000000002' },
+]
+
+function classifyPosterItem(name) {
+  const n = ` ${(name || '').toLowerCase()} `
+  if (/(foam|silver plate|plate 420|microwave|cover|lid\b|straw|napkin|towel|tissue|sponge|soap|detergent|chlorine|sanitizer|foil|cling|film|\bbag\b|takeaway|container|glove|trash|garbage|clean|bleach|disposable|toothpick|skewer|paper|degreaser|dishwasher|polish|charcoal|candle)/.test(n)) {
+    return { cat: 'Consumables', foodSub: 'Dry, Sauces & Bakery' }
+  }
+  if (/(beer|wine|vodka|\bgin\b|\brum\b|whisky|whiskey|tequila|bourbon|brandy|cognac|liqueur|aperol|campari|vermouth|prosecco|champagne|stella|sakara|heineken|desperados|corona|syrup|monin|puree|juice|soda|cola|pepsi|sprite|fanta|schweppes|tonic|red bull|water|dasani|aquafina|coffee|espresso|beans|\btea\b|matcha|kombucha|bitters|triple sec|amaretto|baileys|kahlua|jagermeister|ouzo|arak|sake|soju|alcohol|mojito|daiquiri)/.test(n)) {
+    return { cat: 'Bar & Beverages', foodSub: 'Beverages' }
+  }
+  if (/(beef|chicken|steak|burger|patty|meat|lamb|duck|turkey|fish|salmon|shrimp|prawn|calamari|tuna|crab|bacon|sausage|pepperoni|bresaola|prosciutto|veal|filet|ribeye|striploin|tenderloin)/.test(n)) {
+    return { cat: 'Food', foodSub: 'Meat & Seafood' }
+  }
+  if (/(tomato|onion|garlic|lettuce|potato|carrot|cucumber|pepper|lemon|lime|orange|apple|banana|berry|strawberry|mango|avocado|mushroom|spinach|arugula|rocca|basil|mint|parsley|coriander|cilantro|ginger|chili|zucchini|eggplant|cabbage|broccoli|corn|pineapple|watermelon|melon|grape|pear|peach|kiwi|celery|leek|radish|beet|herb|jalapeno|rucola)/.test(n)) {
+    return { cat: 'Food', foodSub: 'Produce (Veg & Fruit)' }
+  }
+  if (/(milk|cheese|mozzarella|cheddar|parmesan|feta|cream|butter|yogurt|egg|ricotta|mascarpone|brie|gouda|emmental|halloumi|labneh|ghee)/.test(n)) {
+    return { cat: 'Food', foodSub: 'Dairy & Eggs' }
+  }
+  return { cat: 'Food', foodSub: 'Dry, Sauces & Bakery' }
+}
+
 const ROLES = [
   { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', icon: '🍳', pin: '1111', desc: 'Daily product requests & order status', tabs: ['daily', 'my_orders'] },
   { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', icon: '🧑‍💼', pin: '2222', desc: 'Periodic requests, receiving, shortages & inventory updates', tabs: ['periodic', 'daily', 'receiving', 'shortages', 'inventory'] },
@@ -189,12 +214,13 @@ export default function App() {
     setTimeout(() => setToast(null), 3200)
   }
 
-  // Poster-linked stock lookup for Daily Requests (Live Poster ingredients first + curated Food fallback)
+  // Poster-linked stock lookup for Daily Requests (Food & Bar Beverages only — excludes Consumables/Packaging)
   const stockOptions = useMemo(() => {
     const posterItems = state.posterSnapshot?.branches?.[branchId]?.items || []
-    const posterNames = new Set(posterItems.map((p) => p.name.trim().toLowerCase()))
+    const foodAndBarPoster = posterItems.filter((p) => classifyPosterItem(p.name).cat !== 'Consumables')
+    const posterNames = new Set(foodAndBarPoster.map((p) => p.name.trim().toLowerCase()))
     return [
-      ...posterItems.map((p) => ({
+      ...foodAndBarPoster.map((p) => ({
         name: p.name,
         nameAr: p.name,
         stock: p.poster_stock,
@@ -304,6 +330,8 @@ export default function App() {
   const [dailyDate, setDailyDate] = useState('2026-11-24')
   const [dailyDept, setDailyDept] = useState('Kitchen')
   const [dailyRequester, setDailyRequester] = useState('Kitchen / Bar Lead')
+  const [selectedOfficerId, setSelectedOfficerId] = useState(FIXED_COST_CONTROL_OFFICERS[0].id)
+  const [savedDailyPreview, setSavedDailyPreview] = useState(null)
   const [dailyRows, setDailyRows] = useState([
     { name: 'Tomatoes', qty: '10', notes: 'Fresh' },
     { name: 'Chicken breast', qty: '8', notes: 'Boneless' },
@@ -337,7 +365,12 @@ export default function App() {
         ...prev.dailyRequests,
       ],
     }))
-    notify(isAr ? `تم إرسال الطلب اليومي ${id} لمكتب Cost Control` : `Daily Request ${id} sent to Cost Control Office`)
+    const lines = items
+      .map((i) => `- ${i.name} | Stock: ${i.stock} | Order: ${i.qty}${i.notes ? ` (${i.notes})` : ''}`)
+      .join('\n')
+    const msg = `🥬 Daily Request ${id}\nRestaurant: ${branchTitle} (${dailyDept})\nBy: ${dailyRequester}\nDate: ${dailyDate}\n\n${lines}`
+    setSavedDailyPreview({ id, msg })
+    notify(isAr ? `تم حفظ الطلب ${id} — راجع المعاينة وأرسل لـ Cost Control` : `Saved ${id}! Review preview below and send to Cost Control.`)
   }
 
   const approveDailyByOffice = (dailyId) => {
@@ -600,6 +633,7 @@ export default function App() {
   const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
   const [expandedShortageId, setExpandedShortageId] = useState(null)
   const [invCategory, setInvCategory] = useState('Tableware & Glassware')
+  const [invFoodSub, setInvFoodSub] = useState('All')
   const [invSearch, setInvSearch] = useState('')
   const [editingInvId, setEditingInvId] = useState(null)
   const [invEditQty, setInvEditQty] = useState('')
@@ -892,19 +926,18 @@ export default function App() {
           <div>
             <h2 style={{ marginTop: 0 }}>🥬 {isAr ? `طلب يومي · ${branchTitle}` : `Daily Purchase Request · ${branchTitle}`}</h2>
 
-            {/* WhatsApp numbers box — ONLY for Kitchen/Bar/Manager who send Daily WhatsApp to Cost Control Office */}
+            {/* Fixed Cost Control Officer selector (locked numbers — no manual phone editing) */}
             {(roleId === 'staff' || roleId === 'manager') && (
-              <div className="wa-settings">
-                <h3>📱 {isAr ? 'أرقام الواتساب (الطلب اليومي)' : 'Daily WhatsApp Numbers'}</h3>
-                <div className="wa-grid">
-                  <div className="wa-field">
-                    <label>Cost Control Office WhatsApp</label>
-                    <input placeholder="2010xxxxxxxx" value={waPhones.office} onChange={(e) => setWaPhones((p) => ({ ...p, office: e.target.value }))} />
-                  </div>
-                </div>
-                <div style={{ marginTop: 10, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="wa-btn whatsapp" onClick={saveWaPhones}>💾 {isAr ? 'حفظ الأرقام' : 'Save Numbers'}</button>
-                  <button className="wa-btn ghost" onClick={clearWaPhones}>🗑️ {isAr ? 'مسح' : 'Clear'}</button>
+              <div style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <div className="wa-field" style={{ flex: '1 1 260px' }}>
+                  <label>📱 {isAr ? 'مسؤول مراقبة التكاليف (ثابت):' : 'Send to Cost Control Officer (Fixed):'}</label>
+                  <select value={selectedOfficerId} onChange={(e) => setSelectedOfficerId(e.target.value)}>
+                    {FIXED_COST_CONTROL_OFFICERS.map((off) => (
+                      <option key={off.id} value={off.id}>
+                        {off.label} ({off.phone})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             )}
@@ -1259,32 +1292,43 @@ export default function App() {
                   })}
                 </div>
 
-                <div className="per-actions-bar">
-                  <button className="wa-btn ghost" onClick={() => setDailyRows((p) => [...p, { name: '', qty: '1', notes: '' }])}>
-                    + {isAr ? 'إضافة صنف' : 'Add Item'}
-                  </button>
-                  <button className="wa-btn" onClick={submitDaily}>
-                    ✅ {isAr ? 'حفظ الطلب وإرساله لمكتب Cost Control' : 'Save Daily Request'}
-                  </button>
-                </div>
-
-                <div className="wa-box">
-                  <b>📱 {isAr ? 'إرسال الطلب اليومي لـ Cost Control Office فقط:' : 'Send Daily Request to Cost Control Office (Approval):'}</b>
-                  <div style={{ marginTop: 10 }}>
-                    <button
-                      className="wa-btn whatsapp"
-                      onClick={() => {
-                        const lines = dailyRows
-                          .filter((r) => r.name && r.qty)
-                          .map((r) => `- ${r.name} | Stock: ${findStock(r.name)} | Order: ${r.qty} ${r.notes ? `(${r.notes})` : ''}`)
-                          .join('\n')
-                        sendWhatsApp(waPhones.office, `🥬 Daily Request\nRestaurant: ${branchTitle} (${dailyDept})\nBy: ${dailyRequester}\nDate: ${dailyDate}\n\n${lines}`)
-                      }}
-                    >
-                      📱 {isAr ? 'ابعت لمكتب Cost Control للموافقة' : 'Send to Cost Control Office (WhatsApp)'}
+                {!savedDailyPreview ? (
+                  <div className="per-actions-bar">
+                    <button className="wa-btn ghost" onClick={() => setDailyRows((p) => [...p, { name: '', qty: '1', notes: '' }])}>
+                      + {isAr ? 'إضافة صنف' : 'Add Item'}
+                    </button>
+                    <button className="wa-btn" onClick={submitDaily}>
+                      ✅ {isAr ? 'حفظ الطلب للمراجعة' : 'Save Daily Request'}
                     </button>
                   </div>
-                </div>
+                ) : (
+                  <div className="wa-box" style={{ marginTop: 14 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <b>✅ {savedDailyPreview.id} Saved — Preview for Cost Control Office:</b>
+                      <button
+                        type="button"
+                        className="wa-btn ghost"
+                        style={{ padding: '4px 10px', fontSize: 12 }}
+                        onClick={() => setSavedDailyPreview(null)}
+                      >
+                        ✏️ Edit / New
+                      </button>
+                    </div>
+                    <pre style={{ margin: '10px 0', padding: 10, background: '#ffffff', border: '1px solid #c8d3c3', borderRadius: 8, fontSize: 12.5, whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+                      {savedDailyPreview.msg}
+                    </pre>
+                    <button
+                      className="wa-btn whatsapp"
+                      style={{ width: '100%' }}
+                      onClick={() => {
+                        const officer = FIXED_COST_CONTROL_OFFICERS.find((o) => o.id === selectedOfficerId) || FIXED_COST_CONTROL_OFFICERS[0]
+                        sendWhatsApp(officer.phone, savedDailyPreview.msg)
+                      }}
+                    >
+                      📱 {isAr ? 'إرسال الآن إلى Cost Control Office' : `Send to ${FIXED_COST_CONTROL_OFFICERS.find((o) => o.id === selectedOfficerId)?.label || 'Cost Control Office'} (WhatsApp)`}
+                    </button>
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -2055,36 +2099,28 @@ export default function App() {
             { id: 'Kitchen & Bar Tools', label: isUk ? 'Інвентар кухні та бару' : 'Kitchen & Bar Tools', icon: '🔪' },
             { id: 'Small Equipment', label: isUk ? 'Мале обладнання' : 'Small Equipment', icon: '⚙️' },
             { id: 'Linen & Textiles', label: isUk ? 'Текстиль' : 'Linen & Textiles', icon: '🧺' },
-            { id: 'Consumables', label: isUk ? 'Витратні матеріали' : 'Consumables', icon: '🧤' },
-            { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Stock)', icon: '🥬' },
+            { id: 'Consumables', label: isUk ? 'Упаковка та хімія' : 'Packaging & Hygiene', icon: '🧤' },
+            { id: 'Bar & Beverages', label: isUk ? 'Бар та напої (Poster)' : 'Bar & Beverages (Poster)', icon: '🍸' },
+            { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Kitchen)', icon: '🥬' },
           ]
 
-          const posterToCatalogItem = (p) => ({
-            id: `POSTER-${p.poster_id}`,
-            name: p.name,
-            nameAr: p.name,
-            spec: `Poster ID #${p.poster_id}${p.prime_cost ? ` · Avg cost ${p.prime_cost} EGP` : ''}`,
-            category: 'Food',
-            subType: 'Food (Poster)',
-            unit: p.unit,
-            emoji: '🥬',
-            posterStock: { [branchId]: p.poster_stock },
-            isPoster: true,
-          })
-
           const getPosterBranchItems = (bId = branchId) =>
-            (state.posterSnapshot?.branches?.[bId]?.items || []).map((p) => ({
-              id: `POSTER-${p.poster_id}`,
-              name: p.name,
-              nameAr: p.name,
-              spec: `Poster ID #${p.poster_id}${p.prime_cost ? ` · Avg cost ${p.prime_cost} EGP` : ''}`,
-              category: 'Food',
-              subType: 'Food (Poster)',
-              unit: p.unit,
-              emoji: '🥬',
-              posterStock: { [bId]: p.poster_stock },
-              isPoster: true,
-            }))
+            (state.posterSnapshot?.branches?.[bId]?.items || []).map((p) => {
+              const cls = classifyPosterItem(p.name)
+              return {
+                id: `POSTER-${p.poster_id}`,
+                name: p.name,
+                nameAr: p.name,
+                spec: `Poster ID #${p.poster_id} · ${cls.cat === 'Food' ? cls.foodSub : cls.cat}${p.prime_cost ? ` · ${p.prime_cost} EGP` : ''}`,
+                category: cls.cat,
+                subType: cls.cat === 'Food' ? cls.foodSub : cls.cat,
+                foodSub: cls.foodSub,
+                unit: p.unit,
+                emoji: cls.cat === 'Consumables' ? '🧤' : cls.cat === 'Bar & Beverages' ? '🍸' : '🥬',
+                posterStock: { [bId]: p.poster_stock },
+                isPoster: true,
+              }
+            })
 
           const branchItemQty = (item, bId = branchId) => getBranchStock(item, bId)
           const sq = invSearch.trim().toLowerCase()
@@ -2092,10 +2128,19 @@ export default function App() {
           const nonFoodCatalog = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
           const posterBranchItems = getPosterBranchItems(branchId)
 
+          const allCombinedItems = [
+            ...nonFoodCatalog,
+            ...posterBranchItems,
+          ]
+
           const catCatalogItems = (sq
-            ? [...nonFoodCatalog, ...posterBranchItems]
+            ? allCombinedItems
             : invCategory === 'Food'
-            ? posterBranchItems
+            ? posterBranchItems.filter((p) => p.category === 'Food' && (invFoodSub === 'All' || p.foodSub === invFoodSub))
+            : invCategory === 'Bar & Beverages'
+            ? posterBranchItems.filter((p) => p.category === 'Bar & Beverages')
+            : invCategory === 'Consumables'
+            ? [...nonFoodCatalog.filter((c) => c.subType === 'Consumables'), ...posterBranchItems.filter((p) => p.category === 'Consumables')]
             : nonFoodCatalog.filter((c) => c.subType === invCategory)
           ).filter((c) => {
             if (branchItemQty(c) <= 0 && !canEditInv) return false
@@ -2167,7 +2212,11 @@ export default function App() {
               <div className="inv-cat-row">
                 {invCategories.map((cat) => {
                   const count = (cat.id === 'Food'
-                    ? posterBranchItems
+                    ? posterBranchItems.filter((p) => p.category === 'Food')
+                    : cat.id === 'Bar & Beverages'
+                    ? posterBranchItems.filter((p) => p.category === 'Bar & Beverages')
+                    : cat.id === 'Consumables'
+                    ? [...nonFoodCatalog.filter((c) => c.subType === 'Consumables'), ...posterBranchItems.filter((p) => p.category === 'Consumables')]
                     : nonFoodCatalog.filter((c) => c.subType === cat.id)
                   ).filter((c) => branchItemQty(c) > 0).length
                   return (
@@ -2184,6 +2233,21 @@ export default function App() {
                   )
                 })}
               </div>
+
+              {!sq && invCategory === 'Food' && (
+                <div className="chip-row" style={{ marginBottom: 12 }}>
+                  {['All', 'Meat & Seafood', 'Produce (Veg & Fruit)', 'Dairy & Eggs', 'Dry, Sauces & Bakery'].map((sub) => (
+                    <button
+                      key={sub}
+                      type="button"
+                      className={`chip-btn ${invFoodSub === sub ? 'active' : ''}`}
+                      onClick={() => setInvFoodSub(sub)}
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {catCatalogItems.length === 0 ? (
                 <div className="wa-card" style={{ color: '#526359', fontSize: 13.5 }}>

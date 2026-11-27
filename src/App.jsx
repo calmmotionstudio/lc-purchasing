@@ -1908,8 +1908,12 @@ export default function App() {
               const buckets = [
                 {
                   num: 2,
-                  title: '1 - Cost Control Manager',
-                  subtitle: isAr ? 'في انتظار اعتماد Cost Control Manager' : 'Submitted · Waiting for Cost Control Manager',
+                  title: roleId === 'cost_control'
+                    ? (isAr ? '⚡ بانتظار موافقتك الآن' : '⚡ Waiting for you to approve')
+                    : '1 - Cost Control Manager',
+                  subtitle: roleId === 'cost_control'
+                    ? (isAr ? 'مطلوب إجراء منك — راجع واعتمد أو ارفض' : 'Action required — review items and Approve, Reject, or Escalate to Owner')
+                    : (isAr ? 'في انتظار اعتماد Cost Control Manager' : 'Submitted · Waiting for Cost Control Manager'),
                   items: waitingStep2,
                   canAct: roleId === 'cost_control',
                   reminderPhone: waPhones.costMgr,
@@ -1935,19 +1939,29 @@ export default function App() {
                       📋 {isAr ? 'الطلبات المرسلة وحالة الاعتماد' : 'Submitted Requests & Approval Status'}
                     </h3>
                   )}
-                  {visibleBuckets.map((bucket) => (
-                    <div key={bucket.num} className={`approval-bucket ${bucket.items.length > 0 ? 'has-pending' : ''}`}>
+                  {visibleBuckets.map((bucket) => {
+                    const isUrgentMine = roleId === 'cost_control' && bucket.canAct && bucket.items.length > 0
+                    const isSecondaryBucket = roleId === 'cost_control' && !bucket.canAct
+                    return (
+                    <div
+                      key={bucket.num}
+                      className={`approval-bucket ${isUrgentMine ? 'urgent-mine' : isSecondaryBucket ? 'secondary-bucket' : bucket.items.length > 0 ? 'has-pending' : ''}`}
+                    >
                       <div className="approval-bucket-head">
                         <div>
-                          <b style={{ fontSize: 15, color: '#0e3a2a' }}>
+                          <b style={{ fontSize: 15, color: isUrgentMine ? '#991b1b' : '#0e3a2a' }}>
                             {roleId === 'owner' ? (isUk ? 'Очікують на ваше рішення' : 'Pending Your Final Approval') : bucket.title}
                           </b>
                           {roleId !== 'owner' && (
-                            <div style={{ fontSize: 12, color: '#526359', marginTop: 2 }}>{bucket.subtitle}</div>
+                            <div style={{ fontSize: 12, color: isUrgentMine ? '#7f1d1d' : '#526359', marginTop: 2 }}>{bucket.subtitle}</div>
                           )}
                         </div>
-                        <span className={`wa-badge ${bucket.items.length > 0 ? 'amber' : 'gray'}`}>
-                          {bucket.items.length > 0 ? `${bucket.items.length} ${isUk ? 'очікує' : 'Pending'}` : (isUk ? 'Немає запитів' : 'No pending')}
+                        <span className={`wa-badge ${isUrgentMine ? 'red' : isSecondaryBucket ? 'gray' : bucket.items.length > 0 ? 'amber' : 'gray'}`}>
+                          {bucket.items.length > 0
+                            ? isUrgentMine
+                              ? `${bucket.items.length} Action Required`
+                              : `${bucket.items.length} ${isUk ? 'очікує' : 'Pending'}`
+                            : (isUk ? 'Немає запитів' : 'No pending')}
                         </span>
                       </div>
 
@@ -2069,7 +2083,9 @@ export default function App() {
                               </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <span className="wa-badge amber">Pending · {req.date}</span>
+                              <span className={`wa-badge ${isUrgentMine ? 'red' : 'amber'}`}>
+                                {isUrgentMine ? `⚡ Waiting for you · ${req.date}` : `Pending · ${req.date}`}
+                              </span>
                               <span style={{ fontSize: 13, fontWeight: 700, color: '#0e3a2a' }}>{isPerOpen ? '▲' : '▼'}</span>
                             </div>
                           </div>
@@ -2174,7 +2190,8 @@ export default function App() {
                       )
                       })}
                     </div>
-                  ))}
+                    )
+                  })}
 
                   {roleId !== 'owner' && completedOrRejected.length > 0 && (
                     <div className="approval-bucket">

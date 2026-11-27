@@ -796,6 +796,18 @@ td select {
   background: #fffdf8;
 }
 
+.approval-bucket.urgent-mine {
+  border-color: #dc2626;
+  border-left: 6px solid #dc2626;
+  background: #fff5f5;
+  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.12);
+}
+
+.approval-bucket.secondary-bucket {
+  border-color: #d6dfd3;
+  background: #f9fbf9;
+}
+
 .approval-bucket-head {
   display: flex;
   justify-content: space-between;

@@ -189,21 +189,22 @@ export default function App() {
     setTimeout(() => setToast(null), 3200)
   }
 
-  // Poster-linked stock lookup for Daily Requests (Food / Daily items ONLY — excludes Periodic Non-food)
+  // Poster-linked stock lookup for Daily Requests (Live Poster ingredients first + curated Food fallback)
   const stockOptions = useMemo(() => {
     const posterItems = state.posterSnapshot?.branches?.[branchId]?.items || []
+    const posterNames = new Set(posterItems.map((p) => p.name.trim().toLowerCase()))
     return [
-      ...CURATED_CATALOG.filter((c) => c.category === 'Food').map((c) => ({
-        name: c.name,
-        nameAr: c.nameAr,
-        stock: c.posterStock[branchId] ?? 0,
-        unit: c.unit,
-      })),
-      ...posterItems.slice(0, 60).map((p) => ({
+      ...posterItems.map((p) => ({
         name: p.name,
         nameAr: p.name,
         stock: p.poster_stock,
         unit: p.unit,
+      })),
+      ...CURATED_CATALOG.filter((c) => c.category === 'Food' && !posterNames.has(c.name.trim().toLowerCase())).map((c) => ({
+        name: c.name,
+        nameAr: c.nameAr,
+        stock: c.posterStock[branchId] ?? 0,
+        unit: c.unit,
       })),
     ]
   }, [state.posterSnapshot, branchId])
@@ -2058,22 +2059,51 @@ export default function App() {
             { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Stock)', icon: '🥬' },
           ]
 
+          const posterToCatalogItem = (p) => ({
+            id: `POSTER-${p.poster_id}`,
+            name: p.name,
+            nameAr: p.name,
+            spec: `Poster ID #${p.poster_id}${p.prime_cost ? ` · Avg cost ${p.prime_cost} EGP` : ''}`,
+            category: 'Food',
+            subType: 'Food (Poster)',
+            unit: p.unit,
+            emoji: '🥬',
+            posterStock: { [branchId]: p.poster_stock },
+            isPoster: true,
+          })
+
+          const getPosterBranchItems = (bId = branchId) =>
+            (state.posterSnapshot?.branches?.[bId]?.items || []).map((p) => ({
+              id: `POSTER-${p.poster_id}`,
+              name: p.name,
+              nameAr: p.name,
+              spec: `Poster ID #${p.poster_id}${p.prime_cost ? ` · Avg cost ${p.prime_cost} EGP` : ''}`,
+              category: 'Food',
+              subType: 'Food (Poster)',
+              unit: p.unit,
+              emoji: '🥬',
+              posterStock: { [bId]: p.poster_stock },
+              isPoster: true,
+            }))
+
           const branchItemQty = (item, bId = branchId) => getBranchStock(item, bId)
           const sq = invSearch.trim().toLowerCase()
           const canEditInv = roleId === 'manager' || roleId === 'cost_control'
+          const nonFoodCatalog = CURATED_CATALOG.filter((c) => c.category === 'Non-food')
+          const posterBranchItems = getPosterBranchItems(branchId)
 
           const catCatalogItems = (sq
-            ? CURATED_CATALOG
+            ? [...nonFoodCatalog, ...posterBranchItems]
             : invCategory === 'Food'
-            ? CURATED_CATALOG.filter((c) => c.category === 'Food')
-            : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === invCategory)
+            ? posterBranchItems
+            : nonFoodCatalog.filter((c) => c.subType === invCategory)
           ).filter((c) => {
             if (branchItemQty(c) <= 0 && !canEditInv) return false
             if (canEditInv && branchItemQty(c) <= 0 && !sq) return false
             if (!sq) return true
             return (
               c.name.toLowerCase().includes(sq) ||
-              c.nameAr.includes(invSearch.trim()) ||
+              (c.nameAr || '').includes(invSearch.trim()) ||
               (c.spec || '').toLowerCase().includes(sq) ||
               (c.subType || '').toLowerCase().includes(sq) ||
               c.category.toLowerCase().includes(sq)
@@ -2088,17 +2118,18 @@ export default function App() {
                 <h2>📦 {isUk ? `Інвентар та залишки · ${branchTitle}` : `Restaurant Inventory · ${branchTitle}`}</h2>
                 <p>
                   {canEditInv
-                    ? 'Update actual stock counts or record broken, damaged, or lost items with a mandatory reason. Changes sync immediately to Periodic requests and Owner view.'
+                    ? `Live Poster food stock (${state.posterSnapshot?.fetched_at_utc || 'synced'}) + bar/kitchen supplies. Update actual counts or record breakage with a mandatory reason.`
                     : isUk
-                    ? 'Оберіть ресторан і категорію, щоб побачити фактичну кількість посуду, обладнання, інвентарю та продуктів із фото.'
-                    : 'Select any restaurant and category below to view current stock counts for tableware, bar/kitchen tools, equipment, and food.'}
+                    ? `Живі залишки продуктів із Poster (${state.posterSnapshot?.fetched_at_utc || ''}) та інвентар бару/кухні по кожному ресторану.`
+                    : `Live Poster food stock (${state.posterSnapshot?.fetched_at_utc || 'synced'}) plus tableware, bar/kitchen tools & equipment.`}
                 </p>
               </div>
 
               {(roleId === 'owner' || roleId === 'cost_control') && (
                 <div className="inv-branch-grid">
                   {BRANCHES.map((b) => {
-                    const totalUnits = CURATED_CATALOG.reduce((sum, c) => sum + branchItemQty(c, b.id), 0)
+                    const posterCount = (state.posterSnapshot?.branches?.[b.id]?.items || []).filter((p) => p.poster_stock > 0).length
+                    const nonFoodCount = nonFoodCatalog.filter((c) => branchItemQty(c, b.id) > 0).length
                     const isActive = branchId === b.id
                     return (
                       <button
@@ -2112,7 +2143,7 @@ export default function App() {
                           {isActive && <span className="wa-badge green compact">✓</span>}
                         </div>
                         <div style={{ fontSize: 12, color: '#526359', marginTop: 4 }}>
-                          📍 {b.city} · {totalUnits} {isUk ? 'од. на обліку' : 'units tracked'}
+                          📍 {b.city} · {posterCount} Poster + {nonFoodCount} supplies
                         </div>
                       </button>
                     )
@@ -2124,7 +2155,7 @@ export default function App() {
                 <input
                   placeholder={
                     isUk
-                      ? '🔍 Пошук по назві або категорії (наприклад: Glass, Wine, Kitchen)...'
+                      ? '🔍 Пошук по назві або категорії (наприклад: Glass, Wine, Tomatoes)...'
                       : '🔍 Search item or category across this restaurant...'
                   }
                   value={invSearch}
@@ -2136,8 +2167,8 @@ export default function App() {
               <div className="inv-cat-row">
                 {invCategories.map((cat) => {
                   const count = (cat.id === 'Food'
-                    ? CURATED_CATALOG.filter((c) => c.category === 'Food')
-                    : CURATED_CATALOG.filter((c) => c.category === 'Non-food' && c.subType === cat.id)
+                    ? posterBranchItems
+                    : nonFoodCatalog.filter((c) => c.subType === cat.id)
                   ).filter((c) => branchItemQty(c) > 0).length
                   return (
                     <button

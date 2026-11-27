@@ -463,8 +463,7 @@ export default function App() {
   const [perDate, setPerDate] = useState('2026-11-24')
   const [perDept, setPerDept] = useState('Restaurant')
   const [perRows, setPerRows] = useState([
-    { name: 'Dinner plate 27 cm', specs: 'TW-027 Porcelain', category: 'Tableware & Glassware', inventory: '130', qty: '15' },
-    { name: 'Nachos Skillet', specs: 'Cast iron', category: 'Kitchen & Bar Tools', inventory: '8', qty: '10' },
+    { name: '', specs: '', category: 'Tableware & Glassware', inventory: '0', qty: '1' },
   ])
   const [openPerComboIdx, setOpenPerComboIdx] = useState(null)
   const [openDailyComboIdx, setOpenDailyComboIdx] = useState(null)
@@ -684,6 +683,7 @@ export default function App() {
   const [myOrdersFilter, setMyOrdersFilter] = useState('All')
   const [myOrdersSearch, setMyOrdersSearch] = useState('')
   const [expandedMyOrderId, setExpandedMyOrderId] = useState(null)
+  const [expandedPeriodicId, setExpandedPeriodicId] = useState(null)
   const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
   const [expandedShortageId, setExpandedShortageId] = useState(null)
   const [invCategory, setInvCategory] = useState('Tableware & Glassware')
@@ -1937,7 +1937,7 @@ export default function App() {
                     + Add Item
                   </button>
                   <button className="wa-btn" onClick={savePeriodic}>
-                    ✅ Save Periodic Request
+                    ✅ {isAr ? 'حفظ الطلب' : 'Save Equipment Request'}
                   </button>
                 </div>
               </div>
@@ -1975,7 +1975,12 @@ export default function App() {
               const visibleBuckets = roleId === 'owner' ? buckets.filter((b) => b.num === 3) : buckets
 
               return (
-                <div style={{ marginTop: roleId === 'owner' ? 8 : 18 }}>
+                <div style={{ marginTop: roleId === 'owner' ? 8 : 22 }}>
+                  {roleId !== 'owner' && (
+                    <h3 style={{ margin: '0 0 10px', fontSize: 16, color: '#0e3a2a' }}>
+                      📋 {isAr ? 'الطلبات المرسلة وحالة الاعتماد' : 'Submitted Requests & Approval Status'}
+                    </h3>
+                  )}
                   {visibleBuckets.map((bucket) => (
                     <div key={bucket.num} className={`approval-bucket ${bucket.items.length > 0 ? 'has-pending' : ''}`}>
                       <div className="approval-bucket-head">
@@ -2094,16 +2099,30 @@ export default function App() {
                           )
                         }
 
+                        const isPerOpen = expandedPeriodicId === req.id
                         return (
                         <div key={req.id} className="wf-request-box">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-                            <b style={{ fontSize: 15, color: '#0e3a2a' }}>
-                              {req.id} · {branchTitle} ({req.department})
-                            </b>
-                            <span className="wa-badge amber">Pending · {req.date}</span>
+                          <div
+                            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, cursor: 'pointer' }}
+                            onClick={() => setExpandedPeriodicId((cur) => (cur === req.id ? null : req.id))}
+                          >
+                            <div>
+                              <b style={{ fontSize: 15, color: '#0e3a2a' }}>
+                                {req.id} · {branchTitle} ({req.department})
+                              </b>
+                              <div style={{ fontSize: 12.5, color: '#526359', marginTop: 3 }}>
+                                {req.items.length} {req.items.length === 1 ? 'item' : 'items'}: {req.items.slice(0, 2).map((i) => `${i.name} (×${i.qty})`).join(', ')}{req.items.length > 2 ? ` +${req.items.length - 2}` : ''}
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <span className="wa-badge amber">Pending · {req.date}</span>
+                              <span style={{ fontSize: 13, fontWeight: 700, color: '#0e3a2a' }}>{isPerOpen ? '▲' : '▼'}</span>
+                            </div>
                           </div>
 
-                          <div className="wf-meta-row">
+                          {isPerOpen && (
+                          <>
+                          <div className="wf-meta-row" style={{ marginTop: 10 }}>
                             {req.step1?.approved && (
                               <span style={{ color: '#146c43' }}>
                                 ✅ Approved by Restaurant Manager: <b>{req.step1.name}</b> ({req.step1.time})
@@ -2187,7 +2206,7 @@ export default function App() {
                                 onClick={() =>
                                   sendWhatsApp(
                                     bucket.reminderPhone,
-                                    `⏰ Reminder: Periodic Request ${req.id} (${branchTitle} - ${req.department}) is waiting for your approval.\n${req.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
+                                    `⏰ Reminder: Equipment Request ${req.id} (${branchTitle} - ${req.department}) is waiting for your approval.\n${req.items.map((i) => `- ${i.name} (Have: ${i.inventory ?? 0}, Need: ${i.qty})`).join('\n')}`
                                   )
                                 }
                               >
@@ -2195,6 +2214,8 @@ export default function App() {
                               </button>
                             </div>
                           ) : null}
+                          </>
+                          )}
                         </div>
                       )
                       })}

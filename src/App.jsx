@@ -115,8 +115,18 @@ function loadState() {
 
 export default function App() {
   const isDemoMode = typeof window !== 'undefined' && window.location.search.includes('demo=1')
+  const isStartMode = typeof window !== 'undefined' && window.location.search.includes('start=1')
   const [authRoleId, setAuthRoleId] = useState(() => {
     if (isDemoMode) return 'owner'
+    if (isStartMode) {
+      try {
+        localStorage.removeItem(AUTH_STORAGE_KEY)
+        localStorage.removeItem('lc_auth_branch_v2')
+      } catch (e) {
+        // ignore
+      }
+      return null
+    }
     try {
       return localStorage.getItem(AUTH_STORAGE_KEY) || null
     } catch (e) {
@@ -125,6 +135,7 @@ export default function App() {
   })
   const [authBranchSelected, setAuthBranchSelected] = useState(() => {
     if (isDemoMode) return true
+    if (isStartMode) return false
     try {
       const savedRole = localStorage.getItem(AUTH_STORAGE_KEY)
       if (savedRole === 'owner') return true
@@ -670,6 +681,9 @@ export default function App() {
   // ============ MY ORDERS (STAFF) & HISTORY ============
   const [historyFilter, setHistoryFilter] = useState('All')
   const [expandedHistoryId, setExpandedHistoryId] = useState(null)
+  const [myOrdersFilter, setMyOrdersFilter] = useState('All')
+  const [myOrdersSearch, setMyOrdersSearch] = useState('')
+  const [expandedMyOrderId, setExpandedMyOrderId] = useState(null)
   const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
   const [expandedShortageId, setExpandedShortageId] = useState(null)
   const [invCategory, setInvCategory] = useState('Tableware & Glassware')
@@ -952,7 +966,14 @@ export default function App() {
             style={{ padding: '6px 10px', fontSize: 12 }}
             onClick={() => {
               localStorage.removeItem(STORAGE_KEY)
+              localStorage.removeItem(AUTH_STORAGE_KEY)
+              localStorage.removeItem('lc_auth_branch_v2')
               setState(INITIAL_STATE)
+              setAuthRoleId(null)
+              setAuthBranchSelected(false)
+              setPendingPinRole(null)
+              setPinInput('')
+              setPinError('')
               notify('Reset done')
             }}
           >
@@ -1075,19 +1096,21 @@ export default function App() {
                       ))}
                     </div>
 
-                    <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button className="wa-btn" style={{ flex: '1 1 130px' }} onClick={() => approveDailyByOffice(d.id)}>
-                        ✅ {isAr ? 'موافقة' : 'Approve'}
-                      </button>
-                      <button className="wa-btn red" style={{ flex: '1 1 130px' }} onClick={() => rejectDailyByOffice(d.id)}>
-                        ❌ {isAr ? 'رفض' : 'Reject'}
-                      </button>
-                    </div>
+                    {!d.status.includes('Approved') && !d.status.includes('Rejected') && (
+                      <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button className="wa-btn" style={{ flex: '1 1 130px' }} onClick={() => approveDailyByOffice(d.id)}>
+                          ✅ {isAr ? 'موافقة' : 'Approve'}
+                        </button>
+                        <button className="wa-btn red" style={{ flex: '1 1 130px' }} onClick={() => rejectDailyByOffice(d.id)}>
+                          ❌ {isAr ? 'رفض' : 'Reject'}
+                        </button>
+                      </div>
+                    )}
 
                     {d.status === 'Approved by Cost Control Office' && (
                       <div className="supplier-box">
                         <div style={{ fontSize: 12.5, fontWeight: 700, color: '#0e3a2a', marginBottom: 6 }}>
-                          📤 {isAr ? 'إرسال الطلب المعتمد للمورد:' : 'Approved — Send to Supplier:'}
+                          📤 {isAr ? 'تمت الموافقة — إرسال للمورد:' : 'Approved — Ready to Send to Supplier:'}
                         </div>
                         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                           <input
@@ -1097,8 +1120,23 @@ export default function App() {
                             style={{ flex: '1 1 160px', padding: '7px 10px', border: '1px solid #9ab0a2', borderRadius: 8, fontSize: 13 }}
                           />
                           <button
+                            className="wa-btn whatsapp"
+                            style={{ padding: '8px 14px', fontSize: 13 }}
+                            onClick={() =>
+                              sendSupplierWhatsApp({
+                                id: d.id,
+                                branchName: branchTitle,
+                                department: d.department,
+                                date: d.date,
+                                items: d.items,
+                              })
+                            }
+                          >
+                            📱 {isAr ? 'إرسال للمورد' : 'Send to Supplier'}
+                          </button>
+                          <button
                             className="wa-btn ghost"
-                            style={{ padding: '7px 12px', fontSize: 12.5 }}
+                            style={{ padding: '8px 12px', fontSize: 12.5 }}
                             onClick={() =>
                               printOrderPdf({
                                 id: d.id,
@@ -1111,22 +1149,7 @@ export default function App() {
                               })
                             }
                           >
-                            📄 PDF
-                          </button>
-                          <button
-                            className="wa-btn whatsapp"
-                            style={{ padding: '7px 12px', fontSize: 12.5 }}
-                            onClick={() =>
-                              sendSupplierWhatsApp({
-                                id: d.id,
-                                branchName: branchTitle,
-                                department: d.department,
-                                date: d.date,
-                                items: d.items,
-                              })
-                            }
-                          >
-                            📱 WhatsApp Supplier
+                            📄 Download PDF
                           </button>
                         </div>
                       </div>
@@ -1450,87 +1473,142 @@ export default function App() {
           </div>
         )}
 
-        {/* ================= TAB 2: MY ORDERS (STAFF TWO-PANE TIMELINE) ================= */}
-        {activeTab === 'my_orders' && (
-          <div>
-            <h2 style={{ marginTop: 0 }}>📋 {isAr ? `طلباتي · ${branchTitle}` : `My Orders · ${branchTitle}`}</h2>
-            <div className="wa-grid-2">
-              <div>
-                {branchDaily.map((d) => (
-                  <div
-                    key={d.id}
-                    className="wa-card"
-                    style={{
-                      cursor: 'pointer',
-                      borderColor: selectedOrderId === d.id ? '#0e3a2a' : '#dfe6dc',
-                      background: selectedOrderId === d.id ? '#f2f9f4' : '#fff',
-                      marginBottom: 10,
-                    }}
-                    onClick={() => setSelectedOrderId(d.id)}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <strong>{d.id} · {d.department}</strong>
-                      <span className={`wa-badge ${d.status.includes('Approved') ? 'green' : 'amber'}`}>{d.status}</span>
-                    </div>
-                    <div style={{ fontSize: 12.5, color: '#526359', marginTop: 4 }}>
-                      {d.date} · {d.items.map((i) => `${i.name} (${i.qty})`).join(', ')}
-                    </div>
-                  </div>
-                ))}
+        {/* ================= TAB 2: MY ORDERS (SCALABLE ACCORDION LIST) ================= */}
+        {activeTab === 'my_orders' && (() => {
+          const mq = myOrdersSearch.trim().toLowerCase()
+          const filteredMyOrders = branchDaily.filter((d) => {
+            if (myOrdersFilter === 'Waiting' && (d.status.includes('Approved') || d.status.includes('Rejected'))) return false
+            if (myOrdersFilter === 'Approved' && !d.status.includes('Approved')) return false
+            if (myOrdersFilter === 'Rejected' && !d.status.includes('Rejected')) return false
+            if (!mq) return true
+            return (
+              d.id.toLowerCase().includes(mq) ||
+              d.date.toLowerCase().includes(mq) ||
+              d.department.toLowerCase().includes(mq) ||
+              d.items.some((i) => i.name.toLowerCase().includes(mq))
+            )
+          })
+
+          return (
+            <div>
+              <div className="section-head-clean">
+                <h2>📋 {isAr ? `طلباتي · ${branchTitle}` : `My Orders · ${branchTitle}`}</h2>
+                <p>{isAr ? 'اضغط على أي طلب لعرض الأصناف والتحديثات' : 'Tap any order card to inspect items, status timeline & add notes.'}</p>
               </div>
 
-              {(() => {
-                const ord = branchDaily.find((d) => d.id === selectedOrderId) || branchDaily[0]
-                if (!ord) return <div className="wa-card">No orders yet.</div>
-                return (
-                  <div className="wa-card">
-                    <h3 style={{ marginTop: 0 }}>{ord.id} · {ord.department}</h3>
-                    <div style={{ marginBottom: 10 }}>
-                      {ord.items.map((i, idx) => (
-                        <div key={idx} style={{ padding: '4px 0', borderBottom: '1px solid #eef2ec', display: 'flex', justifyContent: 'space-between' }}>
-                          <span><strong>{i.name}</strong></span>
-                          <span>Qty: <strong>{i.qty}</strong></span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div style={{ background: '#f8faf7', padding: 12, borderRadius: 10, marginBottom: 12 }}>
-                      <strong style={{ display: 'block', marginBottom: 8 }}>Timeline</strong>
-                      <div className="timeline-list">
-                        {(ord.timeline || []).map((t, i) => (
-                          <div key={i} className="timeline-item">
-                            <span className="timeline-dot" />
-                            <span><strong>{t.time}</strong> — {t.text}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                      <input
-                        className="wa-field"
-                        style={{ flex: 1, padding: '8px 10px', border: '1.5px solid #cfd9cb', borderRadius: 8 }}
-                        placeholder="Add a photo or note..."
-                        value={orderNoteText}
-                        onChange={(e) => setOrderNoteText(e.target.value)}
-                      />
-                      <button className="wa-btn" onClick={() => addTimelineNote(ord.id, orderNoteText)}>
-                        📎 Add note
-                      </button>
-                    </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
+                <div className="chip-row" style={{ marginBottom: 0 }}>
+                  {['All', 'Waiting', 'Approved', 'Rejected'].map((f) => (
                     <button
-                      className="wa-btn ghost"
-                      style={{ width: '100%' }}
-                      onClick={() => addTimelineNote(ord.id, 'Asked Cost Control Office for update')}
+                      key={f}
+                      type="button"
+                      className={`chip-btn ${myOrdersFilter === f ? 'active' : ''}`}
+                      onClick={() => setMyOrdersFilter(f)}
                     >
-                      Ask for update
+                      {f}
                     </button>
-                  </div>
-                )
-              })()}
+                  ))}
+                </div>
+                <input
+                  placeholder={isAr ? '🔍 بحث برقم الطلب أو الصنف...' : '🔍 Search order ID, item, or date...'}
+                  value={myOrdersSearch}
+                  onChange={(e) => setMyOrdersSearch(e.target.value)}
+                  style={{ flex: '1 1 220px', padding: '8px 12px', border: '1.5px solid #9ab0a2', borderRadius: 10, fontSize: 13.5 }}
+                />
+              </div>
+
+              {filteredMyOrders.length === 0 ? (
+                <div className="wa-card" style={{ color: '#526359' }}>
+                  {isAr ? 'لا توجد طلبات مطابقة.' : 'No orders found.'}
+                </div>
+              ) : (
+                filteredMyOrders.map((d) => {
+                  const isOpen = expandedMyOrderId === d.id
+                  const badgeCls = d.status.includes('Approved') ? 'green' : d.status.includes('Rejected') ? 'red' : 'amber'
+                  return (
+                    <div key={d.id} className="daily-review-card" style={{ marginBottom: 10 }}>
+                      <div
+                        className="daily-review-head"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setExpandedMyOrderId(isOpen ? null : d.id)}
+                      >
+                        <div className="daily-review-meta">
+                          <strong style={{ fontSize: 15, color: '#0e3a2a' }}>{d.id}</strong>
+                          <span className="dept-pill">
+                            {d.department === 'Bar' ? '🍸' : '🍳'} {d.department}
+                          </span>
+                          <span className="date-pill">📅 {d.date}</span>
+                          <span style={{ fontSize: 12.5, color: '#526359' }}>
+                            · {d.items.length} {d.items.length === 1 ? 'item' : 'items'}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span className={`wa-badge ${badgeCls}`}>{d.status}</span>
+                          <span style={{ fontSize: 13, color: '#526359', fontWeight: 700 }}>{isOpen ? '▲' : '▼'}</span>
+                        </div>
+                      </div>
+
+                      {!isOpen && (
+                        <div
+                          style={{ fontSize: 12.5, color: '#526359', marginTop: 6, cursor: 'pointer' }}
+                          onClick={() => setExpandedMyOrderId(d.id)}
+                        >
+                          {d.items.map((i) => `${i.name} (×${i.qty})`).join(', ')}
+                        </div>
+                      )}
+
+                      {isOpen && (
+                        <div style={{ marginTop: 12, paddingTop: 10, borderTop: '1px solid #e6ece3' }}>
+                          <div style={{ marginBottom: 10 }}>
+                            {d.items.map((i, idx) => (
+                              <div key={idx} className="history-detail-row">
+                                <span>
+                                  <strong>{i.name}</strong>
+                                  {i.notes ? <span style={{ color: '#526359', fontSize: 12, marginInlineStart: 6 }}>({i.notes})</span> : null}
+                                </span>
+                                <strong style={{ color: '#0e3a2a' }}>× {i.qty}</strong>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div style={{ background: '#f8faf7', padding: 12, borderRadius: 10, marginBottom: 10 }}>
+                            <strong style={{ display: 'block', marginBottom: 8, fontSize: 13 }}>Timeline</strong>
+                            <div className="timeline-list">
+                              {(d.timeline || []).map((t, i) => (
+                                <div key={i} className="timeline-item">
+                                  <span className="timeline-dot" />
+                                  <span><strong>{t.time}</strong> — {t.text}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <input
+                              style={{ flex: '1 1 200px', padding: '8px 10px', border: '1.5px solid #cfd9cb', borderRadius: 8, fontSize: 13 }}
+                              placeholder={isAr ? 'أضف ملاحظة...' : 'Add a note...'}
+                              value={orderNoteText}
+                              onChange={(e) => setOrderNoteText(e.target.value)}
+                            />
+                            <button className="wa-btn" onClick={() => addTimelineNote(d.id, orderNoteText)}>
+                              📎 {isAr ? 'إضافة ملاحظة' : 'Add Note'}
+                            </button>
+                            <button
+                              className="wa-btn ghost"
+                              onClick={() => addTimelineNote(d.id, 'Asked Cost Control Office for update')}
+                            >
+                              {isAr ? 'طلب تحديث' : 'Ask for Update'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* ================= TAB 3: PERIODIC (NO PRICES, 4 SUBCATEGORIES, MANUAL INVENTORY -> NEED) ================= */}
         {activeTab === 'periodic' && (

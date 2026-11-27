@@ -1154,9 +1154,15 @@ td select {
 /* Owner Inventory Explorer */
 .inv-branch-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin-bottom: 14px;
+}
+
+@media (min-width: 900px) {
+  .inv-branch-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .inv-branch-card {
@@ -1176,10 +1182,16 @@ td select {
 }
 
 .inv-cat-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
+}
+
+@media (min-width: 760px) {
+  .inv-cat-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .inv-cat-btn {
@@ -1187,19 +1199,77 @@ td select {
   background: #ffffff;
   color: #15221b;
   border-radius: 10px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  text-align: center;
   gap: 6px;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.inv-cat-btn.food-hero {
+  grid-column: 1 / -1;
+  background: #f6faf7;
+  border-color: #9ab5a3;
 }
 
 .inv-cat-btn.active {
   background: #0e3a2a;
   color: #ffffff;
   border-color: #0e3a2a;
+}
+
+.inv-subcat-bar {
+  background: #f3f7f4;
+  border: 1.5px dashed #b4c8ba;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+}
+
+.inv-subcat-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #3f5749;
+  margin-bottom: 8px;
+}
+
+.inv-subcat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 760px) {
+  .inv-subcat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.inv-subcat-btn {
+  border: 1.5px solid #cbd8cf;
+  background: #ffffff;
+  color: #1e3528;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.inv-subcat-btn.active {
+  background: #1d6b4c;
+  color: #ffffff;
+  border-color: #1d6b4c;
+  box-shadow: 0 2px 8px rgba(29, 107, 76, 0.22);
 }
 
 .inv-items-grid {
@@ -1293,18 +1363,43 @@ td select {
   background: #fcfdfb;
   cursor: pointer;
   text-align: start;
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+  transition: border-color 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.auth-role-card:hover {
-  border-color: #0e3a2a;
-  background: #f0f7f2;
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .auth-role-card:hover {
+    border-color: #0e3a2a;
+    background: #eef6f0;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(14, 58, 42, 0.14);
+  }
+
+  .auth-role-card.owner-card:hover {
+    border-color: #16a34a;
+    background: #e9faef;
+    box-shadow: 0 10px 26px rgba(37, 211, 102, 0.22);
+  }
 }
 
 .auth-role-card.owner-card {
   border-color: #25d366;
   background: #f2fbf5;
+}
+
+.branch-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+
+@media (max-width: 520px) {
+  .branch-pick-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .auth-pin-box {

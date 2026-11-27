@@ -30,10 +30,10 @@ function classifyPosterItem(name) {
 }
 
 const ROLES = [
-  { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', icon: '🍳', pin: '1111', desc: 'Daily product requests & order status', tabs: ['daily', 'my_orders'] },
-  { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', icon: '🧑‍💼', pin: '2222', desc: 'Periodic requests, receiving, shortages & inventory updates', tabs: ['periodic', 'daily', 'receiving', 'shortages', 'inventory'] },
-  { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', icon: '🗂️', pin: '3333', desc: 'Approve/Reject Daily, view Periodic & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages'] },
-  { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', icon: '📊', pin: '4444', desc: 'Approve/Escalate Periodic, edit Inventory & send PDF/WhatsApp to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages', 'inventory'] },
+  { id: 'staff', labelEn: 'Kitchen / Bar', labelAr: 'المطبخ / البار', icon: '🍳', pin: '1111', desc: 'Daily food & bar requests & order status', tabs: ['daily', 'my_orders'] },
+  { id: 'manager', labelEn: 'Restaurant Manager', labelAr: 'مدير المطعم', icon: '🧑‍💼', pin: '2222', desc: 'Equipment & supplies orders, receiving, shortages & inventory', tabs: ['periodic', 'daily', 'receiving', 'shortages', 'inventory'] },
+  { id: 'cost_office', labelEn: 'Cost Control Office', labelAr: 'مكتب مراقبة التكاليف', icon: '🗂️', pin: '3333', desc: 'Approve/Reject Daily, view Equipment orders & send to Supplier', tabs: ['daily', 'periodic', 'history', 'shortages'] },
+  { id: 'cost_control', labelEn: 'Cost Control Manager', labelAr: 'مدير مراقبة التكاليف', icon: '📊', pin: '4444', desc: 'Approve/Escalate Equipment & Supplies, edit Inventory & send to Supplier', tabs: ['periodic', 'daily', 'history', 'shortages', 'inventory'] },
   { id: 'owner', labelEn: 'Owner · Lyudmyla', labelAr: 'المالكة · ليودميلا', icon: '👑', pin: null, desc: 'Final approvals, full history, inventory & view any role without PIN', tabs: ['periodic', 'history', 'shortages', 'inventory'] },
 ]
 
@@ -123,12 +123,28 @@ export default function App() {
       return null
     }
   })
+  const [authBranchSelected, setAuthBranchSelected] = useState(() => {
+    if (isDemoMode) return true
+    try {
+      const savedRole = localStorage.getItem(AUTH_STORAGE_KEY)
+      if (savedRole === 'owner') return true
+      return Boolean(localStorage.getItem('lc_auth_branch_v2'))
+    } catch (e) {
+      return false
+    }
+  })
   const [pendingPinRole, setPendingPinRole] = useState(null)
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState('')
 
   const [state, setState] = useState(loadState)
-  const [branchId, setBranchId] = useState('boho')
+  const [branchId, setBranchId] = useState(() => {
+    try {
+      return localStorage.getItem('lc_auth_branch_v2') || 'boho'
+    } catch (e) {
+      return 'boho'
+    }
+  })
   const [roleId, setRoleId] = useState(() => authRoleId || 'owner')
   const [lang, setLang] = useState('en')
   const [activeTab, setActiveTab] = useState('periodic')
@@ -145,6 +161,12 @@ export default function App() {
       localStorage.setItem(AUTH_STORAGE_KEY, r.id)
       setAuthRoleId(r.id)
       setRoleId(r.id)
+      if (r.id === 'owner') {
+        setAuthBranchSelected(true)
+      } else {
+        localStorage.removeItem('lc_auth_branch_v2')
+        setAuthBranchSelected(false)
+      }
       setPendingPinRole(null)
       setPinInput('')
       setPinError('')
@@ -162,6 +184,12 @@ export default function App() {
       localStorage.setItem(AUTH_STORAGE_KEY, pendingPinRole.id)
       setAuthRoleId(pendingPinRole.id)
       setRoleId(pendingPinRole.id)
+      if (pendingPinRole.id === 'owner') {
+        setAuthBranchSelected(true)
+      } else {
+        localStorage.removeItem('lc_auth_branch_v2')
+        setAuthBranchSelected(false)
+      }
       setPendingPinRole(null)
       setPinInput('')
       setPinError('')
@@ -170,9 +198,22 @@ export default function App() {
     }
   }
 
+  const selectBranchAndEnter = (bId) => {
+    setBranchId(bId)
+    localStorage.setItem('lc_auth_branch_v2', bId)
+    setAuthBranchSelected(true)
+  }
+
+  const changeRestaurantScreen = () => {
+    localStorage.removeItem('lc_auth_branch_v2')
+    setAuthBranchSelected(false)
+  }
+
   const lockRoleScreen = () => {
     localStorage.removeItem(AUTH_STORAGE_KEY)
+    localStorage.removeItem('lc_auth_branch_v2')
     setAuthRoleId(null)
+    setAuthBranchSelected(false)
     setPendingPinRole(null)
     setPinInput('')
     setPinError('')
@@ -333,8 +374,7 @@ export default function App() {
   const [selectedOfficerId, setSelectedOfficerId] = useState(FIXED_COST_CONTROL_OFFICERS[0].id)
   const [savedDailyPreview, setSavedDailyPreview] = useState(null)
   const [dailyRows, setDailyRows] = useState([
-    { name: 'Tomatoes', qty: '10', notes: 'Fresh' },
-    { name: 'Chicken breast', qty: '8', notes: 'Boneless' },
+    { name: '', qty: '1', notes: '' },
   ])
 
   const submitDaily = () => {
@@ -633,7 +673,7 @@ export default function App() {
   const [expandedOwnerReqId, setExpandedOwnerReqId] = useState(null)
   const [expandedShortageId, setExpandedShortageId] = useState(null)
   const [invCategory, setInvCategory] = useState('Tableware & Glassware')
-  const [invFoodSub, setInvFoodSub] = useState('All')
+  const [invFoodSub, setInvFoodSub] = useState('Meat & Seafood')
   const [invSearch, setInvSearch] = useState('')
   const [editingInvId, setEditingInvId] = useState(null)
   const [invEditQty, setInvEditQty] = useState('')
@@ -780,6 +820,51 @@ export default function App() {
     )
   }
 
+  if (authRoleId !== 'owner' && !authBranchSelected) {
+    return (
+      <div className="auth-screen">
+        <header className="wa-header">
+          <div className="header-eyebrow">● STEP 2 OF 2 · SELECT RESTAURANT</div>
+          <h1>{role.icon} {role.labelEn}</h1>
+          <p>Choose the restaurant you are working in right now</p>
+        </header>
+        <div className="auth-body">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div style={{ fontSize: 14, color: '#2b3a31', fontWeight: 600 }}>
+              Tap your restaurant below to open its stock, requests &amp; orders.
+            </div>
+            <button
+              type="button"
+              className="wa-btn ghost"
+              style={{ padding: '6px 12px', fontSize: 12 }}
+              onClick={lockRoleScreen}
+            >
+              ← Switch Role
+            </button>
+          </div>
+
+          <div className="branch-pick-grid">
+            {BRANCHES.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                className="auth-role-card"
+                onClick={() => selectBranchAndEnter(b.id)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 22 }}>🏪</span>
+                  <span className="wa-badge compact green">{b.city}</span>
+                </div>
+                <strong style={{ fontSize: 15.5, color: '#0e3a2a', display: 'block' }}>{b.name}</strong>
+                <div style={{ fontSize: 12, color: '#526359', marginTop: 4 }}>{b.nameAr}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="wa-container">
       {/* Deep Forest Green Header */}
@@ -798,16 +883,30 @@ export default function App() {
       {/* Top Controls Bar */}
       <div className="wa-controls-bar">
         <div className="wa-control-group">
-          <div className="wa-pill-select">
-            <span>🏪 {isAr ? 'المطعم:' : isUk ? 'Ресторан:' : 'Restaurant:'}</span>
-            <select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
-              {BRANCHES.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {isAr ? b.nameAr : b.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {authRoleId === 'owner' ? (
+            <div className="wa-pill-select">
+              <span>🏪 {isAr ? 'المطعم:' : isUk ? 'Ресторан:' : 'Restaurant:'}</span>
+              <select value={branchId} onChange={(e) => setBranchId(e.target.value)}>
+                {BRANCHES.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {isAr ? b.nameAr : b.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="wa-pill-select">
+              <span>🏪 <b>{branchTitle}</b></span>
+              <button
+                type="button"
+                className="wa-btn ghost"
+                style={{ padding: '2px 8px', fontSize: 11.5, borderRadius: 6 }}
+                onClick={changeRestaurantScreen}
+              >
+                🔄 {isAr ? 'تغيير' : 'Switch'}
+              </button>
+            </div>
+          )}
 
           {authRoleId === 'owner' ? (
             <div className="wa-pill-select">
@@ -878,7 +977,7 @@ export default function App() {
         )}
         {role.tabs.includes('periodic') && (
           <button className={activeTab === 'periodic' ? 'active' : ''} onClick={() => setActiveTab('periodic')}>
-            🍽️ {isAr ? 'مشتريات دورية | Periodic' : isUk ? 'Періодичні закупівлі' : 'Periodic Purchases'}
+            🍽️ {isAr ? 'معدات وأدوات المطعم' : isUk ? 'Обладнання та інвентар' : 'Equipment & Supplies'}
             <small>
               {isAr
                 ? 'أدوات المطبخ والبار والمعدات مع الجرد'
@@ -886,7 +985,7 @@ export default function App() {
                 ? 'Фінальне погодження запитів від Cost Control'
                 : roleId === 'owner'
                 ? 'Final Approve / Reject for Cost Control requests'
-                : 'Tableware, bar tools & equipment requests'}
+                : 'Tableware, bar tools & equipment orders'}
             </small>
           </button>
         )}
@@ -1127,182 +1226,184 @@ export default function App() {
             {/* KITCHEN / BAR / RESTAURANT MANAGER: Create Daily with +/- steppers & send ONLY to Cost Control Office */}
             {(roleId === 'staff' || roleId === 'manager') && (
               <>
-                <div className="wa-grid-3">
-                  <div className="wa-field">
-                    <label>{isAr ? 'التاريخ / Date' : 'Date'}</label>
-                    <input type="date" value={dailyDate} onChange={(e) => setDailyDate(e.target.value)} />
-                  </div>
-                  <div className="wa-field">
-                    <label>{isAr ? 'القسم / Department' : 'Department'}</label>
-                    <select value={dailyDept} onChange={(e) => setDailyDept(e.target.value)}>
-                      <option value="Kitchen">Kitchen</option>
-                      <option value="Bar">Bar</option>
-                    </select>
-                  </div>
-                  <div className="wa-field">
-                    <label>{isAr ? 'اسم الطالب / Requested By' : 'Requested By'}</label>
-                    <input value={dailyRequester} onChange={(e) => setDailyRequester(e.target.value)} />
-                  </div>
-                </div>
-
-                <div className="wa-table-wrap">
-                  <div className="daily-row-head">
-                    <div>{isAr ? 'اسم الصنف / Item' : 'Item Name'}</div>
-                    <div>{isAr ? 'بوستر / Stock' : 'In Stock'}</div>
-                    <div>{isAr ? 'الكمية / Order Qty' : 'Order Qty'}</div>
-                    <div>{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
-                    <div></div>
-                  </div>
-                  {dailyRows.map((row, idx) => {
-                    const dq = (row.name || '').trim().toLowerCase()
-                    const dExact = stockOptions.some((s) => s.name.toLowerCase() === dq || s.nameAr === row.name.trim())
-                    const filteredDailyStock = !dq || dExact
-                      ? stockOptions
-                      : stockOptions.filter((s) => s.name.toLowerCase().includes(dq) || s.nameAr.includes(row.name.trim()))
-                    return (
-                    <div key={idx} className="daily-row-grid">
-                      <div className="item-card-top-bar">
-                        <strong style={{ color: '#0e3a2a', fontSize: 13.5 }}>
-                          {isAr ? `صنف #${idx + 1}` : `Item #${idx + 1}`}
-                        </strong>
-                        <button
-                          type="button"
-                          className="wa-btn ghost"
-                          style={{ padding: '4px 10px', fontSize: 12 }}
-                          onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}
-                        >
-                          ✕ {isAr ? 'حذف' : 'Remove'}
-                        </button>
+                {!savedDailyPreview ? (
+                  <>
+                    <div className="wa-grid-3">
+                      <div className="wa-field">
+                        <label>{isAr ? 'التاريخ / Date' : 'Date'}</label>
+                        <input type="date" value={dailyDate} onChange={(e) => setDailyDate(e.target.value)} />
                       </div>
-
-                      <div>
-                        <div className="per-cell-label">{isAr ? 'اسم الصنف / Item' : 'Item Name'}</div>
-                        <div className="combo-wrap">
-                          <div className="combo-input-row">
-                            <input
-                              type="text"
-                              placeholder={isAr ? 'اكتب أو اختر الصنف...' : 'Type or pick item...'}
-                              value={row.name}
-                              onFocus={() => setOpenDailyComboIdx(idx)}
-                              onBlur={() => setTimeout(() => setOpenDailyComboIdx((cur) => (cur === idx ? null : cur)), 160)}
-                              onChange={(e) => {
-                                setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))
-                                setOpenDailyComboIdx(idx)
-                              }}
-                            />
-                            <button
-                              type="button"
-                              className="combo-toggle-btn"
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => setOpenDailyComboIdx((cur) => (cur === idx ? null : idx))}
-                              aria-label="Toggle daily items list"
-                            >
-                              ▾
-                            </button>
-                          </div>
-
-                          {openDailyComboIdx === idx && (
-                            <div className="combo-menu">
-                              {filteredDailyStock.length === 0 ? (
-                                <div className="combo-option" style={{ color: '#526359', cursor: 'default' }}>
-                                  <span>{isAr ? `صنف مخصص: "${row.name}"` : `Custom item: "${row.name}"`}</span>
-                                </div>
-                              ) : (
-                                filteredDailyStock.map((s, si) => (
-                                  <div
-                                    key={si}
-                                    className="combo-option"
-                                    onMouseDown={(e) => {
-                                      e.preventDefault()
-                                      const pickedName = isAr ? s.nameAr : s.name
-                                      setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: pickedName } : r)))
-                                      setOpenDailyComboIdx(null)
-                                    }}
-                                  >
-                                    <span>
-                                      <b>{isAr ? s.nameAr : s.name}</b>
-                                      <span style={{ color: '#526359', marginInlineStart: 6, fontSize: 12 }}>
-                                        {isAr ? s.name : s.nameAr}
-                                      </span>
-                                    </span>
-                                    <small>{s.stock} {s.unit}</small>
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
+                      <div className="wa-field">
+                        <label>{isAr ? 'القسم / Department' : 'Department'}</label>
+                        <select value={dailyDept} onChange={(e) => setDailyDept(e.target.value)}>
+                          <option value="Kitchen">Kitchen</option>
+                          <option value="Bar">Bar</option>
+                        </select>
                       </div>
-
-                      <div className="per-steppers-pair">
-                        <div>
-                          <div className="per-cell-label">{isAr ? 'الموجود / Stock' : 'In Stock (Poster)'}</div>
-                          <span className="wa-badge green">{findStock(row.name)}</span>
-                        </div>
-
-                        <div>
-                          <div className="per-cell-label">{isAr ? 'الكمية المطلوبة / Order Qty' : 'Order Qty'}</div>
-                          <div className="stepper-box">
-                            <button
-                              type="button"
-                              className="stepper-btn"
-                              onClick={() =>
-                                setDailyRows((p) =>
-                                  p.map((r, i) => (i === idx ? { ...r, qty: String(Math.max(0, Number(r.qty || 0) - 1)) } : r))
-                                )
-                              }
-                            >
-                              −
-                            </button>
-                            <input
-                              type="number"
-                              className="stepper-val"
-                              value={row.qty}
-                              onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, qty: e.target.value } : r)))}
-                            />
-                            <button
-                              type="button"
-                              className="stepper-btn plus"
-                              onClick={() =>
-                                setDailyRows((p) =>
-                                  p.map((r, i) => (i === idx ? { ...r, qty: String(Number(r.qty || 0) + 1) } : r))
-                                )
-                              }
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="per-cell-label">{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
-                        <input
-                          placeholder={isAr ? 'اختياري' : 'Optional'}
-                          value={row.notes}
-                          onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, notes: e.target.value } : r)))}
-                        />
-                      </div>
-
-                      <div className="per-remove-desktop-cell">
-                        <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
+                      <div className="wa-field">
+                        <label>{isAr ? 'اسم الطالب / Requested By' : 'Requested By'}</label>
+                        <input value={dailyRequester} onChange={(e) => setDailyRequester(e.target.value)} />
                       </div>
                     </div>
-                    )
-                  })}
-                </div>
 
-                {!savedDailyPreview ? (
-                  <div className="per-actions-bar">
-                    <button className="wa-btn ghost" onClick={() => setDailyRows((p) => [...p, { name: '', qty: '1', notes: '' }])}>
-                      + {isAr ? 'إضافة صنف' : 'Add Item'}
-                    </button>
-                    <button className="wa-btn" onClick={submitDaily}>
-                      ✅ {isAr ? 'حفظ الطلب للمراجعة' : 'Save Daily Request'}
-                    </button>
-                  </div>
+                    <div className="wa-table-wrap">
+                      <div className="daily-row-head">
+                        <div>{isAr ? 'اسم الصنف / Item' : 'Item Name'}</div>
+                        <div>{isAr ? 'بوستر / Stock' : 'In Stock'}</div>
+                        <div>{isAr ? 'الكمية / Order Qty' : 'Order Qty'}</div>
+                        <div>{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
+                        <div></div>
+                      </div>
+                      {dailyRows.map((row, idx) => {
+                        const dq = (row.name || '').trim().toLowerCase()
+                        const dExact = stockOptions.some((s) => s.name.toLowerCase() === dq || s.nameAr === row.name.trim())
+                        const filteredDailyStock = !dq || dExact
+                          ? stockOptions
+                          : stockOptions.filter((s) => s.name.toLowerCase().includes(dq) || s.nameAr.includes(row.name.trim()))
+                        return (
+                        <div key={idx} className="daily-row-grid">
+                          <div className="item-card-top-bar">
+                            <strong style={{ color: '#0e3a2a', fontSize: 13.5 }}>
+                              {isAr ? `صنف #${idx + 1}` : `Item #${idx + 1}`}
+                            </strong>
+                            <button
+                              type="button"
+                              className="wa-btn ghost"
+                              style={{ padding: '4px 10px', fontSize: 12 }}
+                              onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}
+                            >
+                              ✕ {isAr ? 'حذف' : 'Remove'}
+                            </button>
+                          </div>
+
+                          <div>
+                            <div className="per-cell-label">{isAr ? 'اسم الصنف / Item' : 'Item Name'}</div>
+                            <div className="combo-wrap">
+                              <div className="combo-input-row">
+                                <input
+                                  type="text"
+                                  placeholder={isAr ? 'اكتب أو اختر الصنف...' : 'Type or pick item...'}
+                                  value={row.name}
+                                  onFocus={() => setOpenDailyComboIdx(idx)}
+                                  onBlur={() => setTimeout(() => setOpenDailyComboIdx((cur) => (cur === idx ? null : cur)), 160)}
+                                  onChange={(e) => {
+                                    setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: e.target.value } : r)))
+                                    setOpenDailyComboIdx(idx)
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  className="combo-toggle-btn"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => setOpenDailyComboIdx((cur) => (cur === idx ? null : idx))}
+                                  aria-label="Toggle daily items list"
+                                >
+                                  ▾
+                                </button>
+                              </div>
+
+                              {openDailyComboIdx === idx && (
+                                <div className="combo-menu">
+                                  {filteredDailyStock.length === 0 ? (
+                                    <div className="combo-option" style={{ color: '#526359', cursor: 'default' }}>
+                                      <span>{isAr ? `صنف مخصص: "${row.name}"` : `Custom item: "${row.name}"`}</span>
+                                    </div>
+                                  ) : (
+                                    filteredDailyStock.map((s, si) => (
+                                      <div
+                                        key={si}
+                                        className="combo-option"
+                                        onMouseDown={(e) => {
+                                          e.preventDefault()
+                                          const pickedName = isAr ? s.nameAr : s.name
+                                          setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, name: pickedName } : r)))
+                                          setOpenDailyComboIdx(null)
+                                        }}
+                                      >
+                                        <span>
+                                          <b>{isAr ? s.nameAr : s.name}</b>
+                                          <span style={{ color: '#526359', marginInlineStart: 6, fontSize: 12 }}>
+                                            {isAr ? s.name : s.nameAr}
+                                          </span>
+                                        </span>
+                                        <small>{s.stock} {s.unit}</small>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="per-steppers-pair">
+                            <div>
+                              <div className="per-cell-label">{isAr ? 'الموجود / Stock' : 'In Stock (Poster)'}</div>
+                              <span className="wa-badge green">{findStock(row.name)}</span>
+                            </div>
+
+                            <div>
+                              <div className="per-cell-label">{isAr ? 'الكمية المطلوبة / Order Qty' : 'Order Qty'}</div>
+                              <div className="stepper-box">
+                                <button
+                                  type="button"
+                                  className="stepper-btn"
+                                  onClick={() =>
+                                    setDailyRows((p) =>
+                                      p.map((r, i) => (i === idx ? { ...r, qty: String(Math.max(0, Number(r.qty || 0) - 1)) } : r))
+                                    )
+                                  }
+                                >
+                                  −
+                                </button>
+                                <input
+                                  type="number"
+                                  className="stepper-val"
+                                  value={row.qty}
+                                  onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, qty: e.target.value } : r)))}
+                                />
+                                <button
+                                  type="button"
+                                  className="stepper-btn plus"
+                                  onClick={() =>
+                                    setDailyRows((p) =>
+                                      p.map((r, i) => (i === idx ? { ...r, qty: String(Number(r.qty || 0) + 1) } : r))
+                                    )
+                                  }
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="per-cell-label">{isAr ? 'ملاحظات / Notes' : 'Notes'}</div>
+                            <input
+                              placeholder={isAr ? 'اختياري' : 'Optional'}
+                              value={row.notes}
+                              onChange={(e) => setDailyRows((p) => p.map((r, i) => (i === idx ? { ...r, notes: e.target.value } : r)))}
+                            />
+                          </div>
+
+                          <div className="per-remove-desktop-cell">
+                            <button className="wa-btn ghost" style={{ padding: '6px 10px' }} onClick={() => setDailyRows((p) => p.filter((_, i) => i !== idx))}>✕</button>
+                          </div>
+                        </div>
+                        )
+                      })}
+                    </div>
+
+                    <div className="per-actions-bar">
+                      <button className="wa-btn ghost" onClick={() => setDailyRows((p) => [...p, { name: '', qty: '1', notes: '' }])}>
+                        + {isAr ? 'إضافة صنف' : 'Add Item'}
+                      </button>
+                      <button className="wa-btn" onClick={submitDaily}>
+                        ✅ {isAr ? 'حفظ الطلب للمراجعة' : 'Save Daily Request'}
+                      </button>
+                    </div>
+                  </>
                 ) : (
-                  <div className="wa-box" style={{ marginTop: 14 }}>
+                  <div className="wa-box" style={{ marginTop: 4 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                       <b>✅ {savedDailyPreview.id} Saved — Preview for Cost Control Office:</b>
                       <button
@@ -1311,22 +1412,37 @@ export default function App() {
                         style={{ padding: '4px 10px', fontSize: 12 }}
                         onClick={() => setSavedDailyPreview(null)}
                       >
-                        ✏️ Edit / New
+                        ✏️ Edit
                       </button>
                     </div>
-                    <pre style={{ margin: '10px 0', padding: 10, background: '#ffffff', border: '1px solid #c8d3c3', borderRadius: 8, fontSize: 12.5, whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
+                    <pre style={{ margin: '10px 0 12px', padding: 12, background: '#ffffff', border: '1px solid #c8d3c3', borderRadius: 8, fontSize: 12.5, whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
                       {savedDailyPreview.msg}
                     </pre>
-                    <button
-                      className="wa-btn whatsapp"
-                      style={{ width: '100%' }}
-                      onClick={() => {
-                        const officer = FIXED_COST_CONTROL_OFFICERS.find((o) => o.id === selectedOfficerId) || FIXED_COST_CONTROL_OFFICERS[0]
-                        sendWhatsApp(officer.phone, savedDailyPreview.msg)
-                      }}
-                    >
-                      📱 {isAr ? 'إرسال الآن إلى Cost Control Office' : `Send to ${FIXED_COST_CONTROL_OFFICERS.find((o) => o.id === selectedOfficerId)?.label || 'Cost Control Office'} (WhatsApp)`}
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <button
+                        className="wa-btn whatsapp"
+                        style={{ width: '100%' }}
+                        onClick={() => {
+                          const officer = FIXED_COST_CONTROL_OFFICERS.find((o) => o.id === selectedOfficerId) || FIXED_COST_CONTROL_OFFICERS[0]
+                          sendWhatsApp(officer.phone, savedDailyPreview.msg)
+                          setSavedDailyPreview(null)
+                          setDailyRows([{ name: '', qty: '1', notes: '' }])
+                        }}
+                      >
+                        📱 {isAr ? 'إرسال الآن إلى Cost Control Office' : `Send to ${FIXED_COST_CONTROL_OFFICERS.find((o) => o.id === selectedOfficerId)?.label || 'Cost Control Office'} (WhatsApp)`}
+                      </button>
+                      <button
+                        type="button"
+                        className="wa-btn ghost"
+                        style={{ width: '100%' }}
+                        onClick={() => {
+                          setSavedDailyPreview(null)
+                          setDailyRows([{ name: '', qty: '1', notes: '' }])
+                        }}
+                      >
+                        + {isAr ? 'إضافة طلب آخر' : 'Add another one'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </>
@@ -1423,16 +1539,16 @@ export default function App() {
               <h2>
                 {roleId === 'owner'
                   ? `👑 ${isUk ? `Погодження власника · ${branchTitle}` : `Owner Approvals · ${branchTitle}`}`
-                  : `🍽️ ${isAr ? `مشتريات دورية · ${branchTitle}` : `Periodic Purchases · ${branchTitle}`}`}
+                  : `🍽️ ${isAr ? `معدات وأدوات المطعم · ${branchTitle}` : `Equipment & Supplies · ${branchTitle}`}`}
               </h2>
               <p>
                 {roleId === 'owner'
                   ? (isUk
-                      ? 'Тут ви отримуєте періодичні запити на закупівлю від Cost Control Manager для фінального рішення — погодити (Approve) або відхилити (Reject). Натисніть на картку, щоб переглянути деталі, або зв’яжіться з Cost Control Manager напряму.'
-                      : 'Here you receive Periodic Purchase Requests escalated by the Cost Control Manager for your final Approve or Reject decision. Tap any card to inspect full item details & stock, or contact the Cost Control Manager directly.')
+                      ? 'Тут ви отримуєте запити на обладнання та інвентар від Cost Control Manager для фінального рішення — погодити (Approve) або відхилити (Reject). Натисніть на картку, щоб переглянути деталі, або зв’яжіться з Cost Control Manager напряму.'
+                      : 'Here you receive Equipment & Supplies Requests escalated by the Cost Control Manager for your final Approve or Reject decision. Tap any card to inspect full item details & stock, or contact the Cost Control Manager directly.')
                   : isAr
-                  ? 'طلبات دورية للأطباق والزجاجيات وأدوات المطبخ والبار والمعدات مع مقارنة الرصيد الحالي.'
-                  : 'Scheduled requests for Tableware & Glassware, Kitchen & Bar Tools, Small Equipment & Textiles with current inventory counts.'}
+                  ? 'طلبات المعدات والأطباق والزجاجيات وأدوات المطبخ والبار مع مقارنة الرصيد الحالي.'
+                  : 'Non-daily requests for Tableware & Glassware, Kitchen & Bar Tools, Small Equipment & Textiles with current inventory counts.'}
               </p>
             </div>
 
@@ -2095,13 +2211,13 @@ export default function App() {
         {/* ================= TAB 7: INVENTORY EXPLORER (OWNER VIEW + MANAGER LIVE UPDATE & BREAKAGE) ================= */}
         {activeTab === 'inventory' && (() => {
           const invCategories = [
+            { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Kitchen)', icon: '🥬', hero: true },
             { id: 'Tableware & Glassware', label: isUk ? 'Посуд та скло' : 'Tableware & Glassware', icon: '🍽️' },
             { id: 'Kitchen & Bar Tools', label: isUk ? 'Інвентар кухні та бару' : 'Kitchen & Bar Tools', icon: '🔪' },
             { id: 'Small Equipment', label: isUk ? 'Мале обладнання' : 'Small Equipment', icon: '⚙️' },
             { id: 'Linen & Textiles', label: isUk ? 'Текстиль' : 'Linen & Textiles', icon: '🧺' },
             { id: 'Consumables', label: isUk ? 'Упаковка та хімія' : 'Packaging & Hygiene', icon: '🧤' },
             { id: 'Bar & Beverages', label: isUk ? 'Бар та напої (Poster)' : 'Bar & Beverages (Poster)', icon: '🍸' },
-            { id: 'Food', label: isUk ? 'Продукти (Poster)' : 'Food (Poster Kitchen)', icon: '🥬' },
           ]
 
           const getPosterBranchItems = (bId = branchId) =>
@@ -2136,7 +2252,7 @@ export default function App() {
           const catCatalogItems = (sq
             ? allCombinedItems
             : invCategory === 'Food'
-            ? posterBranchItems.filter((p) => p.category === 'Food' && (invFoodSub === 'All' || p.foodSub === invFoodSub))
+            ? posterBranchItems.filter((p) => p.category === 'Food' && p.foodSub === invFoodSub)
             : invCategory === 'Bar & Beverages'
             ? posterBranchItems.filter((p) => p.category === 'Bar & Beverages')
             : invCategory === 'Consumables'
@@ -2223,7 +2339,7 @@ export default function App() {
                     <button
                       key={cat.id}
                       type="button"
-                      className={`inv-cat-btn ${invCategory === cat.id ? 'active' : ''}`}
+                      className={`inv-cat-btn ${cat.hero ? 'food-hero' : ''} ${invCategory === cat.id ? 'active' : ''}`}
                       onClick={() => setInvCategory(cat.id)}
                     >
                       <span>{cat.icon}</span>
@@ -2235,17 +2351,22 @@ export default function App() {
               </div>
 
               {!sq && invCategory === 'Food' && (
-                <div className="chip-row" style={{ marginBottom: 12 }}>
-                  {['All', 'Meat & Seafood', 'Produce (Veg & Fruit)', 'Dairy & Eggs', 'Dry, Sauces & Bakery'].map((sub) => (
-                    <button
-                      key={sub}
-                      type="button"
-                      className={`chip-btn ${invFoodSub === sub ? 'active' : ''}`}
-                      onClick={() => setInvFoodSub(sub)}
-                    >
-                      {sub}
-                    </button>
-                  ))}
+                <div className="inv-subcat-bar">
+                  <div className="inv-subcat-label">
+                    {isUk ? 'Підкатегорія продуктів (Poster):' : 'Food Subcategory (Choose group):'}
+                  </div>
+                  <div className="inv-subcat-grid">
+                    {['Meat & Seafood', 'Produce (Veg & Fruit)', 'Dairy & Eggs', 'Dry, Sauces & Bakery'].map((sub) => (
+                      <button
+                        key={sub}
+                        type="button"
+                        className={`inv-subcat-btn ${invFoodSub === sub ? 'active' : ''}`}
+                        onClick={() => setInvFoodSub(sub)}
+                      >
+                        {sub}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 

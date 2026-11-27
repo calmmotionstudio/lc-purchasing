@@ -549,7 +549,8 @@ export default function App() {
       }
     })
     setSelectedPerId(newId)
-    notify(isAr ? `تم حفظ طلب الدوري ${newId}` : `Periodic Request ${newId} saved`)
+    setPerRows([{ name: '', specs: '', category: 'Tableware & Glassware', inventory: '0', qty: '1' }])
+    notify(isAr ? `تم حفظ الطلب ${newId}` : `Equipment Request ${newId} saved`)
   }
 
   const approvePeriodicStep = (perId, stepNum, escalateToOwner = false) => {
@@ -1166,7 +1167,7 @@ export default function App() {
                   👁️ {isAr ? 'مدير مراقبة التكاليف — الطلبات اليومية (للعلم فقط)' : 'Cost Control Manager — Daily Requests (Information Only)'}
                 </h3>
                 <p style={{ fontSize: 13, color: '#526359', marginTop: 0, marginBottom: 12 }}>
-                  {isAr ? 'للعلم فقط (الاعتماد من مكتب مراقبة التكاليف).' : 'Shown for information only (Cost Control Manager approves Periodic Purchases only).'}
+                  {isAr ? 'للعلم فقط (الاعتماد من مكتب مراقبة التكاليف).' : 'Shown for information only (Cost Control Manager approves Equipment & Supplies only).'}
                 </p>
                 {branchDaily.map((d) => (
                   <div key={d.id} className="daily-review-card">
@@ -1194,53 +1195,6 @@ export default function App() {
                         </div>
                       ))}
                     </div>
-                    {d.status === 'Approved by Cost Control Office' && (
-                      <div className="supplier-box">
-                        <div style={{ fontSize: 12.5, fontWeight: 700, color: '#0e3a2a', marginBottom: 6 }}>
-                          📤 {isAr ? 'إرسال الطلب المعتمد للمورد:' : 'Approved — Send to Supplier:'}
-                        </div>
-                        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                          <input
-                            placeholder="Supplier WhatsApp (2010...)"
-                            value={waPhones.supplier}
-                            onChange={(e) => setWaPhones((p) => ({ ...p, supplier: e.target.value }))}
-                            style={{ flex: '1 1 160px', padding: '7px 10px', border: '1px solid #9ab0a2', borderRadius: 8, fontSize: 13 }}
-                          />
-                          <button
-                            className="wa-btn ghost"
-                            style={{ padding: '7px 12px', fontSize: 12.5 }}
-                            onClick={() =>
-                              printOrderPdf({
-                                id: d.id,
-                                type: 'Daily',
-                                branchName: branchTitle,
-                                department: d.department,
-                                date: d.date,
-                                items: d.items,
-                                status: d.status,
-                              })
-                            }
-                          >
-                            📄 PDF
-                          </button>
-                          <button
-                            className="wa-btn whatsapp"
-                            style={{ padding: '7px 12px', fontSize: 12.5 }}
-                            onClick={() =>
-                              sendSupplierWhatsApp({
-                                id: d.id,
-                                branchName: branchTitle,
-                                department: d.department,
-                                date: d.date,
-                                items: d.items,
-                              })
-                            }
-                          >
-                            📱 WhatsApp Supplier
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>

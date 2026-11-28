@@ -1306,6 +1306,34 @@ td select {
   font-weight: 700;
 }
 
+.inv-active-branch-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #0e3a2a;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.inv-change-branch-btn {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inv-change-branch-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
 .inv-branch-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

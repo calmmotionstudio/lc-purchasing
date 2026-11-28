@@ -689,7 +689,7 @@ export default function App() {
   const [expandedShortageId, setExpandedShortageId] = useState(null)
   const [invCategory, setInvCategory] = useState('Tableware & Glassware')
   const [invFoodSub, setInvFoodSub] = useState('Meat & Seafood')
-  const [invBranchOpen, setInvBranchOpen] = useState(false)
+  const [invBranchPicked, setInvBranchPicked] = useState(false)
   const [invCatOpen, setInvCatOpen] = useState(false)
   const [invSearch, setInvSearch] = useState('')
   const [editingInvId, setEditingInvId] = useState(null)
@@ -2359,7 +2359,7 @@ export default function App() {
               </div>
 
               {(() => {
-                const showBranchPicker = roleId === 'owner' || roleId === 'cost_control'
+                const needsBranchPick = (roleId === 'owner' || roleId === 'cost_control') && !invBranchPicked
                 const activeBranchObj = BRANCHES.find((b) => b.id === branchId) || BRANCHES[0]
                 const activePosterCount = (state.posterSnapshot?.branches?.[activeBranchObj.id]?.items || []).filter((p) => p.poster_stock > 0).length
                 const activeNonFoodCount = nonFoodCatalog.filter((c) => branchItemQty(c, activeBranchObj.id) > 0).length
@@ -2374,72 +2374,74 @@ export default function App() {
                   ).filter((c) => branchItemQty(c) > 0).length
                 const activeCatObj = invCategories.find((c) => c.id === invCategory) || invCategories[0]
 
+                if (needsBranchPick) {
+                  return (
+                    <div style={{ marginTop: 8 }}>
+                      <div style={{ fontSize: 13.5, fontWeight: 700, color: '#0e3a2a', marginBottom: 10 }}>
+                        {isUk ? 'Крок 1: Оберіть ресторан, щоб переглянути залишки' : 'Step 1: Choose a restaurant to view its inventory'}
+                      </div>
+                      <div className="inv-branch-grid">
+                        {BRANCHES.map((b) => {
+                          const pCount = (state.posterSnapshot?.branches?.[b.id]?.items || []).filter((p) => p.poster_stock > 0).length
+                          const nCount = nonFoodCatalog.filter((c) => branchItemQty(c, b.id) > 0).length
+                          return (
+                            <button
+                              key={b.id}
+                              type="button"
+                              className="inv-branch-card"
+                              onClick={() => {
+                                setBranchId(b.id)
+                                setInvBranchPicked(true)
+                                setInvCatOpen(false)
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 6 }}>
+                                <strong style={{ color: '#0e3a2a', fontSize: 15 }}>🏪 {b.name}</strong>
+                                <span style={{ color: '#0e3a2a', fontWeight: 700 }}>→</span>
+                              </div>
+                              <div style={{ fontSize: 12, color: '#526359', marginTop: 5 }}>
+                                📍 {b.city} · {pCount} Poster + {nCount} supplies
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                }
+
                 return (
-                  <div className={`inv-pickers-grid ${showBranchPicker ? '' : 'single'}`}>
-                    {showBranchPicker && (
-                      <div className="inv-picker-wrap">
+                  <>
+                    {(roleId === 'owner' || roleId === 'cost_control') && (
+                      <div className="inv-active-branch-bar">
+                        <div>
+                          <strong style={{ fontSize: 15 }}>🏪 {activeBranchObj.name}</strong>
+                          <div style={{ fontSize: 11.5, opacity: 0.85, marginTop: 2 }}>
+                            📍 {activeBranchObj.city} · {activePosterCount} Poster + {activeNonFoodCount} supplies
+                          </div>
+                        </div>
                         <button
                           type="button"
-                          className="inv-picker-card"
+                          className="inv-change-branch-btn"
                           onClick={() => {
-                            setInvBranchOpen((v) => !v)
+                            setInvBranchPicked(false)
                             setInvCatOpen(false)
+                            setInvSearch('')
                           }}
                         >
-                          <div style={{ minWidth: 0 }}>
-                            <div className="inv-picker-eyebrow">{isUk ? 'Ресторан' : 'Restaurant'}</div>
-                            <strong style={{ color: '#0e3a2a', fontSize: 15, display: 'block' }}>
-                              🏪 {activeBranchObj.name}
-                            </strong>
-                            <div style={{ fontSize: 11.5, color: '#526359', marginTop: 2 }}>
-                              📍 {activeBranchObj.city} · {activePosterCount} Poster + {activeNonFoodCount} supplies
-                            </div>
-                          </div>
-                          <span className="inv-picker-chevron">{invBranchOpen ? '▲ Close' : 'Switch ▾'}</span>
+                          ← {isUk ? 'Змінити ресторан' : 'Change Restaurant'}
                         </button>
-
-                        {invBranchOpen && (
-                          <div className="inv-picker-menu">
-                            {BRANCHES.map((b) => {
-                              const pCount = (state.posterSnapshot?.branches?.[b.id]?.items || []).filter((p) => p.poster_stock > 0).length
-                              const nCount = nonFoodCatalog.filter((c) => branchItemQty(c, b.id) > 0).length
-                              const isActive = branchId === b.id
-                              return (
-                                <button
-                                  key={b.id}
-                                  type="button"
-                                  className={`inv-picker-option ${isActive ? 'active' : ''}`}
-                                  onClick={() => {
-                                    setBranchId(b.id)
-                                    setInvBranchOpen(false)
-                                  }}
-                                >
-                                  <span>
-                                    <b>{b.name}</b>
-                                    <span style={{ display: 'block', fontSize: 11.5, opacity: 0.8 }}>
-                                      📍 {b.city} · {pCount} Poster + {nCount} supplies
-                                    </span>
-                                  </span>
-                                  {isActive && <span>✓</span>}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        )}
                       </div>
                     )}
 
-                    <div className="inv-picker-wrap">
+                    <div className="inv-picker-wrap" style={{ marginBottom: 12 }}>
                       <button
                         type="button"
                         className="inv-picker-card"
-                        onClick={() => {
-                          setInvCatOpen((v) => !v)
-                          setInvBranchOpen(false)
-                        }}
+                        onClick={() => setInvCatOpen((v) => !v)}
                       >
                         <div style={{ minWidth: 0 }}>
-                          <div className="inv-picker-eyebrow">{isUk ? 'Категорія' : 'Category'}</div>
+                          <div className="inv-picker-eyebrow">{isUk ? 'Крок 2 · Категорія' : 'Category'}</div>
                           <strong style={{ color: '#0e3a2a', fontSize: 15, display: 'block' }}>
                             {activeCatObj.icon} {activeCatObj.label}
                           </strong>
@@ -2447,7 +2449,7 @@ export default function App() {
                             {getCatCount(activeCatObj)} {isUk ? 'позицій в наявності' : 'items in stock'}
                           </div>
                         </div>
-                        <span className="inv-picker-chevron">{invCatOpen ? '▲ Close' : 'Change ▾'}</span>
+                        <span className="inv-picker-chevron">{invCatOpen ? '▲ Close' : 'Choose Category ▾'}</span>
                       </button>
 
                       {invCatOpen && (
@@ -2475,33 +2477,35 @@ export default function App() {
                         </div>
                       )}
                     </div>
-                  </div>
+
+                    <div className="inv-search-wrap">
+                      <input
+                        className="inv-search-input"
+                        placeholder={
+                          isUk
+                            ? '🔍 Пошук по назві або категорії (наприклад: Glass, Wine, Tomatoes)...'
+                            : '🔍 Search item or category across this restaurant...'
+                        }
+                        value={invSearch}
+                        onChange={(e) => setInvSearch(e.target.value)}
+                      />
+                      {invSearch && (
+                        <button
+                          type="button"
+                          className="inv-search-clear"
+                          onClick={() => setInvSearch('')}
+                          aria-label="Clear search"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </>
                 )
               })()}
 
-              <div className="inv-search-wrap">
-                <input
-                  className="inv-search-input"
-                  placeholder={
-                    isUk
-                      ? '🔍 Пошук по назві або категорії (наприклад: Glass, Wine, Tomatoes)...'
-                      : '🔍 Search item or category across this restaurant...'
-                  }
-                  value={invSearch}
-                  onChange={(e) => setInvSearch(e.target.value)}
-                />
-                {invSearch && (
-                  <button
-                    type="button"
-                    className="inv-search-clear"
-                    onClick={() => setInvSearch('')}
-                    aria-label="Clear search"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-
+              {!((roleId === 'owner' || roleId === 'cost_control') && !invBranchPicked) && (
+              <>
               {!sq && invCategory === 'Food' && (
                 <div className="inv-subcat-bar">
                   <div className="inv-subcat-label">
@@ -2630,6 +2634,8 @@ export default function App() {
                     </div>
                   ))}
                 </div>
+              )}
+              </>
               )}
             </div>
           )
